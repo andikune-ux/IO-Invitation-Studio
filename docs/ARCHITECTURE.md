@@ -56,7 +56,7 @@ Jangan menganggap wildcard domain milik provider dapat dikonfigurasi oleh pemili
 Dokumen ini menetapkan rancangan hostname. Resolver, registry hostname, autentikasi multi-Admin, DNS, TLS, dan deployment produksi belum dibuat atau diverifikasi. API cloud dasar telah ditambahkan di branch pengembangan, tetapi belum dideploy atau diuji.
 
 
-## Editor undangan dan halaman Tamu (implementasi demo)
+## Editor undangan dan halaman Tamu (demo + integrasi cloud)
 
 Branch `feat/admin-media-editor` menambahkan:
 
@@ -67,16 +67,14 @@ Branch `feat/admin-media-editor` menambahkan:
 
 **Batasan demo lokal:** draft lokal tidak otomatis tersedia pada hostname/subdomain lain atau perangkat lain. Publikasi cloud merupakan alur terpisah yang memerlukan API dan konfigurasi EdgeOne sesuai bagian berikutnya.
 
-## Tahap backend yang masih wajib
+## Tahap backend lanjutan yang masih wajib
 
-Sebelum fitur dipakai sungguhan, implementasikan dan uji:
+Fondasi API cloud sudah dibuat di branch ini. Sebelum fitur dipakai sungguhan, masih perlu:
 
-1. Identitas/login Admin dan pemeriksaan kepemilikan `event_id` di server.
-2. API untuk membuat upload URL sementara (presigned URL) dan membatasi ukuran, MIME type, serta key berdasarkan event.
-3. Penyimpanan file di cloud dan metadata file pada database persisten.
-4. Endpoint baca publik yang hanya mengembalikan data undangan yang memang dipublikasikan.
-5. Registry hostname eksplisit untuk pemetaan Admin/Tamu, status, dan masa berlaku.
-6. Pengujian akses lintas perangkat, upload, batas ukuran, izin, dan HTTPS.
+1. Identitas/login Admin per acara dan pemeriksaan kepemilikan `event_id` di server (token Owner saat ini hanya solusi sementara).
+2. Konfigurasi dan deployment Cloud Functions + Blob Storage pada project EdgeOne yang benar.
+3. Registry hostname eksplisit untuk pemetaan Admin/Tamu, status, dan masa berlaku.
+4. Pengujian akses lintas perangkat, upload, batas ukuran, izin, kuota, dan HTTPS.
 
 Jangan menaruh token rahasia atau kredensial storage di JavaScript frontend. Jangan mengizinkan endpoint upload anonim membuat key arbitrer.
 
@@ -102,4 +100,4 @@ Penyimpanan memakai namespace Blob `io-invitation-media`. SDK resmi `@edgeone/pa
 Blob Free Edition memiliki batas ukuran objek tunggal 25 MB. Foto dibatasi 8 MB dan video 25 MB di API. EdgeOne menyatakan Blob bukan CDN hosting publik; endpoint media di atas mem-proxy objek melalui Cloud Functions, sehingga beban egress/kuota perlu diuji sebelum penggunaan ramai. 
 
 ### Status
-Kode API dan UI cloud sudah ditambahkan ke branch. Belum ada build, konfigurasi environment, deployment, upload sungguhan, atau pengujian lintas perangkat. Status tersebut tidak boleh dianggap aktif sebelum dites pada project EdgeOne yang benar.
+Kode API dan UI cloud sudah ditambahkan ke branch. Pemeriksaan sintaks JavaScript lokal telah lulus. Pengguna melaporkan build berhasil, tetapi deployment fungsi, konfigurasi environment, upload sungguhan, dan pengujian lintas perangkat belum diverifikasi dari project EdgeOne. Status tersebut tidak boleh dianggap aktif sebelum tes runtime berhasil.
