@@ -24,7 +24,6 @@ export async function onRequestPost({ request, env }) {
       const parts = key.slice(`events/${body.eventId}/media/${kind}-`.length).split(".");
       const extensions = kind === "cover" ? ["jpg", "png", "webp"] : ["mp4", "webm"];
       if (parts.length !== 2 || !/^[a-z0-9-]+$/.test(parts[0]) || !extensions.includes(parts[1])) return json({ error: "Jenis file media tidak sesuai." }, 400);
-      if (!expected.test(key)) return json({ error: "Jenis file media tidak sesuai." }, 400);
       const uploaded = await store.get(key, { type: "arrayBuffer", consistency: "strong" });
       if (!uploaded) return json({ error: "File media belum selesai diunggah." }, 400);
       if (uploaded.byteLength > max) return json({ error: "Ukuran file aktual melebihi batas." }, 413);
