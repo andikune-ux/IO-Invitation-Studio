@@ -28,6 +28,9 @@ export async function onRequestPost({ request, env }) {
   const key = `events/${body.eventId}/media/${kind}-${randomUUID()}.${type.ext}`;
   try {
     const store = getStore("io-invitation-media");
+    const meta = await store.get(`events/${body.eventId}/meta.json`, { type: "json", consistency: "strong" });
+    if (!meta) return json({ error: "Acara tidak ditemukan." }, 404);
+    if (meta.status === "archived") return json({ error: "Aktifkan acara sebelum mengunggah media." }, 403);
     const signed = await store.createUploadUrl(key, { expireSeconds: 300, contentType: body.contentType });
     return json({ uploadUrl: signed.url, key, expiresAt: signed.expiresAt, contentType: body.contentType });
   } catch {
