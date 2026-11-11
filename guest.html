@@ -5,7 +5,8 @@
 <section id="guest-empty" class="guest-empty"><h1 id="guest-error-title">Memuat undangan…</h1><p id="guest-error">Mohon tunggu sebentar.</p><a href="./index.html">Kembali ke IO Invitation Studio</a></section>
 <script>
 (async()=>{
- const $=id=>document.getElementById(id),params=new URLSearchParams(location.search),eventId=params.get('event'),recipient=params.get('to'),set=(id,value)=>$(id).textContent=value||'';
+ const $=id=>document.getElementById(id),params=new URLSearchParams(location.search),eventId=params.get('event'),guestId=params.get('guestId'),hash=new URLSearchParams(location.hash.replace(/^#/,'')),inviteToken=hash.get('invite')||'',recipient=params.get('to'),set=(id,value)=>$(id).textContent=value||'';
+ if(location.hash)history.replaceState(null,'',location.pathname+location.search);
  if(recipient)set('guest-recipient','Kepada Yth. '+recipient);
  const show=()=>{$('guest-root').hidden=false;$('guest-empty').hidden=true};
  try{
@@ -19,6 +20,12 @@
    }
   }
   if(!eventId||!/^[a-z0-9][a-z0-9-]{2,63}$/.test(eventId))throw new Error('ID acara tidak valid atau belum diisi.');
+  if(guestId){
+   if(!inviteToken)throw new Error('Token undangan personal tidak ditemukan.');
+   const check=await fetch('/api/guest/resolve?eventId='+encodeURIComponent(eventId)+'&guestId='+encodeURIComponent(guestId),{headers:{Authorization:'Bearer '+inviteToken,Accept:'application/json'}});
+   const verified=await check.json();if(!check.ok)throw new Error(verified.error||'Tautan tamu tidak valid.');
+   set('guest-recipient','Kepada Yth. '+verified.guest.name);
+  }
   const response=await fetch('/api/invitation/'+encodeURIComponent(eventId),{headers:{Accept:'application/json'}});
   const d=await response.json();if(!response.ok)throw new Error(d.error||'Undangan tidak ditemukan.');
   set('guest-title',d.title);set('guest-opening',d.opening);set('guest-names',[d.personOne,d.personTwo].filter(Boolean).join(' & '));set('guest-date',d.date?new Date(d.date).toLocaleString('id-ID'):'');set('guest-location',d.location);set('guest-closing',d.closing);
