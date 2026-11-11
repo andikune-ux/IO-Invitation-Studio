@@ -54,3 +54,28 @@ Jangan menganggap wildcard domain milik provider dapat dikonfigurasi oleh pemili
 ## Status saat ini
 
 Dokumen ini menetapkan rancangan. Resolver, backend, database, autentikasi, DNS, TLS, dan deployment produksi belum dibuat atau diverifikasi.
+
+
+## Editor undangan dan halaman Tamu (implementasi demo)
+
+Branch `feat/admin-media-editor` menambahkan:
+
+- Form editor konten undangan untuk Admin.
+- Pemilihan foto JPG/PNG/WEBP hingga 8 MB dan video MP4/WebM hingga 25 MB.
+- Preview langsung dan halaman `guest.html`.
+- Draft teks menggunakan `localStorage`; file media demo menggunakan IndexedDB pada origin browser yang sama.
+
+**Batasan yang disengaja:** ini belum menjadi sistem publikasi. Data browser tidak otomatis tersedia pada hostname/subdomain lain atau perangkat lain. Jangan menampilkan status "published" dan jangan menganggap upload sudah masuk cloud.
+
+## Tahap backend yang masih wajib
+
+Sebelum fitur dipakai sungguhan, implementasikan dan uji:
+
+1. Identitas/login Admin dan pemeriksaan kepemilikan `event_id` di server.
+2. API untuk membuat upload URL sementara (presigned URL) dan membatasi ukuran, MIME type, serta key berdasarkan event.
+3. Penyimpanan file di cloud dan metadata file pada database persisten.
+4. Endpoint baca publik yang hanya mengembalikan data undangan yang memang dipublikasikan.
+5. Registry hostname eksplisit untuk pemetaan Admin/Tamu, status, dan masa berlaku.
+6. Pengujian akses lintas perangkat, upload, batas ukuran, izin, dan HTTPS.
+
+Jangan menaruh token rahasia atau kredensial storage di JavaScript frontend. Jangan mengizinkan endpoint upload anonim membuat key arbitrer.
