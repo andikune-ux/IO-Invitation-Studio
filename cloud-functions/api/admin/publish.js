@@ -2,7 +2,7 @@ import { getStore } from "@edgeone/pages-blob";
 import { json, readJson, safeText, validEventId } from "../../_lib/http.js";
 import { requireOwner } from "../../_lib/auth.js";
 
-const MEDIA_KINDS = ["cover", "hero", "groom", "bride", "video", ...Array.from({ length: 6 }, (_, i) => "gallery-" + (i + 1)), ...Array.from({ length: 3 }, (_, i) => "story-" + (i + 1))];
+const MEDIA_KINDS = ["cover", "hero", "groom", "bride", "child", "video", ...Array.from({ length: 6 }, (_, i) => "gallery-" + (i + 1)), ...Array.from({ length: 3 }, (_, i) => "story-" + (i + 1))];
 const validMediaKey = (key, eventId, kind) => typeof key === "string" &&
   key.startsWith(`events/${eventId}/media/${kind}-`) &&
   /^events\/[a-z0-9][a-z0-9-]{2,63}\/media\/[a-z0-9-]+\.(jpg|jpeg|png|webp|mp4|webm)$/.test(key);
