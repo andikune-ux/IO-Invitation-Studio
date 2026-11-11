@@ -44,7 +44,7 @@ const cleanContent = (input) => {
       };
     }
   }
-  return { family, bankAccounts, stories, featuredCount, mapUrl: cleanText(source.mapUrl, 1000), categoryData };
+  return { family, bankAccounts, stories, storyEnabled: source.storyEnabled !== false, featuredCount, mapUrl: cleanText(source.mapUrl, 1000), categoryData };
 };
 const validMediaKey = (key, eventId, kind) => typeof key === "string" &&
   key.startsWith(`events/${eventId}/media/${kind}-`) &&
