@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const OWNER_DOMAIN = 'https://io-invitation-studio.edgeone.dev';
+  const OWNER_DOMAIN = 'undangandigital-iODigitalInvitation.edgeone.dev';
   const CATEGORY_LABELS = {pernikahan:'UndanganPernikahan',lamaran:'UndanganLamaran',aqiqah:'UndanganAqiqah',khitanan:'UndanganKhitanan',keagamaan:'UndanganKeagamaan','ulang-tahun':'UndanganUlangTahun',lainnya:'UndanganLainnya'};
   const $ = (s) => document.querySelector(s);
   const KEY = 'io-invitation-demo-v1';
@@ -11,7 +11,7 @@
   document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
   document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.go)));
   const linkForm=$('#link-form');
-  if(linkForm) linkForm.addEventListener('submit',(e)=>{e.preventDefault();const admin=slugify($('#host-owner').value),guest=slugify($('#guest-name').value),cat=CATEGORY_LABELS[$('#event-category').value]||CATEGORY_LABELS.lainnya;if(!admin||!guest){toast('Nama penyelenggara dan tamu wajib diisi.');return;}const id=(admin+'-'+cat.toLowerCase()).slice(0,64).replace(/-+$/,'');$('#owner-url').textContent=OWNER_DOMAIN;$('#admin-url').textContent='Belum tersedia — login Admin per acara belum dibuat.';$('#guest-url').textContent=OWNER_DOMAIN+'/guest.html?event='+encodeURIComponent(id)+'&to='+encodeURIComponent($('#guest-name').value.trim());});
+  if(linkForm) linkForm.addEventListener('submit',(e)=>{e.preventDefault();const admin=slugify($('#host-owner').value),guest=slugify($('#guest-name').value),cat=CATEGORY_LABELS[$('#event-category').value]||CATEGORY_LABELS.lainnya;if(!admin||!guest){toast('Nama penyelenggara dan tamu wajib diisi.');return;}const id=(admin+'-'+slugify(cat)).slice(0,120).replace(/-+$/,'');const guestHost=(guest+'-'+id).slice(0,180).replace(/-+$/,'');$('#owner-url').textContent=OWNER_DOMAIN;$('#admin-url').textContent=id+'.'+OWNER_DOMAIN;$('#guest-url').textContent=guestHost+'.'+OWNER_DOMAIN;});
   document.querySelectorAll('[data-copy]').forEach(b=>b.addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('#'+b.dataset.copy).textContent);toast('Link berhasil disalin.');}catch{toast('Clipboard tidak tersedia di browser ini.');}}));
   const openDB=()=>new Promise((resolve,reject)=>{const req=indexedDB.open(DB,1);req.onupgradeneeded=()=>req.result.createObjectStore('media');req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);});
   const putMedia=async(key,file)=>{const db=await openDB();return new Promise((resolve,reject)=>{const tx=db.transaction('media','readwrite');tx.objectStore('media').put(file,key);tx.oncomplete=()=>{db.close();resolve();};tx.onerror=()=>reject(tx.error);});};
