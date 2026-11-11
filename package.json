@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check": "node --check app.js && node --check cloud-publish.js && node --check cloud-functions/_lib/http.js && node --check cloud-functions/api/admin/upload-url.js && node --check cloud-functions/api/admin/publish.js && node --check 'cloud-functions/api/invitation/[eventId].js' && node --check cloud-functions/api/media.js"
+    "check": "node --check app.js && node --check cloud-publish.js && node --check cloud-functions/_lib/http.js && node --check cloud-functions/api/admin/upload-url.js && node --check cloud-functions/api/admin/publish.js && node --check 'cloud-functions/api/invitation/[eventId].js' && node --check cloud-functions/api/media.js && node --check cloud-functions/_lib/auth.js && node --check cloud-functions/api/auth/owner-login.js && node --check cloud-functions/api/auth/admin-login.js && node --check cloud-functions/api/auth/me.js && node --check cloud-functions/api/auth/logout.js && node --check cloud-functions/api/owner/admins.js"
   },
   "dependencies": {
     "@edgeone/pages-blob": "0.0.18"
