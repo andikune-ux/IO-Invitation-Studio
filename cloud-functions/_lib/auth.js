@@ -76,7 +76,7 @@ export const getSession = async (request) => {
 export const requireEventAdmin = async (request, eventId) => {
   if (!originAllowed(request)) return { ok: false, response: json({ error: "Origin tidak diizinkan." }, 403) };
   const authorization = request.headers.get("Authorization") || "";
-  const bearer = authorization.match(/^Bearer\\s+(.+)$/i)?.[1]?.trim() || "";
+  const bearer = authorization.match(/^Bearer\s+(.+)$/i)?.[1]?.trim() || "";
   let identity = null;
   if (bearer && bearer.length >= 40 && bearer.length <= 200) {
     const link = await store().get(`auth/admin-links/${eventId}.json`, { type: "json", consistency: "strong" });
