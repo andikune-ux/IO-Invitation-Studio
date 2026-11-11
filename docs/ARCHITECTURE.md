@@ -53,4 +53,51 @@ Jangan menganggap wildcard domain milik provider dapat dikonfigurasi oleh pemili
 
 ## Status saat ini
 
-Dokumen ini menetapkan rancangan. Resolver, backend, database, autentikasi, DNS, TLS, dan deployment produksi belum dibuat atau diverifikasi.
+Dokumen ini menetapkan rancangan hostname. Resolver, registry hostname, autentikasi multi-Admin, DNS, TLS, dan deployment produksi belum dibuat atau diverifikasi. API cloud dasar telah ditambahkan di branch pengembangan, tetapi belum dideploy atau diuji.
+
+
+## Editor undangan dan halaman Tamu (demo + integrasi cloud)
+
+Branch `feat/admin-media-editor` menambahkan:
+
+- Form editor konten undangan untuk Admin.
+- Pemilihan foto JPG/PNG/WEBP hingga 8 MB dan video MP4/WebM hingga 25 MB.
+- Preview langsung dan halaman `guest.html`.
+- Draft teks menggunakan `localStorage`; file media demo menggunakan IndexedDB pada origin browser yang sama.
+
+**Batasan demo lokal:** draft lokal tidak otomatis tersedia pada hostname/subdomain lain atau perangkat lain. Publikasi cloud merupakan alur terpisah yang memerlukan API dan konfigurasi EdgeOne sesuai bagian berikutnya.
+
+## Tahap backend lanjutan yang masih wajib
+
+Fondasi API cloud sudah dibuat di branch ini. Sebelum fitur dipakai sungguhan, masih perlu:
+
+1. Identitas/login Admin per acara dan pemeriksaan kepemilikan `event_id` di server (token Owner saat ini hanya solusi sementara).
+2. Konfigurasi dan deployment Cloud Functions + Blob Storage pada project EdgeOne yang benar.
+3. Registry hostname eksplisit untuk pemetaan Admin/Tamu, status, dan masa berlaku.
+4. Pengujian akses lintas perangkat, upload, batas ukuran, izin, kuota, dan HTTPS.
+
+Jangan menaruh token rahasia atau kredensial storage di JavaScript frontend. Jangan mengizinkan endpoint upload anonim membuat key arbitrer.
+
+## Backend cloud (fondasi API, belum aktif sebelum deployment)
+
+Branch ini menambahkan Node.js Cloud Functions EdgeOne Makers:
+- `POST /api/admin/upload-url`: membuat presigned upload URL 5 menit untuk media acara.
+- `POST /api/admin/publish`: menyimpan data undangan berstatus published.
+- `GET /api/invitation/{eventId}`: membaca undangan yang sudah diterbitkan.
+- `GET /api/media?key=...`: menyajikan media yang direferensikan oleh undangan published.
+
+Penyimpanan memakai namespace Blob `io-invitation-media`. SDK resmi `@edgeone/pages-blob` digunakan dari Node.js Cloud Functions. Dokumentasi runtime/routing: https://pages.edgeone.ai/document/node-functions dan Blob: https://pages.edgeone.ai/document/blob-storage.
+
+### Konfigurasi wajib di EdgeOne sebelum API dapat dipakai
+1. Hubungkan project EdgeOne Makers ke repository ini dan pastikan root/build output sesuai project statis.
+2. Aktifkan Node.js Cloud Functions untuk direktori `cloud-functions/` (route file-based).
+3. Atur environment variable rahasia `IO_ADMIN_API_TOKEN` pada project EdgeOne. Buat token acak panjang di password manager; jangan commit token ke GitHub atau mengirimkannya di chat.
+4. Deploy ulang. Jika environment variable belum ada, endpoint Admin sengaja mengembalikan 503.
+5. Masukkan token pada panel Publikasi cloud di editor Admin. Token hanya dipakai dalam request saat sesi aktif dan tidak ditulis ke localStorage.
+
+**Batasan keamanan tahap ini:** token adalah token Owner tingkat platform, bukan login multi-Admin dan belum membatasi token ke event tertentu. Jangan membagikannya kepada Admin acara yang belum dipercaya. Sebelum produksi multi-tenant, ganti dengan autentikasi per Admin + otorisasi server-side berdasarkan event_id, rate limit, audit log, dan kebijakan retensi. URL publik undangan hanya mengembalikan record berstatus published.
+
+Blob Free Edition memiliki batas ukuran objek tunggal 25 MB. Foto dibatasi 8 MB dan video 25 MB di API. EdgeOne menyatakan Blob bukan CDN hosting publik; endpoint media di atas mem-proxy objek melalui Cloud Functions, sehingga beban egress/kuota perlu diuji sebelum penggunaan ramai. 
+
+### Status
+Kode API dan UI cloud sudah ditambahkan ke branch. Pemeriksaan sintaks JavaScript lokal telah lulus. Pengguna melaporkan build berhasil, tetapi deployment fungsi, konfigurasi environment, upload sungguhan, dan pengujian lintas perangkat belum diverifikasi dari project EdgeOne. Status tersebut tidak boleh dianggap aktif sebelum tes runtime berhasil.
