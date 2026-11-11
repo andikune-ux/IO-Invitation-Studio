@@ -80,7 +80,7 @@ export const requireEventAdmin = async (request, eventId) => {
   let identity = null;
   if (bearer && bearer.length >= 40 && bearer.length <= 200) {
     const link = await store().get(`auth/admin-links/${eventId}.json`, { type: "json", consistency: "strong" });
-    if (link && !link.revoked && safeEqual(link.tokenHash || "", digest(bearer))) {
+    if (link && !link.revoked && (!link.expiresAt || (Number.isFinite(Date.parse(link.expiresAt)) && Date.parse(link.expiresAt) > Date.now())) && safeEqual(link.tokenHash || "", digest(bearer))) {
       identity = { role: "admin", eventId, access: "link" };
     }
   }
