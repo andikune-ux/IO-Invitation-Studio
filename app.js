@@ -87,7 +87,7 @@ if(form){
   if(sourceCategory!==category)categoryContent[sourceCategory]={family:src.content?.family||{},personOne:src.personOne||'',personTwo:src.personTwo||'',stories:src.content?.stories||[],bankAccounts:src.content?.bankAccounts||[],featuredCount:src.content?.featuredCount||0,mapUrl:src.content?.mapUrl||''};
   const activeContent=sourceCategory===category?(src.content||{}):(categoryContent[category]||{});
   renderFamilies(activeContent.family||{});$('#gallery-count').value=String(activeContent.featuredCount||0);galleryRender(Number($('#gallery-count').value));
-  fields.forEach(id=>{const map={'event-title':'title','opening-text':'opening','event-date':'date','event-location':'location','closing-text':'closing','media-url':'mediaUrl','map-url':'mapUrl'};if(src[map[id]||id]!==undefined&&src[map[id]||id]!==null&&id!=='map-url')$('#'+id).value=src[map[id]||id]});
+  fields.forEach(id=>{const map={'event-title':'title','opening-text':'opening','event-date':'date','event-location':'location','closing-text':'closing','media-url':'mediaUrl','map-url':'mapUrl'};const value=src[map[id]||id]??src[id];if(value!==undefined&&value!==null&&id!=='map-url')$('#'+id).value=value});
   if(sourceCategory===category||!src.category){if(src.personOne!==undefined)$('#person-one').value=src.personOne;if(src.personTwo!==undefined)$('#person-two').value=src.personTwo}else{$('#person-one').value=activeContent.personOne||'';$('#person-two').value=activeContent.personTwo||''}
   $('#map-url').value=activeContent.mapUrl||'';
   (activeContent.bankAccounts||[]).slice(0,2).forEach(addBank);
