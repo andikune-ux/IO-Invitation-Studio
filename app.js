@@ -29,7 +29,24 @@
     $('#video-upload').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;if(!/^video\/(mp4|webm)$/.test(f.type)||f.size>25*1024*1024){toast('Video harus MP4/WebM dan maksimal 25 MB.');e.target.value='';return;}try{mediaKeys.video='video';await putMedia('video',f);showMedia('video',f);}catch{toast('Browser tidak mendukung penyimpanan media lokal.');}});
     form.addEventListener('submit',e=>{e.preventDefault();localStorage.setItem(KEY,JSON.stringify({...readFields(),mediaKeys,savedAt:new Date().toISOString()}));toast('Draft demo tersimpan di browser ini.');});
     $('#reset-editor').addEventListener('click',()=>{if(!confirm('Reset seluruh draft demo di browser ini?'))return;localStorage.removeItem(KEY);location.reload();});
-    const saved=data();fields.forEach(id=>{if(saved[id]!==undefined)$('#'+id).value=saved[id];});mediaKeys=saved.mediaKeys||mediaKeys;updatePreview();
+    const saved=data();fields.forEach(id=>{if(saved[id]!==undefined)$('#'+id).value=saved[id];});mediaKeys=saved.mediaKeys||mediaKeys;
+    const selectedEvent=new URLSearchParams(location.search).get('event');
+    if(selectedEvent && /^[a-z0-9][a-z0-9-]{2,63}$/.test(selectedEvent)){
+      $('#cloud-event-id').value=selectedEvent;
+      const link=$('#guest-preview-link');if(link)link.href='./guest.html?event='+encodeURIComponent(selectedEvent);
+      fetch('/api/invitation/'+encodeURIComponent(selectedEvent),{credentials:'same-origin'}).then(async response=>{
+        if(!response.ok)return null;return response.json();
+      }).then(invitation=>{
+        if(!invitation)return;
+        const values={'event-title':invitation.title,'person-one':invitation.personOne,'person-two':invitation.personTwo,'opening-text':invitation.opening,'event-date':invitation.date,'event-location':invitation.location,'closing-text':invitation.closing};
+        Object.entries(values).forEach(([id,value])=>{if(value!==undefined && value!==null)$('#'+id).value=value;});
+        updatePreview();
+        if(invitation.mediaUrls?.cover){const img=document.createElement('img');img.src=invitation.mediaUrls.cover;img.alt='Foto sampul yang sedang diterbitkan';$('#preview-cover').replaceChildren(img);}
+        if(invitation.mediaUrls?.video){const video=document.createElement('video');video.src=invitation.mediaUrls.video;video.controls=true;video.playsInline=true;$('#video-preview').replaceChildren(video);}
+        toast('Konten undangan cloud berhasil dimuat untuk diedit.');
+      }).catch(()=>toast('Konten cloud belum dapat dimuat. Draft lokal tetap tersedia.'));
+    }
+    updatePreview();
     Promise.all([getMedia(mediaKeys.cover),getMedia(mediaKeys.video)]).then(([cover,video])=>{if(cover)showMedia('cover',cover);if(video)showMedia('video',video);}).catch(()=>{});
     const guestLink=$('#guest-preview-link');if(guestLink)guestLink.href='./guest.html?event=demo';
   }
