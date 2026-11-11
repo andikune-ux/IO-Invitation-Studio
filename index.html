@@ -42,7 +42,7 @@
 
 
       <section class="view" id="view-editor">
-        <div class="section-heading"><div><span class="eyebrow">ADMIN INVITATION EDITOR</span><h2>Editor undangan</h2><p class="muted">Atur konten yang akan ditampilkan pada halaman tamu.</p></div><span class="tag warning">Cloud API menunggu deployment</span></div>
+        <div class="section-heading"><div><span class="eyebrow">OWNER INVITATION EDITOR</span><h2>Editor undangan</h2><p class="muted">Atur konten, media, dan tampilan undangan untuk acara yang dipilih.</p><a class="secondary-button" href="./owner.html">← Kembali ke Owner Dashboard</a></div><span class="tag warning">Memeriksa koneksi cloud</span></div>
         <div class="editor-layout">
           <form class="panel editor-form" id="invitation-form">
             <h3>Konten undangan</h3>
@@ -52,15 +52,15 @@
             <label>Tanggal & waktu<input id="event-date" type="datetime-local"></label>
             <label>Lokasi acara<input id="event-location" maxlength="180" placeholder="Nama gedung, alamat, kota"></label>
             <label>Pesan tambahan<textarea id="closing-text" rows="3" maxlength="500" placeholder="Tulis pesan untuk para tamu..."></textarea></label>
-            <div class="panel cloud-panel"><h3>Publikasi cloud</h3><p>Fitur desain, media, dan publikasi hanya tersedia untuk Owner. Admin acara tidak dapat mengubah desain atau konten utama undangan.</p><label>ID acara<input id="cloud-event-id" maxlength="64" pattern="[a-z0-9-]+" placeholder="ID acara" required></label><button class="primary-button" id="publish-cloud" type="button">Upload media & terbitkan</button><p id="cloud-status" class="muted" role="status">Login Owner diperlukan melalui Owner Dashboard pada origin yang sama.</p><a id="cloud-guest-link" href="./guest.html" target="_blank" rel="noopener" hidden>Buka undangan cloud ↗</a></div>
+            <div class="panel cloud-panel"><h3>Publikasi cloud</h3><p>Fitur desain, media, dan publikasi hanya tersedia untuk Owner. Admin acara tidak dapat mengubah desain atau konten utama undangan.</p><label>ID acara<input id="cloud-event-id" maxlength="64" pattern="[a-z0-9-]+" placeholder="ID acara" required></label><button class="primary-button" id="publish-cloud" type="button">Upload media & terbitkan</button><p id="cloud-status" class="muted" role="status">Editor cloud membutuhkan sesi Owner aktif pada domain yang sama.</p><a id="cloud-guest-link" href="./guest.html" target="_blank" rel="noopener" hidden>Buka undangan cloud ↗</a></div>
             <div class="upload-box"><strong>Foto sampul</strong><p>Pilih foto dari galeri perangkat (JPG, PNG, WEBP — maks. 8 MB untuk preview).</p><input id="cover-upload" type="file" accept="image/jpeg,image/png,image/webp"><div id="cover-preview" class="media-preview"></div></div>
             <div class="upload-box"><strong>Video undangan</strong><p>Pilih video (MP4/WebM — maks. 25 MB untuk preview).</p><input id="video-upload" type="file" accept="video/mp4,video/webm"><div id="video-preview" class="media-preview"></div></div>
             <label>URL musik / video opsional<input id="media-url" type="url" placeholder="https://..."></label>
-            <div class="editor-actions"><button class="primary-button" type="submit">Simpan draft demo</button><button class="secondary-button" id="reset-editor" type="button">Reset</button></div>
+            <div class="editor-actions"><button class="primary-button" type="submit">Simpan draft</button><button class="secondary-button" id="reset-editor" type="button">Reset</button></div>
           </form>
           <div class="editor-side">
             <div class="panel live-preview"><div class="preview-head"><span class="eyebrow">LIVE PREVIEW</span><span class="tag neutral">Tampilan tamu</span></div><div class="invitation-preview" id="invitation-preview"><div class="preview-cover" id="preview-cover"><span>✦</span></div><div class="preview-copy"><small>THE SPECIAL DAY</small><h2 id="preview-title">The Wedding of Andik & Ara</h2><p id="preview-opening">Dengan memohon rahmat dan ridho Tuhan, kami mengundang Anda untuk hadir di hari bahagia kami.</p><h3 id="preview-names">Andik & Ara</h3><p id="preview-date">Tanggal acara</p><p id="preview-location">Lokasi acara</p><p id="preview-closing"></p></div></div><a class="primary-button preview-link" id="guest-preview-link" href="./guest.html" target="_blank" rel="noopener">Buka preview halaman tamu ↗</a></div>
-            <div class="notice">Preview lokal tetap tersimpan di browser. Panel Publikasi cloud memakai sesi Admin per acara. Owner harus membuat akun Admin melalui endpoint Owner setelah Cloud Functions dideploy. Jangan gunakan token Owner sebagai password Admin.</div>
+            <div class="notice">Preview lokal tetap tersimpan di browser. Publikasi cloud hanya dapat dilakukan oleh Owner. Admin acara tetap hanya memiliki akses untuk mengelola daftar tamu.</div>
           </div>
         </div>
       </section>
