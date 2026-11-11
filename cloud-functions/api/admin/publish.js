@@ -36,6 +36,8 @@ export async function onRequestPost({ request, env }) {
   const invitation = {
     eventId: body.eventId,
     title: safeText(body.invitation.title, 100),
+    category: meta.category || null,
+    religion: meta.religion || null,
     personOne: safeText(body.invitation.personOne, 60),
     personTwo: safeText(body.invitation.personTwo, 60),
     opening: safeText(body.invitation.opening, 500),
