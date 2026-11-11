@@ -26,21 +26,25 @@ const cookieValue = (request, name) => {
   }
   return "";
 };
+const ALLOWED_ORIGINS = new Set([
+  "https://io-invitation-studio.edgeone.dev"
+]);
+
 const originAllowed = (request) => {
   const originHeader = request.headers.get("Origin");
   if (!originHeader) return true;
+
   try {
-    const origin = new URL(originHeader);
-    const localOrigin = origin.hostname === "localhost" || origin.hostname === "127.0.0.1";
-    if (origin.protocol !== "https:" && !localOrigin) return false;
+    const origin = new URL(originHeader).origin;
+    if (ALLOWED_ORIGINS.has(origin)) return true;
 
-    // EdgeOne may expose an internal URL to the function while preserving
-    // the public request host in forwarding/Host headers.
-    const forwardedHost = request.headers.get("x-forwarded-host") || "";
-    const requestHost = (forwardedHost || request.headers.get("host") || "").split(",")[0].trim();
-    if (requestHost) return origin.host.toLowerCase() === requestHost.toLowerCase();
+    const parsed = new URL(originHeader);
+    const isLocal = parsed.protocol === "http:" &&
+      (parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1");
+    if (isLocal) return true;
 
-    return origin.origin === new URL(request.url).origin;
+    // Also accept exact same-origin requests in local/test deployments.
+    return origin === new URL(request.url).origin;
   } catch {
     return false;
   }
