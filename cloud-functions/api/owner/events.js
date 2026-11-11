@@ -30,7 +30,7 @@ export async function onRequestGet({ request }) {
         published: invitation?.status === "published",
         publishedAt: invitation?.publishedAt || null,
         admin: admin ? { legacy: true, username: admin.username, displayName: admin.displayName, disabled: Boolean(admin.disabled) } : null,
-        adminLink: adminLink ? { active: !adminLink.revoked, createdAt: adminLink.createdAt || null } : null
+        adminLink: adminLink ? { active: !adminLink.revoked && (!adminLink.expiresAt || (Number.isFinite(Date.parse(adminLink.expiresAt)) && Date.parse(adminLink.expiresAt) > Date.now())), expired: Boolean(adminLink.expiresAt && (!Number.isFinite(Date.parse(adminLink.expiresAt)) || Date.parse(adminLink.expiresAt) <= Date.now())), durationMonths: adminLink.durationMonths || null, expiresAt: adminLink.expiresAt || null, createdAt: adminLink.createdAt || null } : null
       };
     }));
     events.sort((a, b) => String(b?.createdAt || "").localeCompare(String(a?.createdAt || "")));
