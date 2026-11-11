@@ -100,6 +100,8 @@ export async function onRequestPost({ request }) {
       personTwo: safeText(inv.personTwo, 100),
       opening: safeText(inv.opening, 500),
       date: safeText(inv.date, 40),
+      akadDate: safeText(inv.akadDate, 40),
+      receptionDate: safeText(inv.receptionDate, 40),
       location: safeText(inv.location, 250),
       closing: safeText(inv.closing, 1000),
       mediaUrl: safeText(inv.mediaUrl, 500),
