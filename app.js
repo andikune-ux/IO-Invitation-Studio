@@ -26,6 +26,17 @@
   if(form){
     fields.forEach(id=>$('#'+id).addEventListener('input',updatePreview));
     $('#cover-upload').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;if(!/^image\/(jpeg|png|webp)$/.test(f.type)||f.size>8*1024*1024){toast('Foto harus JPG/PNG/WEBP dan maksimal 8 MB.');e.target.value='';return;}try{mediaKeys.cover='cover';await putMedia('cover',f);showMedia('cover',f);}catch{toast('Browser tidak mendukung penyimpanan media lokal.');}});
+    document.querySelectorAll('.upload-box').forEach(box=>{
+      const input=box.querySelector('input[type="file"]');if(!input)return;
+      box.addEventListener('dragover',event=>{event.preventDefault();box.classList.add('drag-over');});
+      box.addEventListener('dragleave',event=>{if(!box.contains(event.relatedTarget))box.classList.remove('drag-over');});
+      box.addEventListener('drop',event=>{
+        event.preventDefault();box.classList.remove('drag-over');
+        const file=event.dataTransfer?.files?.[0];if(!file)return;
+        try{const transfer=new DataTransfer();transfer.items.add(file);input.files=transfer.files;input.dispatchEvent(new Event('change',{bubbles:true}));}
+        catch{toast('Drag-and-drop tidak didukung browser ini. Gunakan tombol pilih file.');}
+      });
+    });
     $('#video-upload').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;if(!/^video\/(mp4|webm)$/.test(f.type)||f.size>25*1024*1024){toast('Video harus MP4/WebM dan maksimal 25 MB.');e.target.value='';return;}try{mediaKeys.video='video';await putMedia('video',f);showMedia('video',f);}catch{toast('Browser tidak mendukung penyimpanan media lokal.');}});
     form.addEventListener('submit',e=>{e.preventDefault();localStorage.setItem(KEY,JSON.stringify({...readFields(),mediaKeys,savedAt:new Date().toISOString()}));toast('Draft demo tersimpan di browser ini.');});
     $('#reset-editor').addEventListener('click',()=>{if(!confirm('Reset seluruh draft demo di browser ini?'))return;localStorage.removeItem(KEY);location.reload();});
