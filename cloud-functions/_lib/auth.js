@@ -75,15 +75,24 @@ export const getSession = async (request) => {
 
 export const requireEventAdmin = async (request, eventId) => {
   if (!originAllowed(request)) return { ok: false, response: json({ error: "Origin tidak diizinkan." }, 403) };
-  const session = await getSession(request);
-  if (!session || session.role !== "admin" || session.eventId !== eventId) {
-    return { ok: false, response: json({ error: "Sesi Admin tidak valid atau tidak memiliki akses ke acara ini." }, 401) };
+  const authorization = request.headers.get("Authorization") || "";
+  const bearer = authorization.match(/^Bearer\\s+(.+)$/i)?.[1]?.trim() || "";
+  let identity = null;
+  if (bearer && bearer.length >= 40 && bearer.length <= 200) {
+    const link = await store().get(`auth/admin-links/${eventId}.json`, { type: "json", consistency: "strong" });
+    if (link && !link.revoked && safeEqual(link.tokenHash || "", digest(bearer))) {
+      identity = { role: "admin", eventId, access: "link" };
+    }
   }
+  // Temporary compatibility for existing Admin sessions during migration.
+  if (!identity) {
+    const session = await getSession(request);
+    if (session?.role === "admin" && session.eventId === eventId) identity = session;
+  }
+  if (!identity) return { ok: false, response: json({ error: "Tautan Admin tidak valid atau sudah dicabut." }, 401) };
   const meta = await store().get(`events/${eventId}/meta.json`, { type: "json", consistency: "strong" });
-  if (!meta || meta.status === "archived") {
-    return { ok: false, response: json({ error: "Acara ini diarsipkan atau tidak tersedia untuk dikelola." }, 403) };
-  }
-  return { ok: true, session };
+  if (!meta || meta.status === "archived") return { ok: false, response: json({ error: "Acara ini diarsipkan atau tidak tersedia untuk dikelola." }, 403) };
+  return { ok: true, session: identity };
 };
 
 export const requireOwner = async (request) => {
@@ -133,37 +142,21 @@ export async function createEventAdmin(request, body) {
   if (!originAllowed(request)) return json({ error: "Origin tidak diizinkan." }, 403);
   const auth = await requireOwner(request);
   if (!auth.ok) return auth.response;
-  const { eventId, eventTitle, username, password, displayName } = body || {};
-  const normalizedUsername = typeof username === "string" ? username.trim().toLowerCase() : "";
-  if (!validEventId(eventId) || !normalizedUsername || !/^[a-z0-9._-]{3,40}$/.test(normalizedUsername)) {
-    return json({ error: "ID acara atau username Admin tidak valid." }, 400);
-  }
-  if (typeof password !== "string" || password.length < 12 || password.length > 256) {
-    return json({ error: "Password Admin wajib 12–256 karakter." }, 400);
-  }
+  const { eventId, eventTitle } = body || {};
+  if (!validEventId(eventId)) return json({ error: "ID acara tidak valid." }, 400);
   const db = store();
-  const accountKey = `auth/admins/${eventId}.json`;
-  const existing = await db.get(accountKey, { type: "json", consistency: "strong" });
-  if (existing) return json({ error: "Akun Admin untuk acara ini sudah ada." }, 409);
-  const salt = randomBytes(16).toString("hex");
-  const passwordHash = (await scrypt(password, salt, 64)).toString("hex");
+  const metaKey = `events/${eventId}/meta.json`;
+  const existing = await db.get(metaKey, { type: "json", consistency: "strong" });
+  if (existing) return json({ error: "ID acara sudah digunakan." }, 409);
   const now = new Date().toISOString();
-  await db.setJSON(`events/${eventId}/meta.json`, {
+  await db.setJSON(metaKey, {
     eventId,
-    title: typeof eventTitle === "string" ? eventTitle.trim().slice(0, 100) : "",
+    title: typeof eventTitle === "string" ? eventTitle.trim().slice(0, 100) : eventId,
     status: "draft",
-    createdAt: now
+    createdAt: now,
+    updatedAt: now
   });
-  await db.setJSON(accountKey, {
-    eventId,
-    username: normalizedUsername,
-    displayName: typeof displayName === "string" ? displayName.trim().slice(0, 80) : normalizedUsername,
-    salt,
-    passwordHash,
-    disabled: false,
-    createdAt: now
-  });
-  return json({ ok: true, eventId, username: normalizedUsername, message: "Akun Admin berhasil dibuat." }, 201);
+  return json({ ok: true, eventId, message: "Acara berhasil dibuat." }, 201);
 }
 
 export async function sessionInfo(request) {
