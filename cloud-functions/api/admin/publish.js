@@ -15,8 +15,19 @@ export async function onRequestPost({ request, env }) {
       return json({ error: "Referensi media tidak valid." }, 400);
     }
   }
+  try {
   const store = getStore("io-invitation-media");
   const previous = await store.get(`events/${body.eventId}/invitation.json`, { type: "json", consistency: "strong" }).catch(() => null);
+  for (const [kind, max] of [["cover", 8 * 1024 * 1024], ["video", 25 * 1024 * 1024]]) {
+    const key = media[kind];
+    if (key) {
+      const expected = kind === "cover" ? /^events\\/[a-z0-9-]+\\/media\\/cover-[a-z0-9-]+\\.(jpg|png|webp)$/ : /^events\\/[a-z0-9-]+\\/media\\/video-[a-z0-9-]+\\.(mp4|webm)$/;
+      if (!expected.test(key)) return json({ error: "Jenis file media tidak sesuai." }, 400);
+      const uploaded = await store.get(key, { type: "arrayBuffer", consistency: "strong" });
+      if (!uploaded) return json({ error: "File media belum selesai diunggah." }, 400);
+      if (uploaded.byteLength > max) return json({ error: "Ukuran file aktual melebihi batas." }, 413);
+    }
+  }
   const invitation = {
     eventId: body.eventId,
     title: safeText(body.invitation.title, 100),
@@ -31,10 +42,9 @@ export async function onRequestPost({ request, env }) {
     status: "published"
   };
   if (!invitation.title) return json({ error: "Nama acara wajib diisi." }, 400);
-  try {
     await store.setJSON(`events/${body.eventId}/invitation.json`, invitation);
     return json({ ok: true, eventId: body.eventId, publishedAt: invitation.publishedAt });
   } catch {
-    return json({ error: "Gagal menyimpan undangan ke Blob Storage." }, 503);
+    return json({ error: "Gagal memverifikasi media atau menyimpan undangan ke Blob Storage." }, 503);
   }
 }
