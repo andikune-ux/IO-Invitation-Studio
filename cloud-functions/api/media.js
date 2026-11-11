@@ -13,8 +13,9 @@ export async function onRequestGet({ request }) {
     const meta = await store.get(`events/${match[1]}/meta.json`, { type: "json", consistency: "strong" });
     if (!meta || meta.status === "archived") return json({ error: "Media tidak ditemukan." }, 404);
     const invitation = await store.get(`events/${match[1]}/invitation.json`, { type: "json", consistency: "strong" });
-    const draft = invitation?.status === "published" ? null : await store.get(`events/${match[1]}/draft.json`, { type: "json", consistency: "strong" });
-    const active = invitation?.status === "published" ? invitation : draft;
+    const draft = await store.get(`events/${match[1]}/draft.json`, { type: "json", consistency: "strong" });
+    const draftIsNewer = Boolean(draft && (!invitation?.publishedAt || (draft.updatedAt && Date.parse(draft.updatedAt) > Date.parse(invitation.publishedAt))));
+    const active = draftIsNewer || invitation?.status !== "published" ? draft : invitation;
     const allowedKeys = Object.values(active?.media || {});
     if (!active || !allowedKeys.includes(key)) return json({ error: "Media tidak ditemukan." }, 404);
     const content = await store.get(key, { type: "arrayBuffer", consistency: "strong" });
