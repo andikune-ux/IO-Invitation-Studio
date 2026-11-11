@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101827">
+  <meta name="description" content="IO Invitation Studio — kelola undangan digital dalam satu tempat.">
+  <title>IO Invitation Studio</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="#home" aria-label="IO Invitation Studio home"><span class="brand-mark">IO</span><span><strong>Invitation Studio</strong><small>Digital invitation platform</small></span></a>
+      <div class="workspace-label">WORKSPACE</div>
+      <nav class="nav-list" aria-label="Navigasi utama">
+        <button class="nav-item active" data-view="overview"><span>▦</span> Ringkasan</button>
+        <button class="nav-item" data-view="events"><span>◇</span> Acara</button>
+        <button class="nav-item" data-view="links"><span>↗</span> Generator Link</button>
+        <button class="nav-item" data-view="settings"><span>⚙</span> Pengaturan</button>
+      </nav>
+      <div class="sidebar-bottom"><span class="status-dot"></span> Platform foundation <small>Prototype</small></div>
+    </aside>
+
+    <main class="main-content" id="home">
+      <header class="topbar"><div><span class="eyebrow">OWNER WORKSPACE</span><h1 id="page-title">Ringkasan</h1></div><div class="topbar-right"><span class="owner-chip"><span class="avatar">O</span> Owner</span></div></header>
+
+      <section class="view active" id="view-overview">
+        <div class="welcome-card"><div><span class="eyebrow light">IO INVITATION STUDIO</span><h2>Satu platform, banyak momen spesial.</h2><p>Kelola acara, admin, dan undangan personal dari satu tempat.</p><button class="primary-button" data-go="links">Buat link undangan <span>→</span></button></div><div class="welcome-art" aria-hidden="true"><div class="art-ring ring-one"></div><div class="art-ring ring-two"></div><div class="art-card">✦<span>YOUR<br>STORY</span></div></div></div>
+        <div class="stats-grid"><article class="stat-card"><span>Total acara</span><strong>—</strong><small>Database belum terhubung</small></article><article class="stat-card"><span>Admin aktif</span><strong>—</strong><small>Menunggu backend</small></article><article class="stat-card"><span>Undangan tamu</span><strong>—</strong><small>Menunggu backend</small></article></div>
+        <div class="section-heading"><div><span class="eyebrow">MULAI DI SINI</span><h2>Fondasi platform</h2></div><span class="muted">Tahap 1 dari 5</span></div>
+        <div class="foundation-grid"><article class="foundation-card"><span class="step-number">01</span><h3>Domain & routing</h3><p>Menentukan identitas Owner, hostname Admin, dan link Tamu.</p><span class="tag warning">Perlu verifikasi DNS/SSL</span></article><article class="foundation-card"><span class="step-number">02</span><h3>Hak akses</h3><p>Memisahkan izin Owner, Admin acara, dan Tamu.</p><span class="tag neutral">Belum dibuat</span></article><article class="foundation-card"><span class="step-number">03</span><h3>Editor undangan</h3><p>Menyusun tema, layout, tombol, foto, dan video.</p><span class="tag neutral">Belum dibuat</span></article></div>
+      </section>
+
+      <section class="view" id="view-events"><div class="section-heading"><div><span class="eyebrow">EVENT MANAGEMENT</span><h2>Acara</h2><p class="muted">Daftar acara akan tampil setelah database terhubung.</p></div></div><div class="empty-state"><div class="empty-icon">◇</div><h3>Belum ada data acara</h3><p>Fondasi dashboard sudah disiapkan. Penyimpanan acara lintas perangkat belum aktif.</p></div></section>
+
+      <section class="view" id="view-links"><div class="section-heading"><div><span class="eyebrow">HOSTNAME BUILDER</span><h2>Generator link undangan</h2><p class="muted">Buat contoh hostname berdasarkan kategori acara dan nama penyelenggara.</p></div></div>
+        <div class="builder-layout"><form class="panel form-panel" id="link-form"><label>Nama penyelenggara / pasangan<input id="host-owner" value="Andik & Ara" required maxlength="60" placeholder="Contoh: Andik & Ara"></label><label>Kategori acara<select id="event-category"><option value="pernikahan">Pernikahan</option><option value="lamaran">Lamaran / Tunangan</option><option value="aqiqah">Aqiqah</option><option value="khitanan">Khitanan</option><option value="keagamaan">Keagamaan</option><option value="ulang-tahun">Ulang Tahun</option><option value="lainnya">Lainnya</option></select></label><label>Nama tamu<input id="guest-name" value="Budi & Wati" required maxlength="60" placeholder="Contoh: Budi & Wati"></label><button class="primary-button full-button" type="submit">Buat contoh link <span>→</span></button></form>
+        <div class="panel result-panel"><span class="eyebrow">HASIL PREVIEW</span><div class="result-block"><span class="result-label">DOMAIN OWNER — TETAP</span><code id="owner-url">undangandigital-iODigitalInvitation.edgeone.dev</code></div><div class="result-block"><span class="result-label">LINK ADMIN</span><code id="admin-url">andik-ara-undanganpernikahan.undangandigital-iODigitalInvitation.edgeone.dev</code><button class="copy-button" data-copy="admin-url" type="button">Salin</button></div><div class="result-block"><span class="result-label">LINK TAMU</span><code id="guest-url">budi-wati-andik-ara-undanganpernikahan.undangandigital-iODigitalInvitation.edgeone.dev</code><button class="copy-button" data-copy="guest-url" type="button">Salin</button></div><p class="notice">Preview format saja. Hostname belum aktif sebelum DNS wildcard, routing, dan sertifikat HTTPS dikonfigurasi serta diuji.</p></div></div>
+      </section>
+
+      <section class="view" id="view-settings"><div class="section-heading"><div><span class="eyebrow">PLATFORM SETTINGS</span><h2>Pengaturan</h2></div></div><div class="panel settings-panel"><div class="setting-row"><div><strong>Domain Owner</strong><p>Alamat induk platform yang ditetapkan tetap.</p></div><code>undangandigital-iODigitalInvitation.edgeone.dev</code></div><div class="setting-row"><div><strong>Mode hostname</strong><p>Subdomain satu tingkat untuk Admin dan Tamu.</p></div><span class="tag warning">Menunggu uji provider</span></div><div class="setting-row"><div><strong>Penyimpanan</strong><p>Data contoh saat ini hanya berada di browser.</p></div><span class="tag neutral">Local preview</span></div></div></section>
+      <footer class="footer">IO Invitation Studio <span>•</span> Foundation preview <span>•</span> Not production-ready</footer>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="./app.js" defer></script>
+</body>
+</html>
