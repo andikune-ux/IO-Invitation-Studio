@@ -2,55 +2,77 @@ import { getStore } from "@edgeone/pages-blob";
 import { json, readJson, safeText, validEventId } from "../../_lib/http.js";
 import { requireOwner } from "../../_lib/auth.js";
 
-export async function onRequestPost({ request, env }) {
+const MEDIA_KINDS = ["cover", "hero", "groom", "bride", "video", ...Array.from({ length: 6 }, (_, i) => "gallery-" + (i + 1)), ...Array.from({ length: 3 }, (_, i) => "story-" + (i + 1))];
+const validMediaKey = (key, eventId, kind) => typeof key === "string" &&
+  key.startsWith(`events/${eventId}/media/${kind}-`) &&
+  /^events\/[a-z0-9][a-z0-9-]{2,63}\/media\/[a-z0-9-]+\.(jpg|jpeg|png|webp|mp4|webm)$/.test(key);
+
+export async function onRequestPost({ request }) {
   const body = await readJson(request);
   if (!body || !validEventId(body.eventId) || !body.invitation || typeof body.invitation !== "object") {
     return json({ error: "Data publikasi tidak lengkap atau eventId tidak valid." }, 400);
   }
   const auth = await requireOwner(request);
   if (!auth.ok) return auth.response;
-  const media = body.media || {};
-  for (const kind of ["cover", "video"]) {
-    const key = media[kind];
-    if (key && (typeof key !== "string" || !key.startsWith(`events/${body.eventId}/media/`) || key.includes(".."))) {
-      return json({ error: "Referensi media tidak valid." }, 400);
+  const eventId = body.eventId;
+  const mediaInput = body.media || {};
+  const media = {};
+  for (const kind of MEDIA_KINDS) {
+    const key = mediaInput[kind];
+    if (key) {
+      if (!validMediaKey(key, eventId, kind)) return json({ error: "Referensi media " + kind + " tidak valid." }, 400);
+      media[kind] = key;
     }
   }
   try {
-  const store = getStore("io-invitation-media");
-  const meta = await store.get(`events/${body.eventId}/meta.json`, { type: "json", consistency: "strong" });
-  if (!meta) return json({ error: "Acara tidak ditemukan." }, 404);
-  if (meta.status === "archived") return json({ error: "Aktifkan acara sebelum menerbitkan undangan." }, 403);
-  const previous = await store.get(`events/${body.eventId}/invitation.json`, { type: "json", consistency: "strong" }).catch(() => null);
-  for (const [kind, max] of [["cover", 8 * 1024 * 1024], ["video", 25 * 1024 * 1024]]) {
-    const key = media[kind];
-    if (key) {
-      const parts = key.slice(`events/${body.eventId}/media/${kind}-`.length).split(".");
-      const extensions = kind === "cover" ? ["jpg", "png", "webp"] : ["mp4", "webm"];
-      if (parts.length !== 2 || !/^[a-z0-9-]+$/.test(parts[0]) || !extensions.includes(parts[1])) return json({ error: "Jenis file media tidak sesuai." }, 400);
+    const store = getStore("io-invitation-media");
+    const meta = await store.get(`events/${eventId}/meta.json`, { type: "json", consistency: "strong" });
+    if (!meta) return json({ error: "Acara tidak ditemukan." }, 404);
+    if (meta.status === "archived") return json({ error: "Aktifkan acara sebelum menerbitkan undangan." }, 403);
+    const previous = await store.get(`events/${eventId}/invitation.json`, { type: "json", consistency: "strong" }).catch(() => null);
+    const finalMedia = {};
+    for (const kind of MEDIA_KINDS) {
+      const key = media[kind] || previous?.media?.[kind] || null;
+      if (!key) { finalMedia[kind] = null; continue; }
+      if (!validMediaKey(key, eventId, kind)) return json({ error: "Media tersimpan tidak valid." }, 400);
+      const ext = key.split(".").pop();
+      const isVideo = kind === "video";
+      if (isVideo ? !["mp4", "webm"].includes(ext) : !["jpg", "jpeg", "png", "webp"].includes(ext)) {
+        return json({ error: "Ekstensi file tidak sesuai jenis media." }, 400);
+      }
       const uploaded = await store.get(key, { type: "arrayBuffer", consistency: "strong" });
-      if (!uploaded) return json({ error: "File media belum selesai diunggah." }, 400);
-      if (uploaded.byteLength > max) return json({ error: "Ukuran file aktual melebihi batas." }, 413);
+      if (!uploaded) return json({ error: "File " + kind + " belum selesai diunggah." }, 400);
+      const max = isVideo ? 25 * 1024 * 1024 : 8 * 1024 * 1024;
+      if (uploaded.byteLength > max) return json({ error: "Ukuran file " + kind + " melebihi batas." }, 413);
+      finalMedia[kind] = key;
     }
-  }
-  const invitation = {
-    eventId: body.eventId,
-    title: safeText(body.invitation.title, 100),
-    category: meta.category || null,
-    religion: meta.religion || null,
-    personOne: safeText(body.invitation.personOne, 60),
-    personTwo: safeText(body.invitation.personTwo, 60),
-    opening: safeText(body.invitation.opening, 500),
-    date: safeText(body.invitation.date, 40),
-    location: safeText(body.invitation.location, 180),
-    closing: safeText(body.invitation.closing, 500),
-    media: { cover: media.cover || previous?.media?.cover || null, video: media.video || previous?.media?.video || null },
-    publishedAt: new Date().toISOString(),
-    status: "published"
-  };
-  if (!invitation.title) return json({ error: "Nama acara wajib diisi." }, 400);
-    await store.setJSON(`events/${body.eventId}/invitation.json`, invitation);
-    return json({ ok: true, eventId: body.eventId, publishedAt: invitation.publishedAt });
+    const inv = body.invitation;
+    const invitation = {
+      eventId,
+      title: safeText(inv.title, 100),
+      category: meta.category || null,
+      religion: meta.religion || null,
+      personOne: safeText(inv.personOne, 100),
+      personTwo: safeText(inv.personTwo, 100),
+      opening: safeText(inv.opening, 500),
+      date: safeText(inv.date, 40),
+      location: safeText(inv.location, 250),
+      closing: safeText(inv.closing, 1000),
+      mediaUrl: safeText(inv.mediaUrl, 500),
+      content: body.content && typeof body.content === "object" ? body.content : {},
+      media: finalMedia,
+      publishedAt: new Date().toISOString(),
+      status: "published"
+    };
+    if (!invitation.title) return json({ error: "Nama acara wajib diisi." }, 400);
+    if (invitation.content.mapUrl) {
+      try {
+        const map = new URL(invitation.content.mapUrl);
+        if (!["google.com", "www.google.com", "maps.google.com", "maps.app.goo.gl"].includes(map.hostname)) throw new Error();
+      } catch { return json({ error: "URL Google Maps tidak valid." }, 400); }
+    }
+    await store.setJSON(`events/${eventId}/invitation.json`, invitation);
+    return json({ ok: true, eventId, publishedAt: invitation.publishedAt });
   } catch {
     return json({ error: "Gagal memverifikasi media atau menyimpan undangan ke Blob Storage." }, 503);
   }
