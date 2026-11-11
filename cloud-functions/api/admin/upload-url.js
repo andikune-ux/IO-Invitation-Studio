@@ -3,7 +3,7 @@ import { getStore } from "@edgeone/pages-blob";
 import { json, readJson, validEventId } from "../../_lib/http.js";
 import { requireOwner } from "../../_lib/auth.js";
 
-const IMAGE_KINDS = new Set(["cover", "hero", "groom", "bride", ...Array.from({ length: 6 }, (_, i) => "gallery-" + (i + 1)), ...Array.from({ length: 3 }, (_, i) => "story-" + (i + 1))]);
+const IMAGE_KINDS = new Set(["cover", "hero", "groom", "bride", "child", ...Array.from({ length: 6 }, (_, i) => "gallery-" + (i + 1)), ...Array.from({ length: 3 }, (_, i) => "story-" + (i + 1))]);
 const TYPES = {
   "image/jpeg": { ext: "jpg", max: 8 * 1024 * 1024, kind: "image" },
   "image/png": { ext: "png", max: 8 * 1024 * 1024, kind: "image" },
