@@ -21,7 +21,7 @@ export async function onRequestPost({ request, env }) {
   for (const [kind, max] of [["cover", 8 * 1024 * 1024], ["video", 25 * 1024 * 1024]]) {
     const key = media[kind];
     if (key) {
-      const expected = kind === "cover" ? /^events\\/[a-z0-9-]+\\/media\\/cover-[a-z0-9-]+\\.(jpg|png|webp)$/ : /^events\\/[a-z0-9-]+\\/media\\/video-[a-z0-9-]+\\.(mp4|webm)$/;
+      const expected = kind === "cover" ? new RegExp("^events/[a-z0-9-]+/media/cover-[a-z0-9-]+\\\\.(jpg|png|webp)$") : new RegExp("^events/[a-z0-9-]+/media/video-[a-z0-9-]+\\\\.(mp4|webm)$");
       if (!expected.test(key)) return json({ error: "Jenis file media tidak sesuai." }, 400);
       const uploaded = await store.get(key, { type: "arrayBuffer", consistency: "strong" });
       if (!uploaded) return json({ error: "File media belum selesai diunggah." }, 400);
