@@ -17,3 +17,10 @@
 .create-grid .field-disclaimer{font-size:10px;color:#8c93a8;line-height:1.6;font-weight:500}
 .event-badges .category-badge{background:#eeeaff;color:#6258bd}
 .event-badges .religion-badge{background:#e8f2ff;color:#5279a9}
+
+/* Admin link expiry controls */
+.link-duration-control{display:grid;gap:4px;min-width:115px;color:#858ca2;font-size:9px;font-weight:700}
+.link-duration-control select{width:100%;padding:8px 9px;border:1px solid #ffffffd9;border-radius:10px;background:#f0f2f8;color:#626b83;font:700 10px "DM Sans";outline:none;box-shadow:inset 2px 2px 4px #d2d7e2,inset -2px -2px 4px #fff}
+.link-duration-control select:focus{border-color:#9e97e8;box-shadow:0 0 0 3px #8178e522}
+.event-badges .expiry-badge{background:#e8f2ff;color:#5279a9}
+@media(max-width:520px){.link-duration-control{width:100%;max-width:180px}}
