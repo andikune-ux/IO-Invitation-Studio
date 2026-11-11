@@ -40,7 +40,8 @@ const cleanContent = (input) => {
         stories: Array.isArray(entry.stories) ? entry.stories.slice(0, 3).map((story, index) => ({ index: index + 1, text: cleanText(story?.text, 1500) })) : [],
         bankAccounts: Array.isArray(entry.bankAccounts) ? entry.bankAccounts.slice(0, 2).map(account => ({ bank: cleanText(account?.bank, 120), manualBank: cleanText(account?.manualBank, 120), holder: cleanText(account?.holder, 120), number: cleanText(account?.number, 40) })) : [],
         featuredCount: Number.isInteger(entry.featuredCount) ? Math.min(6, Math.max(0, entry.featuredCount)) : 0,
-        mapUrl: cleanText(entry.mapUrl, 1000)
+        mapUrl: cleanText(entry.mapUrl, 1000),
+        storyEnabled: entry.storyEnabled !== false
       };
     }
   }
