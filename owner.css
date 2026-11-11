@@ -7,3 +7,13 @@
 .event-meta{line-height:1.6}
 @media(max-width:980px){.metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:520px){.event-toolbar{display:grid;grid-template-columns:1fr auto}.event-filter{grid-column:1/-1;grid-row:2;width:100%}.metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Event category and optional religion fields */
+.create-grid select{width:100%;padding:13px 15px;border:1px solid #ffffffd9;border-radius:13px;background:linear-gradient(145deg,#e9edf6,#f8f9fc);box-shadow:inset 4px 4px 8px #cbd1e0,inset -4px -4px 8px #fff;color:var(--ink);font:500 13px "DM Sans";outline:none;transition:.2s}
+.create-grid select:focus{border-color:#9e97e8;box-shadow:inset 2px 2px 5px #cbd1e0,inset -2px -2px 5px #fff,0 0 0 3px #8178e522}
+.create-grid .conditional-field{display:grid;gap:7px;padding:15px;border:1px solid #ffffffd4;border-radius:16px;background:#ffffff75}
+.create-grid .conditional-field[hidden]{display:none}
+.create-grid .optional-label{display:inline;color:#a0a6b6;font-weight:500}
+.create-grid .field-disclaimer{font-size:10px;color:#8c93a8;line-height:1.6;font-weight:500}
+.event-badges .category-badge{background:#eeeaff;color:#6258bd}
+.event-badges .religion-badge{background:#e8f2ff;color:#5279a9}
