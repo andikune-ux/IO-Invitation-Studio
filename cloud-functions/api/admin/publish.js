@@ -103,7 +103,7 @@ export async function onRequestPost({ request }) {
       akadDate: safeText(inv.akadDate, 40),
       receptionDate: safeText(inv.receptionDate, 40),
       location: safeText(inv.location, 250),
-      closing: safeText(inv.closing, 1000),
+      closing: safeText(inv.closing, 2000),
       mediaUrl: safeText(inv.mediaUrl, 500),
       content: cleanContent(body.content),
       media: finalMedia,
