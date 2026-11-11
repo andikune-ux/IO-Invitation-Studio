@@ -61,3 +61,18 @@ body.editor-page{margin:0;min-height:100vh;background:linear-gradient(135deg,#e9
 .editor-page [hidden]{display:none!important}
 @media(max-width:900px){.editor-page .editor-layout{grid-template-columns:1fr}.editor-page .editor-side{position:static;grid-row:1}}
 @media(max-width:600px){.editor-page .main-content{padding:14px}.editor-page .topbar{padding:15px;border-radius:18px;align-items:flex-start}.editor-page .owner-chip{font-size:9px;padding:9px}.editor-page .panel{padding:16px;border-radius:18px}.editor-page .two-fields{grid-template-columns:1fr}.editor-page .section-heading{align-items:flex-start}.editor-page .editor-actions>*{flex:1 1 100%}.editor-page .preview-copy{padding:20px 14px}}
+
+/* Invitation content editor additions */
+.editor-page .editor-section{display:grid;gap:12px;padding:16px;border:1px solid #ffffffd9;border-radius:17px;background:#ffffff55}
+.editor-page .editor-section h4{font:800 13px Manrope;margin:0;color:#535b77}
+.editor-page .field-help{font-size:10px;color:var(--muted);line-height:1.6;margin:-5px 0 2px}
+.editor-page .editor-section select{width:100%;padding:12px 14px;border:1px solid #ffffffd9;border-radius:13px;background:#f2f4fa;color:var(--ink);font:500 12px "DM Sans"}
+.editor-page .media-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.editor-page .story-editor{display:grid;gap:10px;padding:14px;border:1px solid #ffffffd9;border-radius:14px;background:#ffffff70}
+.editor-page .story-editor strong{font:800 12px Manrope;color:#535b77}
+.editor-page .bank-account{display:grid;gap:11px;margin:10px 0}
+.editor-page .bank-account label{display:grid;gap:7px}
+.editor-page .bank-account .manual-bank[hidden]{display:none}
+.editor-page .editor-section [hidden]{display:none!important}
+.editor-page .media-preview:empty{display:none}
+@media(max-width:600px){.editor-page .media-grid{grid-template-columns:1fr}.editor-page .editor-section{padding:13px}}
