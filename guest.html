@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#101827">
+<title>Undangan Digital</title><link rel="stylesheet" href="./styles.css">
+</head>
+<body class="guest-page">
+<main id="guest-root" class="guest-card" hidden>
+  <div class="guest-cover" id="guest-cover">✦</div>
+  <article class="guest-copy"><small>YOU ARE INVITED</small><h1 id="guest-title">Undangan</h1><p id="guest-opening"></p><h2 id="guest-names"></h2><p id="guest-date"></p><p id="guest-location"></p><video id="guest-video" controls playsinline hidden></video><p id="guest-closing"></p></article>
+</main>
+<section id="guest-empty" class="guest-empty"><h1>Preview undangan belum tersedia</h1><p>Buka editor di perangkat dan browser yang sama, lalu simpan draft demo.</p><a href="./index.html">Kembali ke IO Invitation Studio</a></section>
+<script>
+(async()=>{
+ const KEY='io-invitation-demo-v1',DB='io-invitation-media-demo';
+ let data={};try{data=JSON.parse(localStorage.getItem(KEY)||'{}')}catch{}
+ if(!data['event-title'])return;
+ const $=id=>document.getElementById(id),set=(id,value)=>$(id).textContent=value||'';
+ set('guest-title',data['event-title']);set('guest-opening',data['opening-text']);set('guest-names',[data['person-one'],data['person-two']].filter(Boolean).join(' & '));
+ set('guest-date',data['event-date']?new Date(data['event-date']).toLocaleString('id-ID'):'');set('guest-location',data['event-location']);set('guest-closing',data['closing-text']);
+ const openDB=()=>new Promise((resolve,reject)=>{const r=indexedDB.open(DB,1);r.onupgradeneeded=()=>r.result.createObjectStore('media');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)});
+ const get=async key=>{if(!key)return null;const db=await openDB();return new Promise((resolve,reject)=>{const r=db.transaction('media').objectStore('media').get(key);r.onsuccess=()=>{db.close();resolve(r.result||null)};r.onerror=()=>reject(r.error)})};
+ try{
+  const keys=data.mediaKeys||{},[cover,video]=await Promise.all([get(keys.cover),get(keys.video)]);
+  if(cover){const img=document.createElement('img');img.src=URL.createObjectURL(cover);img.alt='Foto undangan';$('guest-cover').replaceChildren(img)}
+  if(video){const v=$('guest-video');v.src=URL.createObjectURL(video);v.hidden=false}
+ }catch(e){}
+ $('guest-root').hidden=false;$('guest-empty').hidden=true;
+})();
+</script>
+</body></html>
