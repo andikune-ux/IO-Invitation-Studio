@@ -37,7 +37,7 @@ const readContent=()=>{
  const content={family,bankAccounts:[],featuredCount:Number($('#gallery-count')?.value||0),stories:[],mapUrl:$('#map-url')?.value.trim()||'',categoryData:{...categoryContent}};
  document.querySelectorAll('.bank-account').forEach(box=>{const bank=box.querySelector('[data-bank]').value,holder=box.querySelector('[data-holder]').value.trim(),number=box.querySelector('[data-number]').value.trim(),manualBank=box.querySelector('[data-manual-bank]')?.value.trim()||'';if(bank||holder||number||manualBank)content.bankAccounts.push({bank,manualBank,holder,number})});
  for(let i=1;i<=3;i++){const text=$('#story-text-'+i)?.value.trim()||'';if(text||mediaKeys['story-'+i])content.stories.push({index:i,text})}
- content.categoryData[category]={family:{...family},personOne:$('#person-one')?.value||'',personTwo:$('#person-two')?.value||'',stories:content.stories};
+ content.categoryData[category]={family:{...family},personOne:$('#person-one')?.value||'',personTwo:$('#person-two')?.value||'',stories:content.stories,bankAccounts:content.bankAccounts,featuredCount:content.featuredCount,mapUrl:content.mapUrl};
  return content;
 };
 const openDB=()=>new Promise((resolve,reject)=>{const r=indexedDB.open(DB,1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains('media'))r.result.createObjectStore('media')};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)});
