@@ -1,102 +1,61 @@
 <!doctype html>
 <html lang="id">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#e9eef7">
   <meta name="description" content="IO Invitation Studio — Visual Editor undangan digital.">
   <title>Visual Editor · IO Invitation Studio</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">\n  <link rel="stylesheet" href="./editor.css?v=glass-editor-2">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./editor.css?v=invitation-content-3">
 </head>
 <body class="editor-page">
-  <main class="main-content" style="max-width:1480px">
-    <header class="topbar">
-      <div><span class="eyebrow">IO INVITATION STUDIO / OWNER</span><h1>Visual Editor</h1><p class="muted">Atur konten, media, dan publikasi undangan acara.</p></div>
-      <a class="owner-chip" href="./owner.html" style="text-decoration:none">← Owner Dashboard</a>
-    </header>
-
-    <section id="editor-access-required" class="panel empty-state">
-      <div class="empty-icon">✎</div>
-      <h2>Editor menunggu acara dipilih</h2>
-      <p>Buka Owner Dashboard, login sebagai Owner, lalu tekan tombol <b>Edit undangan</b> pada acara yang ingin dikelola.</p>
-      <a class="primary-button" href="./owner.html" style="display:inline-block;text-decoration:none;margin-top:12px">Buka Owner Dashboard →</a>
-    </section>
-
-    <section id="editor-workspace" hidden>
-      <div class="section-heading">
-        <div><span class="eyebrow">EVENT EDITOR</span><h2 id="editor-event-name">Memuat acara…</h2><p class="muted">ID acara: <code id="editor-event-id">—</code> · <span id="editor-event-category">Kategori belum ditentukan</span> · Nama acara dikelola dari Owner Dashboard.</p></div>
-        <span class="tag neutral">Owner only</span>
-      </div>
-
-      <div class="editor-layout">
-        <form class="panel editor-form" id="invitation-form">
-          <h3>Konten undangan</h3>
-          <input id="event-title" type="hidden">
-          <div class="two-fields">
-            <label>Nama pertama<input id="person-one" maxlength="60" placeholder="Contoh: Andik"></label>
-            <label>Nama kedua<input id="person-two" maxlength="60" placeholder="Contoh: Ara"></label>
+<main class="main-content" style="max-width:1480px">
+  <header class="topbar"><div><span class="eyebrow">IO INVITATION STUDIO / OWNER</span><h1>Visual Editor</h1><p class="muted">Atur konten, foto, media, dan publikasi undangan.</p></div><a class="owner-chip" href="./owner.html" style="text-decoration:none">← Owner Dashboard</a></header>
+  <section id="editor-access-required" class="panel empty-state"><div class="empty-icon">✎</div><h2>Editor menunggu acara dipilih</h2><p>Buka Owner Dashboard, login sebagai Owner, lalu tekan tombol <b>Edit undangan</b> pada acara yang ingin dikelola.</p><a class="primary-button" href="./owner.html" style="display:inline-block;text-decoration:none;margin-top:12px">Buka Owner Dashboard →</a></section>
+  <section id="editor-workspace" hidden>
+    <div class="section-heading"><div><span class="eyebrow">EVENT EDITOR</span><h2 id="editor-event-name">Memuat acara…</h2><p class="muted">ID acara: <code id="editor-event-id">—</code> · <span id="editor-event-category">Kategori belum ditentukan</span></p></div><span class="tag neutral">Owner only</span></div>
+    <div class="editor-layout">
+      <form class="panel editor-form" id="invitation-form">
+        <h3>Konten undangan</h3><input id="event-title" type="hidden">
+        <section class="editor-section"><h4>Identitas acara</h4>
+          <div id="identity-fields" class="two-fields">
+            <label id="person-one-label">Nama pertama<input id="person-one" maxlength="100" placeholder="Nama pertama"></label>
+            <label id="person-two-label">Nama kedua<input id="person-two" maxlength="100" placeholder="Nama kedua"></label>
           </div>
           <label>Kalimat pembuka<textarea id="opening-text" rows="3" maxlength="500" placeholder="Tulis kalimat pembuka undangan…"></textarea></label>
-          <label>Tanggal & waktu<input id="event-date" type="datetime-local"></label>
-          <label>Lokasi acara<input id="event-location" maxlength="180" placeholder="Nama gedung, alamat, kota"></label>
-          <label>Pesan tambahan<textarea id="closing-text" rows="3" maxlength="500" placeholder="Tulis pesan untuk para tamu…"></textarea></label>
-
-          <div class="upload-box">
-            <strong>Foto sampul</strong><p>Pilih dari galeri atau tarik file ke area ini. JPG, PNG, WEBP — maks. 8 MB untuk preview.</p>
-            <input id="cover-upload" type="file" accept="image/jpeg,image/png,image/webp">
-            <div id="cover-preview" class="media-preview"></div>
-          </div>
-          <div class="upload-box">
-            <strong>Video undangan</strong><p>Pilih dari perangkat atau drag-and-drop. MP4/WebM — maks. 25 MB untuk preview.</p>
-            <input id="video-upload" type="file" accept="video/mp4,video/webm">
-            <div id="video-preview" class="media-preview"></div>
-          </div>
-          <label>URL musik / video opsional<input id="media-url" type="url" placeholder="https://…"></label>
-
-          <div class="panel cloud-panel">
-            <h3>Publikasi undangan</h3>
-            <p>Perubahan dapat disimpan sebagai draft. Saat siap, terbitkan agar halaman tamu dapat dibuka melalui link acara.</p>
-            <input id="cloud-event-id" type="hidden">
-            <div class="editor-actions">
-              <button class="primary-button" type="button" id="publish-cloud">Upload media & terbitkan</button>
-              <a id="cloud-guest-link" href="./guest.html" target="_blank" rel="noopener" hidden>Buka undangan terbit ↗</a>
-            </div>
-            <p id="cloud-status" class="muted" role="status">Memeriksa sesi Owner…</p>
-          </div>
-          <div class="editor-actions">
-            <button class="primary-button" type="submit">Simpan draft</button>
-            <button class="secondary-button" id="reset-editor" type="button">Reset draft lokal</button>
-          </div>
-        </form>
-
-        <aside class="editor-side">
-          <section class="panel live-preview">
-            <div class="preview-head"><span class="eyebrow">LIVE PREVIEW</span><span class="tag neutral">Tampilan tamu</span></div>
-            <div class="invitation-preview" id="invitation-preview">
-              <div class="preview-cover" id="preview-cover"><span>✦</span></div>
-              <div class="preview-copy">
-                <small>THE SPECIAL DAY</small>
-                <h2 id="preview-title">Nama acara</h2>
-                <p id="preview-opening"></p>
-                <h3 id="preview-names">Nama pasangan</h3>
-                <p id="preview-date">Tanggal acara</p>
-                <p id="preview-location">Lokasi acara</p>
-                <p id="preview-closing"></p>
-              </div>
-            </div>
-            <a class="primary-button preview-link" id="guest-preview-link" href="./guest.html" target="_blank" rel="noopener">Buka preview halaman tamu ↗</a>
-          </section>
-          <div class="notice">Editor dan publikasi hanya untuk Owner. Admin acara tetap hanya mengelola daftar tamu, sedangkan tamu hanya membuka undangan dan mengisi RSVP jika tersedia.</div>
-        </aside>
-      </div>
-    </section>
-
-    <footer class="footer">IO Invitation Studio <span>•</span> Visual Editor</footer>
-  </main>
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="./app.js?v=glass-editor-2" defer></script>
-  <script src="./cloud-publish.js?v=glass-editor-2" defer></script>
-</body>
-</html>
+          <label>Tanggal & waktu acara<input id="event-date" type="datetime-local"></label>
+          <label>Lokasi acara<input id="event-location" maxlength="250" placeholder="Nama gedung, alamat, kota"></label>
+          <label>Pesan tambahan<textarea id="closing-text" rows="3" maxlength="1000" placeholder="Tulis pesan untuk para tamu…"></textarea></label>
+        </section>
+        <section class="editor-section" id="family-section"><h4>Data keluarga</h4><p class="field-help">Kolom mengikuti kategori acara yang dipilih.</p><div id="family-fields" class="two-fields"></div></section>
+        <section class="editor-section"><h4>Foto utama undangan</h4><p class="field-help">Foto pembuka ketika undangan dibuka dan gambar pratinjau saat tautan dibagikan. Wajib diisi.</p>
+          <div class="upload-box" data-upload-box><strong>Foto Utama</strong><p>JPG, PNG, WEBP — maksimal 8 MB.</p><input id="hero-upload" data-media-kind="hero" type="file" accept="image/jpeg,image/png,image/webp"><div id="hero-preview" class="media-preview"></div></div>
+        </section>
+        <section class="editor-section" id="profile-photo-section"><h4>Foto profil</h4><p class="field-help">Foto individu bersifat opsional.</p><div class="two-fields">
+          <div class="upload-box" data-upload-box><strong id="groom-photo-title">Foto pria</strong><p>JPG/PNG/WEBP — maks. 8 MB.</p><input id="groom-upload" data-media-kind="groom" type="file" accept="image/jpeg,image/png,image/webp"><div id="groom-preview" class="media-preview"></div></div>
+          <div class="upload-box" data-upload-box><strong id="bride-photo-title">Foto wanita</strong><p>JPG/PNG/WEBP — maks. 8 MB.</p><input id="bride-upload" data-media-kind="bride" type="file" accept="image/jpeg,image/png,image/webp"><div id="bride-preview" class="media-preview"></div></div>
+        </div></section>
+        <section class="editor-section"><h4>Foto unggulan</h4><p class="field-help">Opsional. Pilih 1 sampai 6 foto atau tidak menggunakan galeri.</p>
+          <label>Jumlah foto unggulan<select id="gallery-count"><option value="0">Tidak menggunakan foto unggulan</option><option value="1">1 foto</option><option value="2">2 foto</option><option value="3">3 foto</option><option value="4">4 foto</option><option value="5">5 foto</option><option value="6">6 foto</option></select></label>
+          <div id="gallery-upload-list" class="media-grid"></div>
+        </section>
+        <section class="editor-section" id="story-section"><h4>Kisah perjalanan</h4><p class="field-help">Opsional. Maksimal tiga sesi foto dan kronologi cerita. Ditampilkan di bagian bawah undangan.</p><div id="story-upload-list"></div></section>
+        <section class="editor-section"><h4>Lokasi Google Maps</h4><label>URL Google Maps<input id="map-url" type="url" maxlength="1000" placeholder="https://maps.app.goo.gl/…"></label></section>
+        <section class="editor-section" id="bank-section"><h4>Rekening hadiah</h4><p class="field-help">Opsional. Maksimal dua rekening. Bagian ini tidak muncul jika tidak diisi.</p><div id="bank-account-list"></div><button type="button" class="secondary-button" id="add-bank-account">+ Tambah rekening</button></section>
+        <section class="editor-section"><h4>Media undangan</h4>
+          <div class="upload-box" data-upload-box><strong>Foto sampul</strong><p>Foto sampul lama tetap tersedia dan tidak diganti oleh Foto Utama. JPG/PNG/WEBP — maksimal 8 MB.</p><input id="cover-upload" data-media-kind="cover" type="file" accept="image/jpeg,image/png,image/webp"><div id="cover-preview" class="media-preview"></div></div>
+          <div class="upload-box" data-upload-box><strong>Video undangan</strong><p>Video lama tetap tersedia. MP4/WebM — maksimal 25 MB.</p><input id="video-upload" data-media-kind="video" type="file" accept="video/mp4,video/webm"><div id="video-preview" class="media-preview"></div></div>
+          <label>URL musik / video opsional<input id="media-url" type="url" maxlength="500" placeholder="https://…"></label>
+        </section>
+        <section class="panel cloud-panel"><h3>Publikasi undangan</h3><p>Draft disimpan ke cloud. Terbitkan kembali untuk memperbarui halaman tamu.</p><input id="cloud-event-id" type="hidden"><div class="editor-actions"><button class="primary-button" type="button" id="publish-cloud">Upload media & terbitkan</button><a id="cloud-guest-link" href="./guest.html" target="_blank" rel="noopener" hidden>Buka undangan terbit ↗</a></div><p id="cloud-status" class="muted" role="status">Memeriksa sesi Owner…</p></section>
+        <div class="editor-actions"><button class="primary-button" type="submit">Simpan draft</button><button class="secondary-button" id="reset-editor" type="button">Reset draft lokal</button></div>
+      </form>
+      <aside class="editor-side"><section class="panel live-preview"><div class="preview-head"><span class="eyebrow">LIVE PREVIEW</span><span class="tag neutral">Tampilan tamu</span></div><div class="invitation-preview" id="invitation-preview"><div class="preview-cover" id="preview-cover"><span>✦</span></div><div class="preview-copy"><small id="preview-category">THE SPECIAL DAY</small><h2 id="preview-title">Nama acara</h2><p id="preview-opening"></p><h3 id="preview-names">Nama acara</h3><p id="preview-date">Tanggal acara</p><p id="preview-location">Lokasi acara</p><p id="preview-closing"></p></div></div><a class="primary-button preview-link" id="guest-preview-link" href="./guest.html" target="_blank" rel="noopener">Buka preview halaman tamu ↗</a></section><div class="notice">Editor dan publikasi hanya untuk Owner. Admin acara tetap hanya mengelola daftar tamu. Tamu hanya membuka undangan dan mengisi RSVP jika tersedia.</div></aside>
+    </div>
+  </section>
+  <footer class="footer">IO Invitation Studio <span>•</span> Visual Editor</footer>
+</main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="./app.js?v=invitation-content-3" defer></script><script src="./cloud-publish.js?v=invitation-content-3" defer></script>
+</body></html>
