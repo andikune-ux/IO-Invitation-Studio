@@ -52,6 +52,8 @@ export async function onRequestPut({ request, params }) {
       personTwo: safeText(body.personTwo, 100),
       opening: safeText(body.opening, 500),
       date: safeText(body.date, 40),
+      akadDate: safeText(body.akadDate, 40),
+      receptionDate: safeText(body.receptionDate, 40),
       location: safeText(body.location, 250),
       closing: safeText(body.closing, 1000),
       mediaUrl: safeText(body.mediaUrl, 500),
