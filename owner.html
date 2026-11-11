@@ -24,7 +24,7 @@
       <section id="login-view" class="login-wrap">
         <form id="owner-login-form" class="panel login-card">
           <span class="kicker">OWNER AUTHENTICATION</span><h2>Masuk ke workspace</h2><p>Gunakan secret Owner yang tersimpan di EdgeOne sebagai environment secret. Token tidak disimpan di browser.</p>
-          <label>Owner API token<input id="owner-token" type="password" autocomplete="current-password" required placeholder="Masukkan IO_ADMIN_API_TOKEN"></label>
+          <label>Owner API token<div class="secret-input"><input id="owner-token" type="password" autocomplete="current-password" required placeholder="Masukkan IO_ADMIN_API_TOKEN"><button id="toggle-owner-token" class="secret-toggle" type="button" aria-label="Tampilkan token" aria-pressed="false">Tampilkan</button></div></label>
           <button class="button button-primary" type="submit">Login Owner <span>→</span></button>
           <p id="login-status" class="status" role="status"></p>
         </form>
