@@ -10,11 +10,13 @@ export async function onRequestGet({ request }) {
   if (!match || !validEventId(match[1])) return json({ error: "Media tidak ditemukan." }, 404);
   try {
     const store = getStore("io-invitation-media");
+    const meta = await store.get(`events/${match[1]}/meta.json`, { type: "json", consistency: "strong" });
+    if (!meta || meta.status === "archived") return json({ error: "Media tidak ditemukan." }, 404);
     const invitation = await store.get(`events/${match[1]}/invitation.json`, { type: "json", consistency: "strong" });
-    const publishedKeys = Object.values(invitation?.media || {});
-    if (!invitation || invitation.status !== "published" || !publishedKeys.includes(key)) {
-      return json({ error: "Media tidak ditemukan." }, 404);
-    }
+    const draft = invitation?.status === "published" ? null : await store.get(`events/${match[1]}/draft.json`, { type: "json", consistency: "strong" });
+    const active = invitation?.status === "published" ? invitation : draft;
+    const allowedKeys = Object.values(active?.media || {});
+    if (!active || !allowedKeys.includes(key)) return json({ error: "Media tidak ditemukan." }, 404);
     const content = await store.get(key, { type: "arrayBuffer", consistency: "strong" });
     if (!content) return json({ error: "Media tidak ditemukan." }, 404);
     return new Response(content, {
