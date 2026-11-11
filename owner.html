@@ -55,6 +55,52 @@
           <form id="create-event-form" class="create-grid">
             <label class="field-wide">Nama acara<input id="new-title" required maxlength="100" placeholder="Contoh: Andik & Ara"><small>Nama yang akan dikenali di seluruh workspace.</small></label>
             <label>ID acara<input id="new-event-id" required minlength="3" maxlength="64" pattern="[a-z0-9][a-z0-9-]{2,63}" placeholder="andik-ara-pernikahan"><small>Huruf kecil, angka, dan tanda hubung.</small></label>
+            <label class="field-wide">Kategori acara
+              <select id="new-category" required>
+                <option value="">Pilih kategori acara…</option>
+                <option value="Pernikahan">Pernikahan</option>
+                <option value="Lamaran">Lamaran</option>
+                <option value="Pertunangan">Pertunangan</option>
+                <option value="Khitanan / Sunatan">Khitanan / Sunatan</option>
+                <option value="Aqiqah">Aqiqah</option>
+                <option value="Kelahiran Bayi">Kelahiran Bayi</option>
+                <option value="Ulang Tahun">Ulang Tahun</option>
+                <option value="Wisuda">Wisuda</option>
+                <option value="Kelulusan">Kelulusan</option>
+                <option value="Syukuran">Syukuran</option>
+                <option value="Tasyakuran">Tasyakuran</option>
+                <option value="Keagamaan">Keagamaan</option>
+                <option value="Spiritual">Spiritual</option>
+                <option value="Pengajian">Pengajian</option>
+                <option value="Peresmian">Peresmian</option>
+                <option value="Gathering">Gathering</option>
+                <option value="Reuni">Reuni</option>
+                <option value="Seminar / Workshop">Seminar / Workshop</option>
+                <option value="Konferensi">Konferensi</option>
+                <option value="Acara Keluarga">Acara Keluarga</option>
+                <option value="Memorial / Peringatan">Memorial / Peringatan</option>
+                <option value="Lain-lain">Lain-lain</option>
+              </select>
+              <small>Pilih jenis acara agar sistem dapat menyiapkan rekomendasi template yang relevan.</small>
+            </label>
+            <div id="religion-field" class="field-wide conditional-field" hidden>
+              <label>Agama / kepercayaan <span class="optional-label">Opsional</span>
+                <select id="new-religion">
+                  <option value="">Pilih jika ingin dicantumkan…</option>
+                  <option value="Islam">Islam</option>
+                  <option value="Kristen (Protestan)">Kristen (Protestan)</option>
+                  <option value="Katolik">Katolik</option>
+                  <option value="Hindu">Hindu</option>
+                  <option value="Buddha">Buddha</option>
+                  <option value="Konghucu">Konghucu</option>
+                  <option value="Kepercayaan terhadap Tuhan Yang Maha Esa">Kepercayaan terhadap Tuhan Yang Maha Esa</option>
+                  <option value="Spiritual / Non-denominasi">Spiritual / Non-denominasi</option>
+                  <option value="Lainnya">Lainnya</option>
+                  <option value="Tidak ingin mencantumkan">Tidak ingin mencantumkan</option>
+                </select>
+              </label>
+              <small class="field-disclaimer">Pilihan ini hanya digunakan untuk menyesuaikan rekomendasi template dan konten. Tidak wajib, tidak dipaksakan, dan dapat dibiarkan kosong.</small>
+            </div>
             <div class="field-tip"><span>✧</span><div><b>Secure Admin access</b><small>Link unik dibuat otomatis setelah event berhasil disimpan. Tidak perlu username atau password.</small></div></div>
             <div class="wide form-actions"><button class="button button-primary" type="submit">Buat event & akses Admin <span>→</span></button></div>
           </form>
