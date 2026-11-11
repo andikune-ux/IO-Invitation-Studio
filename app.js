@@ -53,7 +53,20 @@ const saved=(()=>{try{return JSON.parse(localStorage.getItem(draftKey)||'{}')}ca
 const savedContent=saved.content||{};
 const handleUpload=async(input)=>{const kind=input.dataset.mediaKind,file=input.files?.[0];if(!file)return;const video=kind==='video',valid=video?/^video\/(mp4|webm)$/.test(file.type)&&file.size<=MAX_VIDEO:/^image\/(jpeg|png|webp)$/.test(file.type)&&file.size<=MAX_IMAGE;if(!valid){toast(video?'Video harus MP4/WebM maksimal 25 MB.':'Foto harus JPG/PNG/WEBP maksimal 8 MB.');input.value='';return}try{const key=eventId+':'+kind;await putMedia(key,file);mediaKeys[kind]=key;const url=URL.createObjectURL(file);objectUrls.push(url);renderMedia(kind,url);saveLocal();toast('Media '+kind+' tersimpan di perangkat dan siap diunggah.')}catch(e){toast('Gagal menyimpan media: '+e.message)}};
 function saveLocal(){const draft={...Object.fromEntries(fields.map(id=>[id,$('#'+id)?.value||''])),content:readContent(),mediaKeys,savedAt:new Date().toISOString()};localStorage.setItem(draftKey,JSON.stringify(draft));return draft}
-async function saveCloud(){const draft=saveLocal();const res=await fetch('/api/owner/events/'+encodeURIComponent(eventId)+'/draft',{method:'PUT',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:$('#event-title').value,personOne:$('#person-one').value,personTwo:$('#person-two').value,opening:$('#opening-text').value,date:$('#event-date').value,location:$('#event-location').value,closing:$('#closing-text').value,mediaUrl:$('#media-url').value,content:draft.content,media:mediaKeys})});const data=await res.json().catch(()=>({}));if(!res.ok)throw new Error(data.error||'Gagal menyimpan draft cloud');toast('Draft berhasil disimpan ke cloud.')}
+async function saveCloud(){
+  const draft=saveLocal(),cloudMedia={...mediaKeys};
+  for(const [kind,key] of Object.entries(cloudMedia)){
+   if(typeof key!=='string'||!key.startsWith(eventId+':'))continue;
+   const file=await getMedia(key);if(!file)throw new Error('File '+kind+' tidak ditemukan di perangkat. Pilih ulang media tersebut.');
+   const ticket=await fetch('/api/admin/upload-url',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({eventId,kind,contentType:file.type,size:file.size})});
+   const uploadInfo=await ticket.json().catch(()=>({}));if(!ticket.ok)throw new Error(uploadInfo.error||'Izin upload '+kind+' gagal.');
+   const sent=await fetch(uploadInfo.uploadUrl,{method:'PUT',headers:{'Content-Type':file.type},body:file});if(!sent.ok)throw new Error('Upload '+kind+' gagal ('+sent.status+').');
+   cloudMedia[kind]=uploadInfo.key;
+  }
+  const res=await fetch('/api/owner/events/'+encodeURIComponent(eventId)+'/draft',{method:'PUT',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:$('#event-title').value,personOne:$('#person-one').value,personTwo:$('#person-two').value,opening:$('#opening-text').value,date:$('#event-date').value,location:$('#event-location').value,closing:$('#closing-text').value,mediaUrl:$('#media-url').value,content:draft.content,media:cloudMedia})});
+  const data=await res.json().catch(()=>({}));if(!res.ok)throw new Error(data.error||'Gagal menyimpan draft cloud');
+  mediaKeys=cloudMedia;saveLocal();toast('Draft tersimpan di cloud dan link tamu sudah dapat dibuka.');
+}
 window.IOEditor={eventId,get mediaKeys(){return mediaKeys},set mediaKeys(v){mediaKeys=v},readContent,saveLocal,toast};
 const form=$('#invitation-form');
 if(form){
