@@ -18,6 +18,9 @@ export async function onRequestPost({ request, env }) {
   }
   try {
   const store = getStore("io-invitation-media");
+  const meta = await store.get(`events/${body.eventId}/meta.json`, { type: "json", consistency: "strong" });
+  if (!meta) return json({ error: "Acara tidak ditemukan." }, 404);
+  if (meta.status === "archived") return json({ error: "Aktifkan acara sebelum menerbitkan undangan." }, 403);
   const previous = await store.get(`events/${body.eventId}/invitation.json`, { type: "json", consistency: "strong" }).catch(() => null);
   for (const [kind, max] of [["cover", 8 * 1024 * 1024], ["video", 25 * 1024 * 1024]]) {
     const key = media[kind];
