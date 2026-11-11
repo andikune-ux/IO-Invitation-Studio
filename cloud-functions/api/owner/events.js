@@ -12,9 +12,10 @@ export async function onRequestGet({ request }) {
     const { blobs } = await store.list({ prefix: "events/", consistency: "strong" });
     const ids = [...new Set(blobs.map(({ key }) => key.match(/^events\/([a-z0-9-]+)\/meta\.json$/)?.[1]).filter(Boolean))];
     const events = await Promise.all(ids.map(async (eventId) => {
-      const [meta, admin, invitation] = await Promise.all([
+      const [meta, admin, adminLink, invitation] = await Promise.all([
         store.get(`events/${eventId}/meta.json`, { type: "json", consistency: "strong" }),
         store.get(`auth/admins/${eventId}.json`, { type: "json", consistency: "strong" }),
+        store.get(`auth/admin-links/${eventId}.json`, { type: "json", consistency: "strong" }),
         store.get(`events/${eventId}/invitation.json`, { type: "json", consistency: "strong" })
       ]);
       if (!meta) return null;
@@ -26,7 +27,8 @@ export async function onRequestGet({ request }) {
         updatedAt: meta.updatedAt || null,
         published: invitation?.status === "published",
         publishedAt: invitation?.publishedAt || null,
-        admin: admin ? { username: admin.username, displayName: admin.displayName, disabled: Boolean(admin.disabled) } : null
+        admin: admin ? { legacy: true, username: admin.username, displayName: admin.displayName, disabled: Boolean(admin.disabled) } : null,
+        adminLink: adminLink ? { active: !adminLink.revoked, createdAt: adminLink.createdAt || null } : null
       };
     }));
     events.sort((a, b) => String(b?.createdAt || "").localeCompare(String(a?.createdAt || "")));
