@@ -41,12 +41,64 @@
   });
   $('#hide-credentials').addEventListener('click',()=>{$('#created-link').textContent='';$('#created-credentials').hidden=true;});
   document.addEventListener('click',async(event)=>{const button=event.target.closest('[data-copy]');if(!button)return;const text=$('#'+button.dataset.copy).textContent;try{await navigator.clipboard.writeText(text);toast('Link berhasil disalin.');}catch{toast('Clipboard tidak tersedia.');}});
+
+  function crc32(bytes){
+    let crc=0xffffffff;
+    for(const byte of bytes){crc^=byte;for(let i=0;i<8;i++)crc=(crc>>>1)^((crc&1)?0xedb88320:0);}
+    return (crc^0xffffffff)>>>0;
+  }
+  function zipStore(files){
+    const encoder=new TextEncoder(),local=[],central=[];let offset=0;
+    const date=new Date(),dosTime=(date.getHours()<<11)|(date.getMinutes()<<5)|(Math.floor(date.getSeconds()/2));
+    const dosDate=((date.getFullYear()-1980)<<9)|((date.getMonth()+1)<<5)|date.getDate();
+    const u16=n=>new Uint8Array([n&255,(n>>>8)&255]),u32=n=>new Uint8Array([n&255,(n>>>8)&255,(n>>>16)&255,(n>>>24)&255]);
+    const join=parts=>{const size=parts.reduce((n,p)=>n+p.length,0),out=new Uint8Array(size);let at=0;for(const p of parts){out.set(p,at);at+=p.length;}return out;};
+    for(const file of files){
+      const name=encoder.encode(file.name),data=file.data instanceof Uint8Array?file.data:new Uint8Array(file.data),crc=crc32(data);
+      const header=join([u32(0x04034b50),u16(20),u16(0x0800),u16(0),u16(dosTime),u16(dosDate),u32(crc),u32(data.length),u32(data.length),u16(name.length),u16(0),name]);
+      local.push(header,data);
+      central.push(join([u32(0x02014b50),u16(20),u16(20),u16(0x0800),u16(0),u16(dosTime),u16(dosDate),u32(crc),u32(data.length),u32(data.length),u16(name.length),u16(0),u16(0),u16(0),u16(0),u32(0),u32(offset),name]));
+      offset+=header.length+data.length;
+    }
+    const centralBytes=join(central),localBytes=join(local);
+    return new Blob([localBytes,centralBytes,u32(0x06054b50),u16(0),u16(0),u16(files.length),u16(files.length),u32(centralBytes.length),u32(localBytes.length),u16(0)],{type:"application/zip"});
+  }
+  async function exportEventZip(eventId,button){
+    const original=button.textContent;button.disabled=true;button.textContent="Menyiapkan ZIP…";
+    try{
+      const event=cachedEvents.find(item=>item.eventId===eventId);
+      if(!event)throw new Error("Data acara tidak ditemukan. Refresh daftar acara.");
+      const files=[{name:"event.json",data:new TextEncoder().encode(JSON.stringify(event,null,2))}];
+      let invitation=null;
+      try{
+        const response=await fetch("/api/invitation/"+encodeURIComponent(eventId),{credentials:"same-origin"});
+        if(response.ok)invitation=await response.json();
+      }catch{}
+      if(invitation){
+        files.push({name:"invitation.json",data:new TextEncoder().encode(JSON.stringify(invitation,null,2))});
+        for(const kind of ["cover","video"]){
+          const url=invitation.mediaUrls?.[kind];if(!url)continue;
+          const mediaResponse=await fetch(url,{credentials:"same-origin"});
+          if(!mediaResponse.ok)continue;
+          const blob=await mediaResponse.blob(),ext=(blob.type.split("/")[1]|| (kind==="cover"?"jpg":"mp4")).replace("jpeg","jpg");
+          files.push({name:"media/"+kind+"."+ext,data:new Uint8Array(await blob.arrayBuffer())});
+        }
+      }
+      const readme="IO Invitation Studio — Event Backup\nEvent ID: "+eventId+"\nDibuat: "+new Date().toISOString()+"\n\nIsi: metadata event, data undangan terbit (jika tersedia), dan media publik yang direferensikan undangan.\nFile ini adalah backup data acara, bukan source code aplikasi atau konfigurasi rahasia.";
+      files.push({name:"README.txt",data:new TextEncoder().encode(readme)});
+      const blob=zipStore(files),url=URL.createObjectURL(blob),a=document.createElement("a");
+      a.href=url;a.download="io-event-"+eventId+"-backup.zip";document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
+      toast("Backup ZIP berhasil dibuat.");
+    }catch(error){setStatus("#events-status",error.message||"Gagal membuat backup ZIP.",true);}
+    finally{button.disabled=false;button.textContent=original;}
+  }
+
   function renderEvents(){
     const query=($('#event-search').value||'').trim().toLowerCase();
     const events=cachedEvents.filter(e=>(e.title+' '+e.eventId).toLowerCase().includes(query));
     $('#event-count').textContent=events.length+' event';
     if(!events.length){$('#events-list').innerHTML='<div class="empty"><span>✧</span>'+(cachedEvents.length?'Tidak ada acara yang cocok.':'Belum ada acara. Buat event pertama di atas.')+'</div>';return;}
-    $('#events-list').innerHTML=events.map(e=>'<article class="event-card" data-event="'+escapeHtml(e.eventId)+'"><div><div class="event-title">'+escapeHtml(e.title)+'</div><div class="event-meta">ID: '+escapeHtml(e.eventId)+' · Dibuat: '+escapeHtml(e.createdAt?new Date(e.createdAt).toLocaleDateString('id-ID'):'—')+'</div><div class="event-badges"><span class="badge '+(e.published?'good':'warn')+'">'+(e.published?'Undangan terbit':'Draft')+'</span><span class="badge">'+(e.status==='archived'?'Diarsipkan':'Aktif')+'</span><span class="badge '+(e.adminLink?.active?'good':'warn')+'">'+(e.adminLink?.active?'Admin link aktif':'Admin link belum aktif')+'</span>'+(e.admin?' <span class="badge warn">Akun Admin lama</span>':'')+'</div></div><div class="event-actions"><button data-action="rename">Ubah nama</button><button data-action="archive">'+(e.status==='archived'?'Aktifkan':'Arsipkan')+'</button><button data-action="'+(e.adminLink?.active?'rotate':'create-link')+'">'+(e.adminLink?.active?'Rotasi link':'Buat link Admin')+'</button>'+(e.adminLink?.active?'<button class="danger" data-action="revoke">Cabut link</button>':'')+'</div></article>').join('');
+    $('#events-list').innerHTML=events.map(e=>'<article class="event-card" data-event="'+escapeHtml(e.eventId)+'"><div><div class="event-title">'+escapeHtml(e.title)+'</div><div class="event-meta">ID: '+escapeHtml(e.eventId)+' · Dibuat: '+escapeHtml(e.createdAt?new Date(e.createdAt).toLocaleDateString('id-ID'):'—')+'</div><div class="event-badges"><span class="badge '+(e.published?'good':'warn')+'">'+(e.published?'Undangan terbit':'Draft')+'</span><span class="badge">'+(e.status==='archived'?'Diarsipkan':'Aktif')+'</span><span class="badge '+(e.adminLink?.active?'good':'warn')+'">'+(e.adminLink?.active?'Admin link aktif':'Admin link belum aktif')+'</span>'+(e.admin?' <span class="badge warn">Akun Admin lama</span>':'')+'</div></div><div class="event-actions"><button data-action="rename">Ubah nama</button><button data-action="archive">'+(e.status==='archived'?'Aktifkan':'Arsipkan')+'</button><button data-action="'+(e.adminLink?.active?'rotate':'create-link')+'">'+(e.adminLink?.active?'Rotasi link':'Buat link Admin')+'</button>'+'<button data-action="export">Backup ZIP</button>'+(e.adminLink?.active?'<button class="danger" data-action="revoke">Cabut link</button>':'')+'</div></article>').join('');
   }
   async function loadEvents(){
     if(!authenticated)return;const list=$('#events-list');list.innerHTML='<div class="empty"><span>✧</span>Memuat acara…</div>';setStatus('#events-status','');
@@ -58,6 +110,7 @@
   $('#events-list').addEventListener('click',async(event)=>{
     const button=event.target.closest('button[data-action]');if(!button)return;const card=button.closest('[data-event]');const eventId=card.dataset.event;const action=button.dataset.action;button.disabled=true;
     try{
+      if(action==='export'){await exportEventZip(eventId,button);return;}
       if(action==='rename'){const current=card.querySelector('.event-title').textContent;const title=prompt('Nama acara baru:',current);if(title===null)return;if(!title.trim())throw new Error('Nama acara tidak boleh kosong.');await api('/api/owner/events/'+encodeURIComponent(eventId),{method:'PATCH',body:JSON.stringify({title:title.trim()})});}
       if(action==='archive'){const archiving=button.textContent.trim()==='Arsipkan';if(!confirm(archiving?'Arsipkan acara ini? Acara tidak dihapus.':'Aktifkan kembali acara ini?'))return;await api('/api/owner/events/'+encodeURIComponent(eventId),{method:'PATCH',body:JSON.stringify({status:archiving?'archived':'draft'})});}
       if(action==='create-link'||action==='rotate'){if(action==='rotate'&&!confirm('Rotasi link Admin? Link lama langsung tidak berlaku.'))return;const result=action==='create-link'?await api('/api/owner/admin-links',{method:'POST',body:JSON.stringify({eventId})}):await api('/api/owner/admin-links/'+encodeURIComponent(eventId),{method:'PATCH',body:JSON.stringify({action:'rotate'})});revealLink(makeAdminUrl(eventId,result.token));toast('Tautan Admin baru berhasil dibuat.');}
