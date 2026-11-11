@@ -30,11 +30,11 @@ const CATEGORY={
 const BANKS=[
 'BCA','Bank Mandiri','BRI','BNI','BTN','Bank Syariah Indonesia','Bank Muamalat','CIMB Niaga','Danamon','PermataBank','Maybank Indonesia','OCBC Indonesia','PaninBank','Bank Mega','SMBC Indonesia','Bank Sinarmas','KB Bank','Bank Jasa Jakarta','Bank Mestika Dharma','Bank Ina Perdana','Bank Victoria International','Bank Artha Graha Internasional','Bank Maspion','Bank Ganesha','Bank Oke Indonesia','Bank Sahabat Sampoerna','Bank Bumi Arta','QNB Indonesia','Bank Woori Saudara','JTrust Bank','Bank Mayapada','Bank Capital Indonesia','MNC Bank','Bank Nationalnobu','Bank SBI Indonesia','Bank Resona Perdania','Bank CTBC Indonesia','Bank of India Indonesia','Bank Amar Indonesia','Hibank Indonesia','Bank Jago','SeaBank','blu by BCA Digital','Bank Neo Commerce (neobank)','Allo Bank','Superbank','LINE Bank (Hana Bank)','Bank Raya','Bank Saqu','Krom Bank','Bank Aladin Syariah','Bank Nano Syariah','BTPN Syariah','Bank Mega Syariah','BCA Syariah','Bank Victoria Syariah','Panin Dubai Syariah','HSBC Indonesia','DBS Indonesia','UOB Indonesia','Standard Chartered','Citibank Indonesia','MUFG Bank','Mizuho Bank','ICBC Indonesia','China Construction Bank Indonesia','Bank of China','ANZ Indonesia','Shinhan Bank Indonesia','Hana Bank','Bangkok Bank','Deutsche Bank','JPMorgan Chase Bank','Bank of America','BNP Paribas Indonesia','Bank Aceh Syariah','Bank DKI','Bank BJB','BJB Syariah','Bank Jateng','Bank Jatim','Bank DIY','Bank Banten','Bank Sumut','Bank Nagari','Bank Riau Kepri Syariah','Bank Sumsel Babel','Bank Lampung','Bank Jambi','Bank Bengkulu','Bank Kalbar','Bank Kalteng','Bank Kalsel','Bank Kaltimtara','Bank Sulselbar','Bank SulutGo','Bank Sulteng','Bank Sultra','Bank NTB Syariah','Bank NTT','Bank Maluku Malut','Bank Papua'
 ];
-let category='Lain-lain', mediaKeys={}, objectUrls=[];
+let category='Lain-lain', mediaKeys={}, objectUrls=[], categoryContent={};
 const toast=m=>{const n=$('#toast');if(!n)return;n.textContent=m;n.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>n.classList.remove('show'),2800)};
 const readContent=()=>{
- const content={family:{},bankAccounts:[],featuredCount:Number($('#gallery-count')?.value||0),stories:[],mapUrl:$('#map-url')?.value.trim()||''};
- document.querySelectorAll('[data-family-key]').forEach(n=>content.family[n.dataset.familyKey]=n.value.trim());
+ const family={};document.querySelectorAll('[data-family-key]').forEach(n=>family[n.dataset.familyKey]=n.value.trim());const content={family,bankAccounts:[],featuredCount:Number($('#gallery-count')?.value||0),stories:[],mapUrl:$('#map-url')?.value.trim()||'',categoryData:{...categoryContent}};
+ content.categoryData[category]={family:{...family},personOne:$('#person-one')?.value||'',personTwo:$('#person-two')?.value||'',stories:content.stories};
  document.querySelectorAll('.bank-account').forEach(box=>{const bank=box.querySelector('[data-bank]').value,holder=box.querySelector('[data-holder]').value.trim(),number=box.querySelector('[data-number]').value.trim();const manualBank=box.querySelector('[data-manual-bank]')?.value.trim()||'';if(bank||holder||number||manualBank)content.bankAccounts.push({bank,manualBank,holder,number})});
  for(let i=1;i<=3;i++){const text=$('#story-text-'+i)?.value.trim()||'';if(text||mediaKeys['story-'+i])content.stories.push({index:i,text})}
  return content;
@@ -66,12 +66,13 @@ if(form){
   const draftData=draftR.ok?(await draftR.json()).draft:null,inv=invR.ok?await invR.json():null,src=draftData||inv||saved;
   renderFamilies(src.content?.family||{});$('#gallery-count').value=String(src.content?.featuredCount||0);galleryRender(Number($('#gallery-count').value));
   fields.forEach(id=>{const map={'opening-text':'opening','event-date':'date','event-location':'location','closing-text':'closing','media-url':'mediaUrl'};if(src[map[id]||id]!==undefined&&src[map[id]||id]!==null)$('#'+id).value=src[map[id]||id]});
-  if(src.personOne!==undefined)$('#person-one').value=src.personOne;if(src.personTwo!==undefined)$('#person-two').value=src.personTwo;
-  $('#map-url').value=src.content?.mapUrl||'';
-  (src.content?.bankAccounts||[]).slice(0,2).forEach(addBank);
-  if(src.content?.stories){src.content.stories.forEach(st=>{const el=$('#story-text-'+st.index);if(el)el.value=st.text||''})}
+  if((sourceCategory===category)||!src.category){if(src.personOne!==undefined)$('#person-one').value=src.personOne;if(src.personTwo!==undefined)$('#person-two').value=src.personTwo}else{$('#person-one').value=activeContent.personOne||'';$('#person-two').value=activeContent.personTwo||''}
+  $('#map-url').value=activeContent.mapUrl||'';
+  (activeContent.bankAccounts||[]).slice(0,2).forEach(addBank);
+  if(activeContent.stories){activeContent.stories.forEach(st=>{const el=$('#story-text-'+st.index);if(el)el.value=st.text||''})}
   mediaKeys={...(inv?.media||{}),...(draftData?.media||{}),...(saved.mediaKeys||{})};
   if(inv?.mediaUrls){for(const kind of Object.keys(inv.mediaUrls))if(inv.mediaUrls[kind])renderMedia(kind,inv.mediaUrls[kind])}
+  for(const [kind,key] of Object.entries(mediaKeys)){if(typeof key==='string'&&key.startsWith(eventId+':')){try{const file=await getMedia(key);if(file){const url=URL.createObjectURL(file);objectUrls.push(url);renderMedia(kind,url)}}catch{}}}
   if(draftData?.media){for(const [kind,key] of Object.entries(draftData.media))if(key&&!inv?.mediaUrls?.[kind]){}}
   $('#editor-access-required').hidden=true;$('#editor-workspace').hidden=false;$('#guest-preview-link').href='./guest.html?event='+encodeURIComponent(eventId);$('#cloud-guest-link').href='./guest.html?event='+encodeURIComponent(eventId);preview();
  };
