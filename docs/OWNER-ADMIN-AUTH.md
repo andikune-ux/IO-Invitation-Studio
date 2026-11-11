@@ -12,6 +12,15 @@ This feature replaces the shared global Admin bearer token on event upload and p
 - Upload URL and publish endpoints require an Admin session matching the requested event ID.
 - Sessions expire after 8 hours. `POST /api/auth/logout` revokes the current session.
 
+## Owner Dashboard
+
+- Open `/owner.html` to sign in to the Owner workspace.
+- The dashboard lists events from the `io-invitation-media` Blob namespace and shows publication and Admin status.
+- Owner can create an event with its first Admin, rename an event, archive/reactivate it, disable/reactivate its Admin, and reset the Admin password.
+- New and reset passwords are shown once in the browser. Copy and deliver them securely; the server stores only scrypt password hashes.
+- Disabling an Admin or resetting its password revokes all existing sessions for that event.
+- Archived events are not deleted and their Admin credentials are not automatically disabled.
+
 ## Provision the first event Admin
 
 Use a trusted terminal. Do not put the Owner token in frontend source code, a GitHub commit, or a shared chat.
@@ -41,6 +50,9 @@ curl -i -b owner-cookie.txt -X POST \
 |---|---|---|
 | POST | `/api/auth/owner-login` | Exchange Owner secret for an Owner session |
 | POST | `/api/owner/admins` | Create an event and its first Admin |
+| GET | `/api/owner/events` | List events and safe Admin status fields |
+| PATCH | `/api/owner/events/{eventId}` | Rename or archive/reactivate an event |
+| PATCH | `/api/owner/admins/{eventId}` | Enable/disable Admin or reset password |
 | POST | `/api/auth/admin-login` | Create an event-scoped Admin session |
 | GET | `/api/auth/me` | Inspect current session |
 | POST | `/api/auth/logout` | Revoke current session |

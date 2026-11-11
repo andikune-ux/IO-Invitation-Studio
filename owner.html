@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101827">
+  <meta name="description" content="Owner Dashboard — IO Invitation Studio">
+  <title>Owner Dashboard · IO Invitation Studio</title>
+  <link rel="stylesheet" href="./owner.css">
+  <script src="./owner.js" defer></script>
+</head>
+<body>
+  <div class="owner-shell">
+    <aside class="owner-sidebar">
+      <a class="owner-brand" href="./index.html"><span class="brand-mark">IO</span><span><b>Invitation Studio</b><small>Owner workspace</small></span></a>
+      <p class="side-caption">MANAGEMENT</p>
+      <a class="side-link active" href="#dashboard">▦ <span>Dashboard</span></a>
+      <a class="side-link" href="#events">◇ <span>Event Manager</span></a>
+      <a class="side-link" href="./index.html">✎ <span>Invitation Editor</span></a>
+      <div class="side-foot">Secure Owner Area <span>•</span> Session protected</div>
+    </aside>
+    <main class="owner-main">
+      <header class="owner-topbar"><div><span class="kicker">IO INVITATION STUDIO / OWNER</span><h1>Owner Dashboard</h1><p>Kelola semua acara dan akun Admin dari satu tempat.</p></div><button id="logout" class="button button-ghost" hidden>Keluar</button></header>
+      <section id="login-view" class="login-wrap">
+        <form id="owner-login-form" class="panel login-card">
+          <span class="kicker">OWNER AUTHENTICATION</span><h2>Masuk ke workspace</h2><p>Gunakan secret Owner yang tersimpan di EdgeOne sebagai environment secret. Token tidak disimpan di browser.</p>
+          <label>Owner API token<input id="owner-token" type="password" autocomplete="current-password" required placeholder="Masukkan IO_ADMIN_API_TOKEN"></label>
+          <button class="button button-primary" type="submit">Login Owner <span>→</span></button>
+          <p id="login-status" class="status" role="status"></p>
+        </form>
+      </section>
+      <section id="app-view" hidden>
+        <div class="metric-grid">
+          <article class="metric"><span>Total acara</span><strong id="total-events">0</strong><small>Acara tersimpan di cloud</small></article>
+          <article class="metric"><span>Admin aktif</span><strong id="active-admins">0</strong><small>Akun yang dapat login</small></article>
+          <article class="metric"><span>Undangan terbit</span><strong id="published-events">0</strong><small>Siap dibuka tamu</small></article>
+        </div>
+        <section class="panel create-panel" id="create">
+          <div class="section-title"><div><span class="kicker">NEW EVENT</span><h2>Buat acara & akun Admin</h2><p>Satu acara memiliki satu akun Admin pada versi ini.</p></div><span class="pill">Owner only</span></div>
+          <form id="create-event-form" class="create-grid">
+            <label>Nama acara<input id="new-title" required maxlength="100" placeholder="Contoh: Andik & Ara"></label>
+            <label>ID acara<input id="new-event-id" required minlength="3" maxlength="64" pattern="[a-z0-9][a-z0-9-]{2,63}" placeholder="andik-ara-pernikahan"><small>Huruf kecil, angka, dan tanda hubung.</small></label>
+            <label>Username Admin<input id="new-username" required minlength="3" maxlength="40" pattern="[a-zA-Z0-9._-]{3,40}" placeholder="andikadmin"></label>
+            <label>Nama tampilan Admin<input id="new-display" maxlength="80" placeholder="Admin Andik & Ara"></label>
+            <label class="wide">Password awal Admin<input id="new-password" type="password" required minlength="12" maxlength="256" autocomplete="new-password" placeholder="Minimal 12 karakter"><small>Password hanya ditampilkan saat pembuatan dan tidak bisa dilihat kembali.</small></label>
+            <div class="wide form-actions"><button class="button button-primary" type="submit">Buat acara & Admin <span>→</span></button><button id="generate-password" class="button button-ghost" type="button">Buat password aman</button></div>
+          </form>
+          <p id="create-status" class="status" role="status"></p>
+          <div id="created-credentials" class="credential-result" hidden><b>Akun Admin berhasil dibuat</b><p>Simpan kredensial ini dan kirimkan dengan aman kepada Admin. Password tidak akan ditampilkan lagi setelah panel ini ditutup.</p><div><span>Event ID</span><code id="created-event"></code><button class="copy-button" data-copy="created-event" type="button">Salin</button></div><div><span>Username</span><code id="created-user"></code><button class="copy-button" data-copy="created-user" type="button">Salin</button></div><div><span>Password</span><code id="created-pass"></code><button class="copy-button" data-copy="created-pass" type="button">Salin</button></div><button id="hide-credentials" class="button button-ghost" type="button">Tutup & hapus tampilan password</button></div>
+        </section>
+        <section class="panel events-panel" id="events">
+          <div class="section-title"><div><span class="kicker">EVENT MANAGEMENT</span><h2>Daftar acara</h2><p>Pantau publikasi dan kelola akses Admin.</p></div><button id="refresh-events" class="button button-ghost" type="button">↻ Muat ulang</button></div>
+          <div id="events-list" class="events-list"><div class="empty">Memuat data acara…</div></div>
+          <p id="events-status" class="status" role="status"></p>
+        </section>
+      </section>
+      <footer>IO Invitation Studio <span>•</span> Owner Management</footer>
+    </main>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

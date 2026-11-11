@@ -61,6 +61,10 @@ export const requireEventAdmin = async (request, eventId) => {
   if (!session || session.role !== "admin" || session.eventId !== eventId) {
     return { ok: false, response: json({ error: "Sesi Admin tidak valid atau tidak memiliki akses ke acara ini." }, 401) };
   }
+  const meta = await store().get(`events/${eventId}/meta.json`, { type: "json", consistency: "strong" });
+  if (!meta || meta.status === "archived") {
+    return { ok: false, response: json({ error: "Acara ini diarsipkan atau tidak tersedia untuk dikelola." }, 403) };
+  }
   return { ok: true, session };
 };
 
@@ -91,6 +95,8 @@ export async function adminLogin(request, body) {
   if (!validEventId(eventId) || typeof username !== "string" || typeof password !== "string" || password.length > 256) {
     return json({ error: "ID acara, username, atau password tidak valid." }, 400);
   }
+  const meta = await store().get(`events/${eventId}/meta.json`, { type: "json", consistency: "strong" });
+  if (!meta || meta.status === "archived") return json({ error: "Acara ini diarsipkan atau tidak tersedia untuk login." }, 403);
   const account = await store().get(`auth/admins/${eventId}.json`, { type: "json", consistency: "strong" });
   if (!account || account.disabled || account.username !== username.trim().toLowerCase()) {
     return json({ error: "Username atau password tidak cocok." }, 401);
