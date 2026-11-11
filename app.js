@@ -277,6 +277,7 @@
         if (editorEventId) editorEventId.textContent = eventId;
         const titleInput = $('#event-title');
         if (titleInput) titleInput.value = canonicalTitle;
+        updatePreview();
         const draftResult = draftResponse.ok ? await draftResponse.json() : null;
         const invitation = invitationResponse.ok ? await invitationResponse.json() : null;
 
