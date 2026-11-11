@@ -25,7 +25,7 @@ button.addEventListener('click',async()=>{
   status('Menerbitkan seluruh konten undangan…');
   const response=await fetch('/api/admin/publish',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({eventId,invitation:{title:value('event-title'),personOne:value('person-one'),personTwo:value('person-two'),opening:value('opening-text'),date:value('event-date'),location:value('event-location'),closing:value('closing-text'),mediaUrl:value('media-url')},content,media})});
   const result=await response.json().catch(()=>({}));if(!response.ok)throw Error(result.error||'Publikasi gagal.');
-  const link=$('#cloud-guest-link');link.href='./guest.html?event='+encodeURIComponent(eventId);link.hidden=false;
+  const link=$('#cloud-guest-link');link.href='/preview/'+encodeURIComponent(eventId);link.hidden=false;
   editor.mediaKeys={...keys,...media};editor.saveLocal();
   status('Undangan berhasil diterbitkan. Foto Utama, Foto Sampul, Video, dan konten lainnya telah diproses. Link tamu: '+location.origin+link.getAttribute('href'));
  }catch(e){status(e.message||'Publikasi gagal. Periksa konfigurasi backend.',true)}
