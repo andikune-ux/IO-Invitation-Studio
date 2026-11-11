@@ -254,6 +254,7 @@
     const editorWorkspace = $('#editor-workspace');
     const editorEventName = $('#editor-event-name');
     const editorEventId = $('#editor-event-id');
+    const editorEventCategory = $('#editor-event-category');
     if (eventId) {
       if (cloudEventInput) cloudEventInput.value = eventId;
       if (guestPreviewLink) guestPreviewLink.href = './guest.html?event=' + encodeURIComponent(eventId);
@@ -275,6 +276,7 @@
         const canonicalTitle = eventRecord.title || eventId;
         if (editorEventName) editorEventName.textContent = canonicalTitle;
         if (editorEventId) editorEventId.textContent = eventId;
+        if (editorEventCategory) editorEventCategory.textContent = eventRecord.category ? eventRecord.category + (eventRecord.religion ? ' · ' + eventRecord.religion : '') : 'Kategori belum ditentukan';
         const titleInput = $('#event-title');
         if (titleInput) titleInput.value = canonicalTitle;
         updatePreview();
