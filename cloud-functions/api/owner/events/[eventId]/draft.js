@@ -46,6 +46,7 @@ export async function onRequestPut({ request, params }) {
     if (meta.status === "archived") return json({ error: "Aktifkan acara sebelum mengubah draft." }, 403);
     const draft = {
       eventId,
+      category: meta.category || null,
       title: safeText(body.title, 100),
       personOne: safeText(body.personOne, 100),
       personTwo: safeText(body.personTwo, 100),
