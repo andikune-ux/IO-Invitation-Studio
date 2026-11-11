@@ -67,7 +67,7 @@ if(form){
   const draftData=draftR.ok?(await draftR.json()).draft:null,inv=invR.ok?await invR.json():null,src=draftData||inv||saved;
   categoryContent={...(src.content?.categoryData||{})};
   const sourceCategory=src.category||category;
-  if(sourceCategory!==category)categoryContent[sourceCategory]={family:src.content?.family||{},personOne:src.personOne||'',personTwo:src.personTwo||'',stories:src.content?.stories||[]};
+  if(sourceCategory!==category)categoryContent[sourceCategory]={family:src.content?.family||{},personOne:src.personOne||'',personTwo:src.personTwo||'',stories:src.content?.stories||[],bankAccounts:src.content?.bankAccounts||[],featuredCount:src.content?.featuredCount||0,mapUrl:src.content?.mapUrl||''};
   const activeContent=sourceCategory===category?(src.content||{}):(categoryContent[category]||{});
   renderFamilies(activeContent.family||{});$('#gallery-count').value=String(activeContent.featuredCount||0);galleryRender(Number($('#gallery-count').value));
   fields.forEach(id=>{const map={'opening-text':'opening','event-date':'date','event-location':'location','closing-text':'closing','media-url':'mediaUrl','map-url':'mapUrl'};if(src[map[id]||id]!==undefined&&src[map[id]||id]!==null&&id!=='map-url')$('#'+id).value=src[map[id]||id]});
