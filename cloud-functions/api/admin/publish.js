@@ -108,6 +108,12 @@ export async function onRequestPost({ request }) {
       status: "published"
     };
     if (!invitation.title) return json({ error: "Nama acara wajib diisi." }, 400);
+    if (invitation.mediaUrl) {
+      try {
+        const mediaLink = new URL(invitation.mediaUrl);
+        if (!["http:", "https:"].includes(mediaLink.protocol)) throw new Error();
+      } catch { return json({ error: "URL musik atau video harus menggunakan tautan HTTP/HTTPS yang valid." }, 400); }
+    }
     if (invitation.content.mapUrl) {
       try {
         const map = new URL(invitation.content.mapUrl);
