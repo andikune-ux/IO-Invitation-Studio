@@ -6,8 +6,12 @@ export async function onRequestGet({request,params}){
  if(!validEventId(eventId))return new Response("Undangan tidak ditemukan.",{status:404});
  try{
   const store=getStore("io-invitation-media");
-  const data=await store.get(`events/${eventId}/invitation.json`,{type:"json",consistency:"strong"});
-  if(!data||data.status!=="published")return new Response("Undangan belum diterbitkan.",{status:404});
+  const meta=await store.get(`events/${eventId}/meta.json`,{type:"json",consistency:"strong"});
+  if(!meta||meta.status==="archived")return new Response("Undangan tidak tersedia.",{status:404});
+  const published=await store.get(`events/${eventId}/invitation.json`,{type:"json",consistency:"strong"});
+  const draft=published?.status==="published"?null:await store.get(`events/${eventId}/draft.json`,{type:"json",consistency:"strong"});
+  const data=published?.status==="published"?published:draft;
+  if(!data||!data.title)return new Response("Konten undangan belum disimpan Owner.",{status:404});
   const origin=new URL(request.url).origin;
   const incoming=new URL(request.url);
   const targetUrl=new URL("/guest.html",origin);
