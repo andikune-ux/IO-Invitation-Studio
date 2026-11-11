@@ -6,19 +6,20 @@ const TYPES = { jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", webp: "
 export async function onRequestGet({ request }) {
   const url = new URL(request.url);
   const key = url.searchParams.get("key") || "";
-  const match = key.match(/^events\/([a-z0-9][a-z0-9-]{2,63})\/media\/[a-z0-9-]+\.(jpg|jpeg|png|webp|mp4|webm)$/);
+  const match = key.match(/^events\/([a-z0-9][a-z0-9-]{2,63})\/media\/([a-z0-9-]+)\.(jpg|jpeg|png|webp|mp4|webm)$/);
   if (!match || !validEventId(match[1])) return json({ error: "Media tidak ditemukan." }, 404);
   try {
     const store = getStore("io-invitation-media");
     const invitation = await store.get(`events/${match[1]}/invitation.json`, { type: "json", consistency: "strong" });
-    if (!invitation || invitation.status !== "published" || ![invitation.media?.cover, invitation.media?.video].includes(key)) {
+    const publishedKeys = Object.values(invitation?.media || {});
+    if (!invitation || invitation.status !== "published" || !publishedKeys.includes(key)) {
       return json({ error: "Media tidak ditemukan." }, 404);
     }
     const content = await store.get(key, { type: "arrayBuffer", consistency: "strong" });
     if (!content) return json({ error: "Media tidak ditemukan." }, 404);
     return new Response(content, {
       headers: {
-        "Content-Type": TYPES[match[2]],
+        "Content-Type": TYPES[match[3]],
         "Cache-Control": "public, max-age=300",
         "X-Content-Type-Options": "nosniff"
       }
