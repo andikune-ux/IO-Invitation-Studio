@@ -5,27 +5,21 @@
     const node = $('#cloud-status');
     if (node) { node.textContent = message; node.style.color = isError ? '#b42318' : ''; }
   };
-  const publishButton = $('#publish-cloud');
-  if (!publishButton) return;
-  const params = new URLSearchParams(location.search);
-  const eventId = (params.get('event') || '').trim().toLowerCase();
-  const hash = new URLSearchParams(location.hash.replace(/^#/, ''));
-  const accessToken = hash.get('admin') || '';
-  if (location.hash) history.replaceState(null, '', location.pathname + location.search);
-  const eventInput = $('#cloud-event-id');
-  if (eventInput && eventId) eventInput.value = eventId;
-  const valid = /^[a-z0-9][a-z0-9-]{2,63}$/.test(eventId);
-  if (!valid || accessToken.length < 40) {
-    publishButton.disabled = true;
-    status('Tautan Admin tidak lengkap atau tidak valid. Minta Owner menerbitkan link baru.', true);
-    return;
-  }
-  const authHeaders = { Authorization: 'Bearer ' + accessToken };
-  status('Akses Admin siap untuk acara ' + eventId + '.');
-  async function requestUpload(file, kind) {
+  const button = $('#publish-cloud');
+  if (!button) return;
+  let ownerReady = false;
+  fetch('/api/auth/me', { credentials: 'same-origin' })
+    .then(r => r.json())
+    .then(data => {
+      ownerReady = Boolean(data.authenticated && data.user?.role === 'owner');
+      button.disabled = !ownerReady;
+      status(ownerReady ? 'Sesi Owner aktif. Editor dan publikasi tersedia.' : 'Login sebagai Owner terlebih dahulu melalui Owner Dashboard.', !ownerReady);
+    })
+    .catch(() => { button.disabled = true; status('Tidak dapat memverifikasi sesi Owner.', true); });
+  async function requestUpload(file, kind, eventId) {
     const ticket = await fetch('/api/admin/upload-url', {
       method: 'POST', credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json', ...authHeaders },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ eventId, kind, contentType: file.type, size: file.size })
     });
     const ticketData = await ticket.json();
@@ -35,19 +29,20 @@
     if (!uploaded.ok) throw new Error('Upload ' + kind + ' gagal (' + uploaded.status + ').');
     return ticketData.key;
   }
-  publishButton.addEventListener('click', async () => {
-    const coverFile = $('#cover-upload').files[0] || null;
-    const videoFile = $('#video-upload').files[0] || null;
-    publishButton.disabled = true;
+  button.addEventListener('click', async () => {
+    if (!ownerReady) return status('Login Owner diperlukan.', true);
+    const eventId = ($('#cloud-event-id').value || '').trim().toLowerCase();
+    if (!/^[a-z0-9][a-z0-9-]{2,63}$/.test(eventId)) return status('ID acara wajib 3–64 karakter: huruf kecil, angka, dan tanda hubung.', true);
+    const cover = $('#cover-upload').files[0] || null, video = $('#video-upload').files[0] || null;
+    button.disabled = true;
     try {
       const media = {};
-      if (coverFile) media.cover = await requestUpload(coverFile, 'cover');
-      if (videoFile) media.video = await requestUpload(videoFile, 'video');
+      if (cover) media.cover = await requestUpload(cover, 'cover', eventId);
+      if (video) media.video = await requestUpload(video, 'video', eventId);
       const value = id => ($('#' + id).value || '').trim();
       status('Menerbitkan konten undangan…');
       const response = await fetch('/api/admin/publish', {
-        method: 'POST', credentials: 'same-origin',
-        headers: { 'Content-Type': 'application/json', ...authHeaders },
+        method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ eventId, invitation: {
           title: value('event-title'), personOne: value('person-one'), personTwo: value('person-two'),
           opening: value('opening-text'), date: value('event-date'), location: value('event-location'), closing: value('closing-text')
@@ -59,8 +54,7 @@
       link.href = './guest.html?event=' + encodeURIComponent(eventId);
       link.hidden = false;
       status('Berhasil diterbitkan. Link Tamu siap: ' + location.origin + link.getAttribute('href'));
-    } catch (error) {
-      status(error.message || 'Publikasi gagal. Periksa konfigurasi backend.', true);
-    } finally { publishButton.disabled = false; }
+    } catch (error) { status(error.message || 'Publikasi gagal. Periksa konfigurasi backend.', true); }
+    finally { button.disabled = !ownerReady; }
   });
 })();
