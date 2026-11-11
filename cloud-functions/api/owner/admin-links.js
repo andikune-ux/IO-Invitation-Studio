@@ -19,7 +19,7 @@ export async function onRequestPost({ request }) {
     const meta = await db.get(`events/${eventId}/meta.json`, { type: "json", consistency: "strong" });
     if (!meta) return json({ error: "Acara tidak ditemukan." }, 404);
     const existing = await db.get(`auth/admin-links/${eventId}.json`, { type: "json", consistency: "strong" });
-    if (existing && !existing.revoked) return json({ error: "Tautan Admin aktif sudah ada. Gunakan rotasi link." }, 409);
+    if (existing && !existing.revoked && (!existing.expiresAt || (Number.isFinite(Date.parse(existing.expiresAt)) && Date.parse(existing.expiresAt) > Date.now()))) return json({ error: "Tautan Admin aktif sudah ada. Gunakan rotasi link." }, 409);
     const token = randomBytes(32).toString("base64url");
     const now = new Date();
     const day = now.getUTCDate(); now.setUTCDate(1); now.setUTCMonth(now.getUTCMonth() + durationMonths);
