@@ -1,21 +1,32 @@
 <!doctype html>
 <html lang="id">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#e9eef7">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#f3f5fb">
 <meta name="referrer" content="no-referrer"><meta name="robots" content="noindex,nofollow">
-<title>Guest Manager · IO Invitation Studio</title>
+<title>Kelola Undangan · IO Invitation Studio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./admin.css?v=guest-manager-glass-1"><script src="./admin.js?v=guest-manager-glass-1" defer></script>
+<link rel="stylesheet" href="./admin.css?v=guest-simple-2"><script src="./admin.js?v=guest-simple-2" defer></script>
 </head>
-<body><div class="glow"></div><main class="admin-shell">
-<header class="admin-head glass"><a class="brand" href="./index.html"><span class="brand-icon">IO</span><span><b>Invitation Studio</b><small>EVENT ADMIN ACCESS</small></span></a><span class="access-state"><i></i> Secure link session</span></header>
-<section class="welcome"><span class="eyebrow">GUEST MANAGEMENT</span><h1>Daftar tamu<span>.</span></h1><p>Kelola nama tamu dan bagikan tautan undangan personal. Desain dan konten utama acara dikelola oleh Owner.</p></section>
-<section class="event-strip glass"><div><small>EVENT ID</small><b id="event-id">—</b></div><div><small>TOTAL TAMU</small><b id="guest-total">0</b></div><div><small>AKSES</small><b>Admin acara</b></div></section>
-<section class="panel glass"><div class="panel-head"><div><span class="eyebrow">ADD RECIPIENT</span><h2>Tambah tamu</h2><p>Setiap tamu mendapatkan link unik.</p></div><span class="mini-icon">＋</span></div>
-<form id="guest-form"><label for="guest-name">Nama tamu / keluarga</label><div class="add-row"><input id="guest-name" maxlength="100" required placeholder="Contoh: Budi & Wati"><button type="submit" class="primary">Tambah tamu <span>→</span></button></div><p id="form-status" class="status" role="status"></p></form></section>
-<section class="panel glass"><div class="panel-head list-head"><div><span class="eyebrow">YOUR INVITATION LIST</span><h2>Semua tamu</h2><p>Salin link personal untuk dibagikan lewat WhatsApp atau media lain.</p></div><button id="refresh" class="soft-button" type="button">↻ Refresh</button></div>
-<div class="search"><span>⌕</span><input id="search" type="search" placeholder="Cari nama tamu…"></div>
-<div id="guest-list" class="guest-list"><div class="empty">Memuat daftar tamu…</div></div><p id="list-status" class="status" role="status"></p></section>
-<footer>IO Invitation Studio <span>✦</span> Guest management workspace</footer></main>
+<body><main class="admin-shell">
+<header class="topbar"><a class="brand" href="./index.html"><span class="brand-icon">IO</span><span><b>IO Invitation Studio</b><small>ADMIN ACARA</small></span></a><span class="secure"><i></i> Akses aman</span></header>
+<section class="intro"><span class="eyebrow">PENGELOLAAN TAMU</span><h1>Bagikan undangan.</h1><p>Masukkan nama tamu dan pasangan, lalu buat link undangan personal untuk dibagikan.</p></section>
+<section class="summary"><div><small>ACARA</small><b id="event-id">—</b></div><div><small>JUMLAH TAMU</small><b id="guest-total">0</b></div></section>
+<section class="panel">
+  <div class="section-title"><div><h2>Buat link undangan</h2><p>Isi nama tamu. Nama pasangan boleh dikosongkan.</p></div><span class="plus">＋</span></div>
+  <form id="guest-form">
+    <label for="guest-name">Nama tamu undangan</label><input id="guest-name" maxlength="65" required placeholder="Contoh: Budi">
+    <label for="partner-name">Nama pasangan <span>(opsional)</span></label><input id="partner-name" maxlength="65" placeholder="Contoh: Wati">
+    <button type="submit" class="primary" id="generate-button">Generate link undangan <span>→</span></button>
+    <p id="form-status" class="status" role="status"></p>
+  </form>
+  <div id="created-link" class="generated" hidden></div>
+</section>
+<section class="panel list-panel">
+  <div class="section-title"><div><h2>Daftar tamu</h2><p>Buat ulang link jika ingin menerbitkan link baru.</p></div><button id="refresh" class="refresh" type="button" aria-label="Muat ulang">↻</button></div>
+  <input id="search" class="search" type="search" placeholder="Cari nama tamu…">
+  <div id="guest-list" class="guest-list"><div class="empty">Memuat daftar tamu…</div></div>
+  <p id="list-status" class="status" role="status"></p>
+</section>
+<footer>IO Invitation Studio</footer></main>
 <div id="toast" class="toast" role="status" aria-live="polite"></div></body></html>
