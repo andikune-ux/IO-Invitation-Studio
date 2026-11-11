@@ -1,73 +1,58 @@
-# Owner and per-event Admin authentication
+# Owner and per-event Admin access
 
-This feature replaces the shared global Admin bearer token on event upload and publish endpoints with server-side sessions.
+## Roles
 
-## Security model
+- **Owner** signs in with the server-side EdgeOne secret `IO_ADMIN_API_TOKEN` and manages every event.
+- **Admin** receives one secret, event-scoped access URL from Owner. No username, password, or Admin login form is used.
+- **Guest** opens the published public invitation and may submit RSVP when that feature is enabled.
 
-- Owner login: `POST /api/auth/owner-login`, authenticated with the existing EdgeOne secret `IO_ADMIN_API_TOKEN` in an Authorization Bearer header.
-- Owner provisions one Admin account per event: `POST /api/owner/admins`.
-- Admin login: `POST /api/auth/admin-login`, using event ID, username, and password.
-- Sessions are random opaque tokens in Secure, HttpOnly, SameSite=Strict cookies. Only SHA-256 token digests are stored.
-- Admin passwords are stored as scrypt hashes with unique random salts.
-- Upload URL and publish endpoints require an Admin session matching the requested event ID.
-- Sessions expire after 8 hours. `POST /api/auth/logout` revokes the current session.
+## Admin link security
+
+- Owner creates an event with `POST /api/owner/admins`, then provisions access with `POST /api/owner/admin-links`.
+- The server generates 32 cryptographically random bytes and returns the URL token once.
+- Only a SHA-256 digest is stored at `auth/admin-links/{eventId}.json`.
+- Admin access is sent as an Authorization Bearer header to event-scoped upload and publish endpoints. The browser reads the secret from the URL fragment and removes the fragment from browser history immediately.
+- The token is scoped to one event. It cannot call Owner endpoints.
+- Owner can rotate or revoke access with `PATCH /api/owner/admin-links/{eventId}` and `{ "action": "rotate" }` or `{ "action": "revoke" }`.
+- Rotation invalidates the previous token. Revocation disables the current token.
+- When an event is migrated by creating its first Admin link, the legacy password account and its Admin sessions are deleted.
+- Do not forward Admin URLs to anyone except the event manager. Anyone holding the link can manage that event's invitation content and media.
 
 ## Owner Dashboard
 
-- Open `/owner.html` to sign in to the Owner workspace.
-- The dashboard lists events from the `io-invitation-media` Blob namespace and shows publication and Admin status.
-- Owner can create an event with its first Admin, rename an event, archive/reactivate it, disable/reactivate its Admin, and reset the Admin password.
-- New and reset passwords are shown once in the browser. Copy and deliver them securely; the server stores only scrypt password hashes.
-- Disabling an Admin or resetting its password revokes all existing sessions for that event.
-- Archived events are not deleted and their Admin credentials are not automatically disabled.
+Open `/owner.html` and sign in with the Owner API token. The dashboard supports:
+- Create an event and issue a secure Admin link.
+- List and search events.
+- Rename, archive, and reactivate events.
+- Create, rotate, and revoke event-scoped Admin links.
+- Monitor publication state.
 
-## Provision the first event Admin
-
-Use a trusted terminal. Do not put the Owner token in frontend source code, a GitHub commit, or a shared chat.
-
-1. Login as Owner and save the returned cookie:
-
-```sh
-curl -i -c owner-cookie.txt -X POST \
-  -H "Authorization: Bearer $IO_ADMIN_API_TOKEN" \
-  https://YOUR_DEPLOYED_HOST/api/auth/owner-login
-```
-
-2. Create an event and its Admin account:
-
-```sh
-curl -i -b owner-cookie.txt -X POST \
-  -H "Content-Type: application/json" \
-  --data '{"eventId":"andik-ara-pernikahan","eventTitle":"Andik & Ara","username":"andikadmin","password":"GantiDenganPasswordPanjang12Karakter","displayName":"Admin Andik & Ara"}' \
-  https://YOUR_DEPLOYED_HOST/api/owner/admins
-```
-
-3. Admin logs in from the Invitation Studio editor using the event ID, username, and password. The browser receives the session cookie automatically.
+The Admin URL opens `/index.html?event={eventId}#admin={secret}`. The fragment is not sent in the initial HTTP request; the page reads it into memory and removes it from the visible URL. Do not add third-party scripts or analytics to the Admin editor without reviewing their access to page context.
 
 ## Endpoints
 
 | Method | Path | Purpose |
 |---|---|---|
-| POST | `/api/auth/owner-login` | Exchange Owner secret for an Owner session |
-| POST | `/api/owner/admins` | Create an event and its first Admin |
-| GET | `/api/owner/events` | List events and safe Admin status fields |
+| POST | `/api/auth/owner-login` | Exchange Owner secret for a protected Owner session |
+| POST | `/api/owner/admins` | Create event metadata |
+| GET | `/api/owner/events` | List events and access-link status |
 | PATCH | `/api/owner/events/{eventId}` | Rename or archive/reactivate an event |
-| PATCH | `/api/owner/admins/{eventId}` | Enable/disable Admin or reset password |
-| POST | `/api/auth/admin-login` | Create an event-scoped Admin session |
-| GET | `/api/auth/me` | Inspect current session |
-| POST | `/api/auth/logout` | Revoke current session |
-| POST | `/api/admin/upload-url` | Admin-only media upload ticket |
-| POST | `/api/admin/publish` | Admin-only publication |
+| POST | `/api/owner/admin-links` | Create an event-scoped Admin link |
+| PATCH | `/api/owner/admin-links/{eventId}` | Rotate or revoke an Admin link |
+| POST | `/api/auth/admin-login` | Retired; returns HTTP 410 |
+| POST | `/api/admin/upload-url` | Admin-link-only media upload ticket |
+| POST | `/api/admin/publish` | Admin-link-only invitation publication |
 
-## Deployment and verification
+## Deployment checks
 
-Deploy the branch/PR through the configured EdgeOne workflow, confirm the Cloud Functions routes are active, and verify that `IO_ADMIN_API_TOKEN` remains set as a server-side secret. Do not test with a real invitation until Blob storage is confirmed available.
+1. Ensure Cloud Functions are enabled for the `cloud-functions/` directory.
+2. Configure `IO_ADMIN_API_TOKEN` as an EdgeOne server-side secret.
+3. Confirm Blob Storage namespace `io-invitation-media` is available.
+4. Deploy the latest main commit.
+5. Verify Owner login, event creation, one-time Admin link issuance, upload, publish, link rotation, and revocation in a test event.
 
-The repository's `npm run check` validates JavaScript syntax only. It does not exercise live Blob storage, password login, cookies, authorization, or production deployment.
+The repository's `npm run check` checks JavaScript syntax only. It does not verify live Blob Storage, token isolation, upload behavior, or production deployment.
 
-## Current limitations
+## Migration notes
 
-- This initial implementation supports one Admin account per event; account replacement, password reset, and multi-Admin membership are follow-up work.
-- Login rate limiting and audit logging are not implemented yet. Add these before opening public self-service account creation.
-- Blob reads for auth records use strong consistency. Blob does not provide transactional compare-and-set in this implementation, so concurrent Owner requests to create the same event should be avoided.
-- Cookie sessions are host-only. Cross-subdomain login will need a separately designed shared-domain session strategy if wildcard hostnames are later activated.
+Existing events may still have a legacy password account. Their current dashboard will show that legacy record until Owner creates an Admin link for that event. Creating the link removes the legacy password record and revokes its sessions. The new secret link must be saved and shared at issuance time; it cannot be recovered from storage because only its digest is retained.
