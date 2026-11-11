@@ -119,8 +119,15 @@ export async function createEventAdmin(request, body) {
   if (!originAllowed(request)) return json({ error: "Origin tidak diizinkan." }, 403);
   const auth = await requireOwner(request);
   if (!auth.ok) return auth.response;
-  const { eventId, eventTitle } = body || {};
+  const { eventId, eventTitle, category, religion } = body || {};
+  const allowedCategories = new Set(["Pernikahan","Lamaran","Pertunangan","Khitanan / Sunatan","Aqiqah","Kelahiran Bayi","Ulang Tahun","Wisuda","Kelulusan","Syukuran","Tasyakuran","Keagamaan","Spiritual","Pengajian","Peresmian","Gathering","Reuni","Seminar / Workshop","Konferensi","Acara Keluarga","Memorial / Peringatan","Lain-lain"]);
+  const allowedReligions = new Set(["Islam","Kristen (Protestan)","Katolik","Hindu","Buddha","Konghucu","Kepercayaan terhadap Tuhan Yang Maha Esa","Spiritual / Non-denominasi","Lainnya","Tidak ingin mencantumkan"]);
+  const religionCategories = new Set(["Pernikahan","Lamaran","Pertunangan","Keagamaan","Spiritual","Pengajian","Syukuran","Tasyakuran"]);
   if (!validEventId(eventId)) return json({ error: "ID acara tidak valid." }, 400);
+  if (typeof eventTitle !== "string" || !eventTitle.trim() || eventTitle.trim().length > 100) return json({ error: "Nama acara wajib diisi (maksimal 100 karakter)." }, 400);
+  if (!allowedCategories.has(category)) return json({ error: "Kategori acara wajib dipilih dari daftar yang tersedia." }, 400);
+  if (religion != null && religion !== "" && !allowedReligions.has(religion)) return json({ error: "Pilihan agama atau kepercayaan tidak valid." }, 400);
+  const selectedReligion = religionCategories.has(category) && religion ? religion : null;
   const db = store();
   const metaKey = `events/${eventId}/meta.json`;
   const existing = await db.get(metaKey, { type: "json", consistency: "strong" });
@@ -128,7 +135,9 @@ export async function createEventAdmin(request, body) {
   const now = new Date().toISOString();
   await db.setJSON(metaKey, {
     eventId,
-    title: typeof eventTitle === "string" ? eventTitle.trim().slice(0, 100) : eventId,
+    title: eventTitle.trim(),
+    category,
+    religion: selectedReligion,
     status: "draft",
     createdAt: now,
     updatedAt: now
