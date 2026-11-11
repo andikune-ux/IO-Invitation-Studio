@@ -3,6 +3,29 @@ import { json, readJson, safeText, validEventId } from "../../_lib/http.js";
 import { requireOwner } from "../../_lib/auth.js";
 
 const MEDIA_KINDS = ["cover", "hero", "groom", "bride", "child", "video", ...Array.from({ length: 6 }, (_, i) => "gallery-" + (i + 1)), ...Array.from({ length: 3 }, (_, i) => "story-" + (i + 1))];
+const cleanText = (value, max = 1500) => typeof value === "string" ? value.trim().slice(0, max) : "";
+const cleanContent = (input) => {
+  const source = input && typeof input === "object" && !Array.isArray(input) ? input : {};
+  const family = {};
+  if (source.family && typeof source.family === "object" && !Array.isArray(source.family)) {
+    for (const [key, value] of Object.entries(source.family).slice(0, 20)) {
+      if (/^[a-zA-Z][a-zA-Z0-9_-]{0,40}$/.test(key)) family[key] = cleanText(value, 120);
+    }
+  }
+  const bankAccounts = Array.isArray(source.bankAccounts) ? source.bankAccounts.slice(0, 2).map(account => ({
+    bank: cleanText(account?.bank, 120),
+    manualBank: cleanText(account?.manualBank, 120),
+    holder: cleanText(account?.holder, 120),
+    number: cleanText(account?.number, 40)
+  })) : [];
+  const stories = Array.isArray(source.stories) ? source.stories.slice(0, 3).map((story, index) => ({
+    index: Number.isInteger(story?.index) && story.index >= 1 && story.index <= 3 ? story.index : index + 1,
+    text: cleanText(story?.text, 1500)
+  })) : [];
+  const featuredCount = Number.isInteger(source.featuredCount) ? Math.min(6, Math.max(0, source.featuredCount)) : 0;
+  const categoryData = source.categoryData && typeof source.categoryData === "object" && !Array.isArray(source.categoryData) ? source.categoryData : {};
+  return { family, bankAccounts, stories, featuredCount, mapUrl: cleanText(source.mapUrl, 1000), categoryData };
+};
 const validMediaKey = (key, eventId, kind) => typeof key === "string" &&
   key.startsWith(`events/${eventId}/media/${kind}-`) &&
   /^events\/[a-z0-9][a-z0-9-]{2,63}\/media\/[a-z0-9-]+\.(jpg|jpeg|png|webp|mp4|webm)$/.test(key);
@@ -59,7 +82,7 @@ export async function onRequestPost({ request }) {
       location: safeText(inv.location, 250),
       closing: safeText(inv.closing, 1000),
       mediaUrl: safeText(inv.mediaUrl, 500),
-      content: body.content && typeof body.content === "object" ? body.content : {},
+      content: cleanContent(body.content),
       media: finalMedia,
       publishedAt: new Date().toISOString(),
       status: "published"
