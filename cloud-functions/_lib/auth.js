@@ -84,12 +84,7 @@ export const requireEventAdmin = async (request, eventId) => {
       identity = { role: "admin", eventId, access: "link" };
     }
   }
-  // Temporary compatibility for existing Admin sessions during migration.
-  if (!identity) {
-    const session = await getSession(request);
-    if (session?.role === "admin" && session.eventId === eventId) identity = session;
-  }
-  if (!identity) return { ok: false, response: json({ error: "Tautan Admin tidak valid atau sudah dicabut." }, 401) };
+   if (!identity) return { ok: false, response: json({ error: "Tautan Admin tidak valid atau sudah dicabut." }, 401) };
   const meta = await store().get(`events/${eventId}/meta.json`, { type: "json", consistency: "strong" });
   if (!meta || meta.status === "archived") return { ok: false, response: json({ error: "Acara ini diarsipkan atau tidak tersedia untuk dikelola." }, 403) };
   return { ok: true, session: identity };
@@ -116,26 +111,8 @@ export async function ownerLogin(request, env) {
   });
 }
 
-export async function adminLogin(request, body) {
-  if (!originAllowed(request)) return json({ error: "Origin tidak diizinkan." }, 403);
-  const { eventId, username, password } = body || {};
-  if (!validEventId(eventId) || typeof username !== "string" || typeof password !== "string" || password.length > 256) {
-    return json({ error: "ID acara, username, atau password tidak valid." }, 400);
-  }
-  const meta = await store().get(`events/${eventId}/meta.json`, { type: "json", consistency: "strong" });
-  if (!meta || meta.status === "archived") return json({ error: "Acara ini diarsipkan atau tidak tersedia untuk login." }, 403);
-  const account = await store().get(`auth/admins/${eventId}.json`, { type: "json", consistency: "strong" });
-  if (!account || account.disabled || account.username !== username.trim().toLowerCase()) {
-    return json({ error: "Username atau password tidak cocok." }, 401);
-  }
-  const derived = await scrypt(password, account.salt, 64);
-  if (!safeEqual(derived.toString("hex"), account.passwordHash)) {
-    return json({ error: "Username atau password tidak cocok." }, 401);
-  }
-  const { token, session } = await createSession({ role: "admin", eventId, username: account.username });
-  return json({ ok: true, user: { role: session.role, eventId, username: session.username } }, 200, {
-    "Set-Cookie": sessionCookie(token)
-  });
+export async function adminLogin() {
+  return json({ error: "Login username/password Admin sudah dihentikan. Gunakan tautan akses dari Owner." }, 410);
 }
 
 export async function createEventAdmin(request, body) {
