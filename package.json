@@ -1,0 +1,11 @@
+{
+  "name": "io-invitation-studio",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node --check cloud-functions/api/admin/upload-url.js && node --check cloud-functions/api/admin/publish.js && node --check cloud-functions/api/invitation/[eventId].js && node --check cloud-functions/api/media.js"
+  },
+  "dependencies": {
+    "@edgeone/pages-blob": "^1.0.0"
+  }
+}
