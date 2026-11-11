@@ -1,103 +1,73 @@
-# Arsitektur hostname dan akses
+# IO Invitation Studio — arsitektur platform
 
 ## Domain platform
 
-Domain Owner yang dipilih dan harus dipertahankan:
+Domain Owner yang dipilih untuk target akhir:
 
 `undangandigital-iODigitalInvitation.edgeone.dev`
 
-## Pola hostname target
+Deployment yang sebelumnya diverifikasi dari percakapan menggunakan alamat project EdgeOne:
 
-Semua hostname Admin dan Tamu menggunakan satu label subdomain di bawah domain platform.
+`io-invitation-studio.edgeone.dev`
+
+Jangan menganggap domain target dan seluruh subdomain sudah aktif sebelum DNS, routing, dan TLS diuji langsung.
+
+## Pola hostname target
 
 - Owner: `undangandigital-iODigitalInvitation.edgeone.dev`
 - Admin: `{slug-penyelenggara}-{kategori}.{OWNER_DOMAIN}`
 - Tamu: `{slug-tamu}-{slug-penyelenggara}-{kategori}.{OWNER_DOMAIN}`
 
-Contoh:
+Hostname Admin/Tamu memerlukan registry hostname eksplisit. Jangan menebak role dari jumlah titik atau memecah nama hanya berdasarkan tanda hubung karena nama bisa bertabrakan.
 
-- Admin: `andik-ara-undanganpernikahan.undangandigital-iODigitalInvitation.edgeone.dev`
-- Tamu: `budi-wati-andik-ara-undanganpernikahan.undangandigital-iODigitalInvitation.edgeone.dev`
+Registry target: `hostname` unik, `role`, `event_id`, `guest_id` (nullable), `status`, dan `expires_at`.
 
-## Catatan penting tentang resolusi
+## Model peran
 
-Hostname Admin dan Tamu berbagi satu namespace subdomain. Karena itu, aplikasi tidak boleh menebak peran hanya dari jumlah titik atau memecah slug berdasarkan tanda hubung. Nama dapat mengandung beberapa kata dan dapat bertabrakan.
+1. **Owner** — login dengan secret EdgeOne `IO_ADMIN_API_TOKEN`; mengelola event, akses Admin, desain, media, domain, publikasi, dan pengaturan platform.
+2. **Admin acara** — tidak memiliki akun/password. Owner menerbitkan URL rahasia dengan token acak 256-bit yang hanya berlaku untuk satu event. Admin dapat mengelola konten dan media event itu melalui editor.
+3. **Guest** — tanpa login; membuka undangan publik dan mengirim RSVP bila fitur tersedia.
 
-Implementasi produksi harus memakai registry hostname eksplisit di backend/database, misalnya:
+Admin token dikirim melalui Authorization Bearer header. Token dibaca dari URL fragment oleh editor dan fragmen dihapus dari address bar. Backend hanya menyimpan SHA-256 token digest. Owner dapat merotasi atau mencabut token; rotasi membuat token lama tidak berlaku. Endpoint Admin menolak token yang tidak valid, dicabut, atau milik event lain. Token Admin tidak dapat mengakses endpoint Owner.
 
-- `hostname` (unik, lowercase)
-- `role` (`admin` atau `guest`)
-- `event_id`
-- `guest_id` (nullable untuk Admin)
-- `status` dan `expires_at`
+Saat event lama pertama kali diberi Admin link, akun/password Admin lama dan sesi Admin lama untuk event tersebut dihapus. Endpoint login password lama mengembalikan HTTP 410.
 
-Request hostname akan dinormalisasi lalu dicocokkan persis ke registry. Halaman Owner dikenali melalui exact match terhadap domain platform.
+## Cloud Functions dan Blob Storage
 
-## Batasan provider yang wajib diuji
+Namespace Blob: `io-invitation-media`.
 
-Sebelum pola ini dipakai produksi, verifikasi:
+- `POST /api/auth/owner-login` — Owner secret ke sesi Owner HttpOnly.
+- `POST /api/owner/admins` — membuat metadata event.
+- `GET /api/owner/events` — daftar event dan status publikasi/link.
+- `PATCH /api/owner/events/{eventId}` — ubah nama atau arsipkan/aktifkan event.
+- `POST /api/owner/admin-links` — buat Admin link event.
+- `PATCH /api/owner/admin-links/{eventId}` — rotasi atau cabut Admin link.
+- `POST /api/admin/upload-url` — Admin link meminta URL upload sementara.
+- `POST /api/admin/publish` — Admin link menerbitkan konten undangan.
+- `GET /api/invitation/{eventId}` — mengambil undangan yang telah diterbitkan.
+- `GET /api/media?key=...` — menyajikan media yang direferensikan oleh undangan published.
 
-1. Apakah domain project bawaan EdgeOne dapat menerima wildcard DNS untuk subdomain yang dibuat pengguna.
-2. Apakah EdgeOne mengizinkan custom wildcard hostname di bawah domain `edgeone.dev` yang dikelola provider.
-3. Apakah sertifikat TLS yang tersedia mencakup `*.undangandigital-iODigitalInvitation.edgeone.dev`.
-4. Apakah request ke setiap hostname dapat diarahkan ke satu aplikasi dan header Host asli diteruskan.
+Foto dibatasi 8 MB dan video 25 MB. Endpoint media mem-proxy Blob melalui Cloud Functions; uji kuota dan egress sebelum acara dengan trafik tinggi.
 
-Jangan menganggap wildcard domain milik provider dapat dikonfigurasi oleh pemilik project. Jika tidak didukung, gunakan custom domain milik Owner atau fallback URL path.
+## Owner Control Center
 
-## Keamanan
+`/owner.html` adalah ruang kendali Owner dengan desain soft-neumorphism dan iOS-inspired liquid glass. Fungsi yang sudah diimplementasikan pada tahap ini:
+- Login Owner dan sesi terlindungi.
+- Ringkasan jumlah event, Admin link aktif, dan undangan terbit.
+- Buat event dan terbitkan Admin link satu kali.
+- Cari dan daftar event.
+- Ubah nama, arsipkan, aktifkan kembali.
+- Rotasi dan cabut Admin link.
 
-- Jangan menyimpan password, token, atau data tamu sensitif di frontend.
-- Admin harus diverifikasi melalui autentikasi dan izin berdasarkan `event_id`.
-- Link tamu harus memakai identifier/token yang tidak mudah ditebak bila memuat informasi privat.
-- Data tamu tidak boleh dianggap aman hanya karena hostname sulit ditebak.
+Fitur lanjutan seperti Template Studio, Media Library, Guest Manager/RSVP, Analytics, Distribution Center, Domain Manager, Finance, Backup/Restore, audit log, dan pengaturan sistem masih menjadi roadmap. Jangan menampilkan kontrol yang belum memiliki backend sebagai fitur aktif.
 
-## Status saat ini
+## Batasan dan verifikasi deployment
 
-Dokumen ini menetapkan rancangan hostname. Resolver, registry hostname, autentikasi multi-Admin, DNS, TLS, dan deployment produksi belum dibuat atau diverifikasi. API cloud dasar telah ditambahkan di branch pengembangan, tetapi belum dideploy atau diuji.
+Sebelum produksi:
+1. Pastikan Cloud Functions aktif pada project EdgeOne yang terhubung ke repository ini.
+2. Konfigurasikan `IO_ADMIN_API_TOKEN` sebagai secret server-side.
+3. Pastikan Blob Storage namespace tersedia.
+4. Uji login Owner, create event, issuance link, upload foto/video, publish, link rotation, revoke, serta isolasi akses antar-event.
+5. Uji domain target, wildcard DNS, routing, dan sertifikat TLS.
 
-
-## Editor undangan dan halaman Tamu (demo + integrasi cloud)
-
-Branch `feat/admin-media-editor` menambahkan:
-
-- Form editor konten undangan untuk Admin.
-- Pemilihan foto JPG/PNG/WEBP hingga 8 MB dan video MP4/WebM hingga 25 MB.
-- Preview langsung dan halaman `guest.html`.
-- Draft teks menggunakan `localStorage`; file media demo menggunakan IndexedDB pada origin browser yang sama.
-
-**Batasan demo lokal:** draft lokal tidak otomatis tersedia pada hostname/subdomain lain atau perangkat lain. Publikasi cloud merupakan alur terpisah yang memerlukan API dan konfigurasi EdgeOne sesuai bagian berikutnya.
-
-## Tahap backend lanjutan yang masih wajib
-
-Fondasi API cloud sudah dibuat di branch ini. Sebelum fitur dipakai sungguhan, masih perlu:
-
-1. Identitas/login Admin per acara dan pemeriksaan kepemilikan `event_id` di server (token Owner saat ini hanya solusi sementara).
-2. Konfigurasi dan deployment Cloud Functions + Blob Storage pada project EdgeOne yang benar.
-3. Registry hostname eksplisit untuk pemetaan Admin/Tamu, status, dan masa berlaku.
-4. Pengujian akses lintas perangkat, upload, batas ukuran, izin, kuota, dan HTTPS.
-
-Jangan menaruh token rahasia atau kredensial storage di JavaScript frontend. Jangan mengizinkan endpoint upload anonim membuat key arbitrer.
-
-## Backend cloud (fondasi API, belum aktif sebelum deployment)
-
-Branch ini menambahkan Node.js Cloud Functions EdgeOne Makers:
-- `POST /api/admin/upload-url`: membuat presigned upload URL 5 menit untuk media acara.
-- `POST /api/admin/publish`: menyimpan data undangan berstatus published.
-- `GET /api/invitation/{eventId}`: membaca undangan yang sudah diterbitkan.
-- `GET /api/media?key=...`: menyajikan media yang direferensikan oleh undangan published.
-
-Penyimpanan memakai namespace Blob `io-invitation-media`. SDK resmi `@edgeone/pages-blob` digunakan dari Node.js Cloud Functions. Dokumentasi runtime/routing: https://pages.edgeone.ai/document/node-functions dan Blob: https://pages.edgeone.ai/document/blob-storage.
-
-### Konfigurasi wajib di EdgeOne sebelum API dapat dipakai
-1. Hubungkan project EdgeOne Makers ke repository ini dan pastikan root/build output sesuai project statis.
-2. Aktifkan Node.js Cloud Functions untuk direktori `cloud-functions/` (route file-based).
-3. Atur environment variable rahasia `IO_ADMIN_API_TOKEN` pada project EdgeOne. Buat token acak panjang di password manager; jangan commit token ke GitHub atau mengirimkannya di chat.
-4. Deploy ulang. Jika environment variable belum ada, endpoint Admin sengaja mengembalikan 503.
-5. Masukkan token pada panel Publikasi cloud di editor Admin. Token hanya dipakai dalam request saat sesi aktif dan tidak ditulis ke localStorage.
-
-**Batasan keamanan tahap ini:** token adalah token Owner tingkat platform, bukan login multi-Admin dan belum membatasi token ke event tertentu. Jangan membagikannya kepada Admin acara yang belum dipercaya. Sebelum produksi multi-tenant, ganti dengan autentikasi per Admin + otorisasi server-side berdasarkan event_id, rate limit, audit log, dan kebijakan retensi. URL publik undangan hanya mengembalikan record berstatus published.
-
-Blob Free Edition memiliki batas ukuran objek tunggal 25 MB. Foto dibatasi 8 MB dan video 25 MB di API. EdgeOne menyatakan Blob bukan CDN hosting publik; endpoint media di atas mem-proxy objek melalui Cloud Functions, sehingga beban egress/kuota perlu diuji sebelum penggunaan ramai. 
-
-### Status
-Kode API dan UI cloud sudah ditambahkan ke branch. Pemeriksaan sintaks JavaScript lokal telah lulus. Pengguna melaporkan build berhasil, tetapi deployment fungsi, konfigurasi environment, upload sungguhan, dan pengujian lintas perangkat belum diverifikasi dari project EdgeOne. Status tersebut tidak boleh dianggap aktif sebelum tes runtime berhasil.
+GitHub Actions `npm run check` hanya memeriksa sintaks JavaScript; bukan pengujian integrasi Blob, keamanan runtime, atau deployment EdgeOne.
