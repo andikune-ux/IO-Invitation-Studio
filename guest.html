@@ -6,7 +6,8 @@
 <script>
 (async()=>{
  const $=id=>document.getElementById(id),params=new URLSearchParams(location.search),eventId=params.get('event'),recipient=params.get('to'),set=(id,value)=>$(id).textContent=value||'';
- if(recipient)set('guest-recipient','Kepada Yth. '+recipient);\n const show=()=>{$('guest-root').hidden=false;$('guest-empty').hidden=true};
+ if(recipient)set('guest-recipient','Kepada Yth. '+recipient);
+ const show=()=>{$('guest-root').hidden=false;$('guest-empty').hidden=true};
  try{
   if(eventId==='demo'){
    const KEY='io-invitation-demo-v1',DB='io-invitation-media-demo';let d={};try{d=JSON.parse(localStorage.getItem(KEY)||'{}')}catch{}
