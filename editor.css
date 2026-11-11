@@ -76,3 +76,7 @@ body.editor-page{margin:0;min-height:100vh;background:linear-gradient(135deg,#e9
 .editor-page .editor-section [hidden]{display:none!important}
 .editor-page .media-preview:empty{display:none}
 @media(max-width:600px){.editor-page .media-grid{grid-template-columns:1fr}.editor-page .editor-section{padding:13px}}
+
+.editor-page .bank-picker{display:grid;grid-template-columns:44px minmax(0,1fr);gap:10px;align-items:end}
+.editor-page .bank-mark{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(145deg,#e7e9ff,#fff);border:1px solid #fff;color:#5f58b2;font:800 13px Manrope;box-shadow:3px 4px 9px #cbd1e055}
+.editor-page .bank-picker input{width:100%}
