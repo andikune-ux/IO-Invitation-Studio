@@ -1,0 +1,63 @@
+:root{color-scheme:light;--ink:#20243a;--muted:#81899f;--violet:#7167d9;--line:rgba(255,255,255,.78);--glass:rgba(255,255,255,.62);--shadow:14px 14px 34px rgba(117,126,157,.14),-12px -12px 30px rgba(255,255,255,.82)}
+*{box-sizing:border-box}
+body.editor-page{margin:0;min-height:100vh;background:linear-gradient(135deg,#e9edf6 0%,#f3f4fa 48%,#e8edf5 100%);color:var(--ink);font:14px/1.55 "DM Sans",Inter,system-ui,sans-serif;overflow-x:hidden}
+.editor-page:before,.editor-page:after{content:"";position:fixed;z-index:-1;border-radius:50%;pointer-events:none;filter:blur(2px)}
+.editor-page:before{width:420px;height:420px;top:-180px;right:4%;background:radial-gradient(circle,#c9c5ff88,transparent 68%)}
+.editor-page:after{width:380px;height:380px;bottom:-180px;left:18%;background:radial-gradient(circle,#b9e5f188,transparent 68%)}
+.editor-page .main-content{width:min(1440px,100%);padding:30px clamp(16px,3vw,42px);margin:auto}
+.editor-page .topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:28px;padding:18px 22px;border:1px solid #ffffffc9;border-radius:24px;background:#ffffff80;box-shadow:var(--shadow);backdrop-filter:blur(22px)}
+.editor-page .eyebrow{font-size:9px;letter-spacing:.18em;font-weight:800;color:#9299af}
+.editor-page .topbar h1{font:800 clamp(25px,3vw,36px)/1.15 Manrope,"DM Sans",sans-serif;letter-spacing:-.06em;margin:6px 0}
+.editor-page .topbar p{color:var(--muted);margin:5px 0 0}
+.editor-page .owner-chip{display:inline-flex;align-items:center;gap:8px;padding:11px 15px;border:1px solid #fff;border-radius:13px;background:#ffffffb5;color:#626b84;text-decoration:none;font-size:11px;font-weight:800;white-space:nowrap;box-shadow:4px 5px 10px #bfc6d544,-4px -4px 10px #ffffffa8}
+.editor-page .panel{background:var(--glass);border:1px solid var(--line);border-radius:24px;padding:23px;box-shadow:var(--shadow);backdrop-filter:blur(22px) saturate(150%)}
+.editor-page .empty-state{text-align:center;padding:54px 24px;max-width:720px;margin:55px auto}
+.editor-page .empty-icon{font-size:35px;color:var(--violet)}
+.editor-page .empty-state h2{font:800 22px Manrope;margin:12px 0 7px}
+.editor-page .empty-state p{max-width:520px;margin:0 auto;color:var(--muted);font-size:12px}
+.editor-page .primary-button,.editor-page .secondary-button{display:inline-flex;justify-content:center;align-items:center;gap:9px;border:0;border-radius:13px;padding:12px 16px;font:800 11px "DM Sans",sans-serif;cursor:pointer;text-decoration:none;transition:.18s}
+.editor-page .primary-button{color:#fff;background:linear-gradient(145deg,#8178e5,#5e55c3);box-shadow:6px 7px 14px #7169cf45,inset 1px 1px 2px #ffffff78}
+.editor-page .secondary-button{color:#626b84;background:#ffffffb5;border:1px solid #fff;box-shadow:4px 5px 10px #bfc6d544,-4px -4px 10px #ffffffa8}
+.editor-page button:hover,.editor-page a.primary-button:hover{transform:translateY(-1px)}
+.editor-page button:disabled{opacity:.55;cursor:wait;transform:none}
+.editor-page .section-heading{display:flex;justify-content:space-between;align-items:center;gap:15px;margin:0 2px 17px}
+.editor-page .section-heading h2{font:800 22px Manrope;letter-spacing:-.05em;margin:5px 0}
+.editor-page .muted{color:var(--muted);font-size:11px}
+.editor-page code{font:11px ui-monospace,monospace;overflow-wrap:anywhere}
+.editor-page .tag{display:inline-flex;border:1px solid #fff;border-radius:30px;padding:7px 11px;background:#ffffffa8;color:#7167c8;font-size:9px;font-weight:800;white-space:nowrap}
+.editor-page .editor-layout{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(320px,.92fr);gap:19px;align-items:start}
+.editor-page .editor-form{display:grid;gap:15px}
+.editor-page .editor-form h3,.editor-page .cloud-panel h3{font:800 16px Manrope;margin:0 0 2px}
+.editor-page .editor-form label{display:grid;gap:7px;color:#68718a;font-size:11px;font-weight:800}
+.editor-page .editor-form input:not([type=file]):not([type=hidden]),.editor-page .editor-form textarea{width:100%;padding:12px 14px;border:1px solid #ffffffd9;border-radius:13px;background:linear-gradient(145deg,#e9edf6,#f8f9fc);box-shadow:inset 4px 4px 8px #cbd1e0,inset -4px -4px 8px #fff;color:var(--ink);font:500 12px "DM Sans";outline:none;resize:vertical}
+.editor-page .editor-form input:focus,.editor-page .editor-form textarea:focus{border-color:#9e97e8;box-shadow:inset 2px 2px 5px #cbd1e0,inset -2px -2px 5px #fff,0 0 0 3px #8178e522}
+.editor-page .two-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.editor-page .upload-box{border:1px dashed #b9bfda;border-radius:17px;padding:16px;background:#ffffff70;transition:.18s}
+.editor-page .upload-box.drag-over{border-color:#8178e5;background:#8178e51c;outline:2px dashed #8178e5;outline-offset:3px}
+.editor-page .upload-box strong{font:800 12px Manrope;color:#535b77}
+.editor-page .upload-box p,.editor-page .cloud-panel p{font-size:10px;color:var(--muted);line-height:1.6;margin:5px 0 10px}
+.editor-page .upload-box input[type=file]{width:100%;font:11px "DM Sans";color:#68718a}
+.editor-page .media-preview img,.editor-page .media-preview video{display:block;width:100%;max-height:230px;object-fit:contain;margin-top:10px;border-radius:12px;background:#e4e8f1}
+.editor-page .cloud-panel{display:grid;gap:10px;padding:17px;border:1px solid #ffffffd9;border-radius:18px;background:#ffffff75;box-shadow:inset 4px 4px 9px #cbd1df66,inset -4px -4px 9px #fff}
+.editor-page .cloud-panel p{margin:0}
+.editor-page .cloud-panel input[type=hidden]{display:none}
+.editor-page .editor-actions{display:flex;gap:9px;flex-wrap:wrap}
+.editor-page .editor-side{display:grid;gap:15px;position:sticky;top:18px}
+.editor-page .live-preview{padding:18px}
+.editor-page .preview-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:13px}
+.editor-page .invitation-preview{overflow:hidden;border:1px solid #e7e1d8;border-radius:17px;background:#f6efe4;color:#3c4c43;box-shadow:0 15px 35px #3e466014}
+.editor-page .preview-cover{height:170px;display:grid;place-items:center;background:linear-gradient(135deg,#d6e8dc,#e9d9c6);color:#718d7e;font-size:42px;overflow:hidden}
+.editor-page .preview-cover img{width:100%;height:100%;object-fit:cover}
+.editor-page .preview-copy{text-align:center;padding:25px 18px 29px;font-family:Georgia,serif}
+.editor-page .preview-copy small{letter-spacing:.2em;font-size:9px}
+.editor-page .preview-copy h2{font-size:25px;margin:14px 0;line-height:1.2}
+.editor-page .preview-copy p{font-size:12px;line-height:1.7}
+.editor-page .preview-copy h3{font-size:22px;margin:20px 0 8px}
+.editor-page .preview-link{margin-top:14px}
+.editor-page .notice{padding:14px 16px;border-radius:15px;background:#ffffff88;border:1px solid #ffffffd9;color:#747d94;font-size:10px;line-height:1.7}
+.editor-page .footer{margin-top:35px;padding:17px 0;border-top:1px solid #ffffffc9;color:#a0a6b6;font-size:9px;text-align:center}
+.editor-page .toast{position:fixed;bottom:20px;right:20px;background:#292d40;color:#fff;padding:11px 15px;border-radius:11px;font-size:11px;opacity:0;transform:translateY(8px);transition:.2s;pointer-events:none;box-shadow:0 10px 25px #252b4430}
+.editor-page .toast.show{opacity:1;transform:translateY(0)}
+.editor-page [hidden]{display:none!important}
+@media(max-width:900px){.editor-page .editor-layout{grid-template-columns:1fr}.editor-page .editor-side{position:static;grid-row:1}}
+@media(max-width:600px){.editor-page .main-content{padding:14px}.editor-page .topbar{padding:15px;border-radius:18px;align-items:flex-start}.editor-page .owner-chip{font-size:9px;padding:9px}.editor-page .panel{padding:16px;border-radius:18px}.editor-page .two-fields{grid-template-columns:1fr}.editor-page .section-heading{align-items:flex-start}.editor-page .editor-actions>*{flex:1 1 100%}.editor-page .preview-copy{padding:20px 14px}}
