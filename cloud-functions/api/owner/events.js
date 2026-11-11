@@ -22,6 +22,8 @@ export async function onRequestGet({ request }) {
       return {
         eventId,
         title: meta.title || eventId,
+        category: meta.category || null,
+        religion: meta.religion || null,
         status: meta.status || "draft",
         createdAt: meta.createdAt || null,
         updatedAt: meta.updatedAt || null,
