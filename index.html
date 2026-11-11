@@ -17,6 +17,7 @@
         <button class="nav-item active" data-view="overview"><span>▦</span> Ringkasan</button>
         <button class="nav-item" data-view="events"><span>◇</span> Acara</button>
         <button class="nav-item" data-view="links"><span>↗</span> Generator Link</button>
+        <button class="nav-item" data-view="editor"><span>✎</span> Editor Undangan</button>
         <button class="nav-item" data-view="settings"><span>⚙</span> Pengaturan</button>
       </nav>
       <div class="sidebar-bottom"><span class="status-dot"></span> Platform foundation <small>Prototype</small></div>
@@ -39,11 +40,36 @@
         <div class="panel result-panel"><span class="eyebrow">HASIL PREVIEW</span><div class="result-block"><span class="result-label">DOMAIN OWNER — TETAP</span><code id="owner-url">undangandigital-iODigitalInvitation.edgeone.dev</code></div><div class="result-block"><span class="result-label">LINK ADMIN</span><code id="admin-url">andik-ara-undanganpernikahan.undangandigital-iODigitalInvitation.edgeone.dev</code><button class="copy-button" data-copy="admin-url" type="button">Salin</button></div><div class="result-block"><span class="result-label">LINK TAMU</span><code id="guest-url">budi-wati-andik-ara-undanganpernikahan.undangandigital-iODigitalInvitation.edgeone.dev</code><button class="copy-button" data-copy="guest-url" type="button">Salin</button></div><p class="notice">Preview format saja. Hostname belum aktif sebelum DNS wildcard, routing, dan sertifikat HTTPS dikonfigurasi serta diuji.</p></div></div>
       </section>
 
+
+      <section class="view" id="view-editor">
+        <div class="section-heading"><div><span class="eyebrow">ADMIN INVITATION EDITOR</span><h2>Editor undangan</h2><p class="muted">Atur konten yang akan ditampilkan pada halaman tamu.</p></div><span class="tag warning">Mode demo lokal</span></div>
+        <div class="editor-layout">
+          <form class="panel editor-form" id="invitation-form">
+            <h3>Konten undangan</h3>
+            <label>Nama acara<input id="event-title" maxlength="100" value="The Wedding of Andik & Ara" required></label>
+            <div class="two-fields"><label>Nama pertama<input id="person-one" maxlength="60" value="Andik"></label><label>Nama kedua<input id="person-two" maxlength="60" value="Ara"></label></div>
+            <label>Kalimat pembuka<textarea id="opening-text" rows="3" maxlength="500">Dengan memohon rahmat dan ridho Tuhan, kami mengundang Anda untuk hadir di hari bahagia kami.</textarea></label>
+            <label>Tanggal & waktu<input id="event-date" type="datetime-local"></label>
+            <label>Lokasi acara<input id="event-location" maxlength="180" placeholder="Nama gedung, alamat, kota"></label>
+            <label>Pesan tambahan<textarea id="closing-text" rows="3" maxlength="500" placeholder="Tulis pesan untuk para tamu..."></textarea></label>
+            <div class="panel cloud-panel"><h3>Publikasi cloud</h3><p>Gunakan ID acara yang stabil dan token Admin dari pengaturan rahasia deployment. Token tidak disimpan di browser.</p><label>ID acara<input id="cloud-event-id" maxlength="64" pattern="[a-z0-9-]+" placeholder="contoh: andik-ara-pernikahan" required></label><label>Token Admin<input id="cloud-admin-token" type="password" autocomplete="off" placeholder="Masukkan token Admin"></label><button class="primary-button" id="publish-cloud" type="button">Upload media & terbitkan</button><p id="cloud-status" class="muted" role="status">Backend perlu dideploy dan IO_ADMIN_API_TOKEN perlu diatur di EdgeOne.</p><a id="cloud-guest-link" href="./guest.html" target="_blank" rel="noopener" hidden>Buka undangan cloud ↗</a></div>
+            <div class="upload-box"><strong>Foto sampul</strong><p>Pilih foto dari galeri perangkat (JPG, PNG, WEBP — maks. 8 MB untuk preview).</p><input id="cover-upload" type="file" accept="image/jpeg,image/png,image/webp"><div id="cover-preview" class="media-preview"></div></div>
+            <div class="upload-box"><strong>Video undangan</strong><p>Pilih video (MP4/WebM — maks. 25 MB untuk preview).</p><input id="video-upload" type="file" accept="video/mp4,video/webm"><div id="video-preview" class="media-preview"></div></div>
+            <label>URL musik / video opsional<input id="media-url" type="url" placeholder="https://..."></label>
+            <div class="editor-actions"><button class="primary-button" type="submit">Simpan draft demo</button><button class="secondary-button" id="reset-editor" type="button">Reset</button></div>
+          </form>
+          <div class="editor-side">
+            <div class="panel live-preview"><div class="preview-head"><span class="eyebrow">LIVE PREVIEW</span><span class="tag neutral">Tampilan tamu</span></div><div class="invitation-preview" id="invitation-preview"><div class="preview-cover" id="preview-cover"><span>✦</span></div><div class="preview-copy"><small>THE SPECIAL DAY</small><h2 id="preview-title">The Wedding of Andik & Ara</h2><p id="preview-opening">Dengan memohon rahmat dan ridho Tuhan, kami mengundang Anda untuk hadir di hari bahagia kami.</p><h3 id="preview-names">Andik & Ara</h3><p id="preview-date">Tanggal acara</p><p id="preview-location">Lokasi acara</p><p id="preview-closing"></p></div></div><a class="primary-button preview-link" id="guest-preview-link" href="./guest.html" target="_blank" rel="noopener">Buka preview halaman tamu ↗</a></div>
+            <div class="notice">Penting: fitur ini saat ini menyimpan draft dan media sementara di browser yang sama. Agar foto/video dan teks muncul di subdomain tamu lintas perangkat, tahap berikutnya wajib menghubungkan autentikasi Admin, API, dan penyimpanan cloud. Tombol ini belum menerbitkan data ke internet.</div>
+          </div>
+        </div>
+      </section>
       <section class="view" id="view-settings"><div class="section-heading"><div><span class="eyebrow">PLATFORM SETTINGS</span><h2>Pengaturan</h2></div></div><div class="panel settings-panel"><div class="setting-row"><div><strong>Domain Owner</strong><p>Alamat induk platform yang ditetapkan tetap.</p></div><code>undangandigital-iODigitalInvitation.edgeone.dev</code></div><div class="setting-row"><div><strong>Mode hostname</strong><p>Subdomain satu tingkat untuk Admin dan Tamu.</p></div><span class="tag warning">Menunggu uji provider</span></div><div class="setting-row"><div><strong>Penyimpanan</strong><p>Data contoh saat ini hanya berada di browser.</p></div><span class="tag neutral">Local preview</span></div></div></section>
       <footer class="footer">IO Invitation Studio <span>•</span> Foundation preview <span>•</span> Not production-ready</footer>
     </main>
   </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="./app.js" defer></script>
+  <script src="./cloud-publish.js" defer></script>
 </body>
 </html>
