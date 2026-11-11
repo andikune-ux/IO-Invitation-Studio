@@ -15,6 +15,8 @@ export async function onRequestPost({ request, env }) {
       return json({ error: "Referensi media tidak valid." }, 400);
     }
   }
+  const store = getStore("io-invitation-media");
+  const previous = await store.get(`events/${body.eventId}/invitation.json`, { type: "json", consistency: "strong" }).catch(() => null);
   const invitation = {
     eventId: body.eventId,
     title: safeText(body.invitation.title, 100),
@@ -24,13 +26,12 @@ export async function onRequestPost({ request, env }) {
     date: safeText(body.invitation.date, 40),
     location: safeText(body.invitation.location, 180),
     closing: safeText(body.invitation.closing, 500),
-    media: { cover: media.cover || null, video: media.video || null },
+    media: { cover: media.cover || previous?.media?.cover || null, video: media.video || previous?.media?.video || null },
     publishedAt: new Date().toISOString(),
     status: "published"
   };
   if (!invitation.title) return json({ error: "Nama acara wajib diisi." }, 400);
   try {
-    const store = getStore("io-invitation-media");
     await store.setJSON(`events/${body.eventId}/invitation.json`, invitation);
     return json({ ok: true, eventId: body.eventId, publishedAt: invitation.publishedAt });
   } catch {
