@@ -6,13 +6,17 @@ export async function onRequestGet({ params }) {
   if (!validEventId(eventId)) return json({ error: "Undangan tidak ditemukan." }, 404);
   try {
     const store = getStore("io-invitation-media");
-    const invitation = await store.get(`events/${eventId}/invitation.json`, { type: "json", consistency: "strong" });
-    if (!invitation || invitation.status !== "published") return json({ error: "Undangan belum diterbitkan." }, 404);
+    const meta = await store.get(`events/${eventId}/meta.json`, { type: "json", consistency: "strong" });
+    if (!meta || meta.status === "archived") return json({ error: "Undangan tidak tersedia." }, 404);
+    const published = await store.get(`events/${eventId}/invitation.json`, { type: "json", consistency: "strong" });
+    const draft = published?.status === "published" ? null : await store.get(`events/${eventId}/draft.json`, { type: "json", consistency: "strong" });
+    const invitation = published?.status === "published" ? published : draft;
+    if (!invitation || !invitation.title) return json({ error: "Konten undangan belum disimpan Owner." }, 404);
     const mediaUrls = {};
     for (const [kind, key] of Object.entries(invitation.media || {})) {
-      mediaUrls[kind] = key ? `/api/media?key=${encodeURIComponent(key)}` : null;
+      mediaUrls[kind] = key && !String(key).includes(":") ? `/api/media?key=${encodeURIComponent(key)}` : null;
     }
-    return json({ ...invitation, mediaUrls }, 200);
+    return json({ ...invitation, status: published?.status === "published" ? "published" : "ready", mediaUrls }, 200);
   } catch {
     return json({ error: "Penyimpanan belum siap." }, 503);
   }
