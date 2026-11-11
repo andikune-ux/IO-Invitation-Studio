@@ -80,3 +80,15 @@ body.editor-page{margin:0;min-height:100vh;background:linear-gradient(135deg,#e9
 .editor-page .bank-picker{display:grid;grid-template-columns:44px minmax(0,1fr);gap:10px;align-items:end}
 .editor-page .bank-mark{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(145deg,#e7e9ff,#fff);border:1px solid #fff;color:#5f58b2;font:800 13px Manrope;box-shadow:3px 4px 9px #cbd1e055}
 .editor-page .bank-picker input{width:100%}
+
+
+/* Modern ON/OFF switch for story visibility */
+.editor-page .toggle-row{display:flex;align-items:center;gap:13px;cursor:pointer;user-select:none}
+.editor-page .toggle-row input[type="checkbox"]{appearance:none;-webkit-appearance:none;position:relative;flex:0 0 48px;width:48px;height:28px;margin:0;padding:0;border:0;border-radius:999px;background:#cbd2df;cursor:pointer;transition:background .2s ease,box-shadow .2s ease}
+.editor-page .toggle-row input[type="checkbox"]::before{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 4px #17203335;transition:transform .2s ease}
+.editor-page .toggle-row input[type="checkbox"]:checked{background:#16a36a}
+.editor-page .toggle-row input[type="checkbox"]:checked::before{transform:translateX(20px)}
+.editor-page .toggle-row input[type="checkbox"]:focus-visible{outline:3px solid #16a36a55;outline-offset:3px}
+.editor-page .toggle-row .toggle-copy{display:grid;gap:4px}
+.editor-page .toggle-row .toggle-copy strong{font:800 12px Manrope;color:var(--ink)}
+.editor-page .toggle-row .toggle-copy small{font-size:10px;line-height:1.5;color:var(--muted)}
