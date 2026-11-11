@@ -19,16 +19,18 @@
       <form class="panel editor-form" id="invitation-form">
         <h3>Konten undangan</h3><input id="event-title" type="hidden">
         <section class="editor-section"><h4>Identitas acara</h4>
+          <label>Kategori acara<select id="event-category"><option value="Pernikahan">Pernikahan</option><option value="Lamaran">Lamaran</option><option value="Pertunangan">Pertunangan</option><option value="Khitanan / Sunatan">Khitanan / Sunatan</option><option value="Aqiqah">Aqiqah</option><option value="Kelahiran Bayi">Kelahiran Bayi</option><option value="Ulang Tahun">Ulang Tahun</option><option value="Wisuda">Wisuda</option><option value="Kelulusan">Kelulusan</option><option value="Syukuran">Syukuran</option><option value="Tasyakuran">Tasyakuran</option><option value="Keagamaan">Keagamaan</option><option value="Spiritual">Spiritual</option><option value="Pengajian">Pengajian</option><option value="Peresmian">Peresmian</option><option value="Gathering">Gathering</option><option value="Reuni">Reuni</option><option value="Seminar / Workshop">Seminar / Workshop</option><option value="Konferensi">Konferensi</option><option value="Acara Keluarga">Acara Keluarga</option><option value="Memorial / Peringatan">Memorial / Peringatan</option><option value="Lain-lain">Lain-lain</option></select></label>
+          <label>Nama acara / judul undangan<input id="event-title" maxlength="100" placeholder="Contoh: Pernikahan Andi & Sinta"></label>
           <div id="identity-fields" class="two-fields">
-            <label id="person-one-label">Nama pertama<input id="person-one" maxlength="100" placeholder="Nama pertama"></label>
-            <label id="person-two-label">Nama kedua<input id="person-two" maxlength="100" placeholder="Nama kedua"></label>
+            <label id="person-one-label">Nama mempelai pria<input id="person-one" maxlength="100" placeholder="Nama lengkap"></label>
+            <label id="person-two-label">Nama mempelai wanita<input id="person-two" maxlength="100" placeholder="Nama lengkap"></label>
           </div>
-          <label>Kalimat pembuka<textarea id="opening-text" rows="3" maxlength="500" placeholder="Tulis kalimat pembuka undangan…"></textarea></label>
-          <label>Tanggal & waktu acara<input id="event-date" type="datetime-local"></label>
-          <label>Lokasi acara<input id="event-location" maxlength="250" placeholder="Nama gedung, alamat, kota"></label>
-          <label>Pesan tambahan<textarea id="closing-text" rows="3" maxlength="1000" placeholder="Tulis pesan untuk para tamu…"></textarea></label>
+          <label>Kalimat pembuka undangan<textarea id="opening-text" rows="3" maxlength="500" placeholder="Contoh: Dengan memohon rahmat dan ridho Tuhan, kami mengundang…"></textarea></label>
+          <label>Tanggal dan waktu acara<input id="event-date" type="datetime-local"></label>
+          <label>Tempat dan alamat acara<input id="event-location" maxlength="250" placeholder="Contoh: Gedung, jalan, kecamatan, kota"></label>
+          <label>Pesan penutup untuk tamu<textarea id="closing-text" rows="3" maxlength="1000" placeholder="Contoh: Merupakan suatu kehormatan bagi kami atas kehadiran dan doa restu Anda."></textarea></label>
         </section>
-        <section class="editor-section" id="family-section"><h4>Data keluarga</h4><p class="field-help">Kolom mengikuti kategori acara yang dipilih.</p><div id="family-fields" class="two-fields"></div></section>
+        <section class="editor-section" id="family-section"><h4 id="family-heading">Data orang tua / keluarga</h4><p class="field-help" id="family-help">Isi nama orang tua atau pihak keluarga sesuai kategori acara.</p><div id="family-fields" class="two-fields"></div></section>
         <section class="editor-section"><h4>Foto utama undangan</h4><p class="field-help">Foto pembuka ketika undangan dibuka dan gambar pratinjau saat tautan dibagikan. Wajib diisi.</p>
           <div class="upload-box" data-upload-box><strong>Foto Utama</strong><p>JPG, PNG, WEBP — maksimal 8 MB.</p><input id="hero-upload" data-media-kind="hero" type="file" accept="image/jpeg,image/png,image/webp"><div id="hero-preview" class="media-preview"></div></div>
         </section>
