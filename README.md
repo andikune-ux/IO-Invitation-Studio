@@ -28,7 +28,7 @@ Buka `/owner.html` untuk login Owner. Saat ini tersedia:
 
 Owner memberikan link ke `/admin.html?event={eventId}#admin={secret}`. Halaman Admin hanya menyediakan manajemen daftar tamu dan link personal. Token disimpan sebagai hash di Blob Storage dan fragmen URL dihapus dari address bar setelah dibaca.
 
-Link tamu personal berbentuk `/guest.html?event={eventId}&guestId={guestId}#invite={secret}`. Guest token divalidasi server-side sebelum nama penerima ditampilkan.
+Link tamu personal menggunakan `/preview/{eventId}?guestId={guestId}#invite={secret}` agar pratinjau media sosial memakai Foto Utama. Halaman preview meneruskan tamu ke `/guest.html` dan mempertahankan token undangan pada fragmen URL. Guest token divalidasi server-side sebelum nama penerima ditampilkan.
 
 ## Pengembangan dan deployment
 
