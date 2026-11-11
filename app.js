@@ -20,7 +20,7 @@
   const readFields=()=>Object.fromEntries(fields.map(id=>[id,$('#'+id)?.value||'']));
   const data=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'{}');}catch{return {};}};
   let mediaKeys={cover:null,video:null}, objectUrls=[];
-  const showMedia=(kind,file)=>{const box=$('#'+kind+'-preview');if(!box)return;box.replaceChildren();if(!file)return;const url=URL.createObjectURL(file);objectUrls.push(url);const el=document.createElement(kind==='cover'?'img':'video');el.src=url;if(kind==='cover')el.alt='Preview foto sampul';else{el.controls=true;el.playsInline=true;}box.append(el);};
+  const showMedia=(kind,file)=>{const box=$('#'+kind+'-preview');if(!box)return;box.replaceChildren();if(!file)return;const url=URL.createObjectURL(file);objectUrls.push(url);const el=document.createElement(kind==='cover'?'img':'video');el.src=url;if(kind==='cover')el.alt='Preview foto sampul';else{el.controls=true;el.playsInline=true;}box.append(el);if(kind==='cover'){const hero=$('#preview-cover');hero.replaceChildren(el.cloneNode());}};
   const updatePreview=()=>{const v=readFields();$('#preview-title').textContent=v['event-title']||'Nama acara';$('#preview-names').textContent=[v['person-one'],v['person-two']].filter(Boolean).join(' & ')||'Nama pasangan';$('#preview-opening').textContent=v['opening-text'];$('#preview-date').textContent=v['event-date']?new Date(v['event-date']).toLocaleString('id-ID'):'Tanggal acara';$('#preview-location').textContent=v['event-location']||'Lokasi acara';$('#preview-closing').textContent=v['closing-text'];};
   const form=$('#invitation-form');
   if(form){
