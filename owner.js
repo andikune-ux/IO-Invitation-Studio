@@ -25,7 +25,7 @@
   });
   $('#logout').addEventListener('click',async()=>{try{await api('/api/auth/logout',{method:'POST'});}finally{hideApp();}});
   function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-  function makeAdminUrl(eventId,token){return location.origin+'/index.html?event='+encodeURIComponent(eventId)+'#admin='+encodeURIComponent(token);}
+  function makeAdminUrl(eventId,token){return location.origin+'/admin.html?event='+encodeURIComponent(eventId)+'#admin='+encodeURIComponent(token);}
   function revealLink(url){$('#created-link').textContent=url;$('#created-credentials').hidden=false;$('#created-credentials').scrollIntoView({behavior:'smooth',block:'center'});}
   $('#create-event-form').addEventListener('submit',async(event)=>{
     event.preventDefault();const button=$('button[type="submit"]',event.currentTarget);button.disabled=true;$('#created-credentials').hidden=true;setStatus('#create-status','Menyimpan event dan membuat akses Admin…');
