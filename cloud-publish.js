@@ -7,13 +7,26 @@
   };
   const publish = $('#publish-cloud');
   if (!publish) return;
+  const login = $('#admin-login');
+  if (login) login.addEventListener('click', async () => {
+    const eventId = ($('#cloud-event-id').value || '').trim().toLowerCase();
+    const username = ($('#cloud-admin-username').value || '').trim().toLowerCase();
+    const password = $('#cloud-admin-password').value || '';
+    if (!/^[a-z0-9][a-z0-9-]{2,63}$/.test(eventId) || !username || !password) return status('Isi ID acara, username, dan password Admin.', true);
+    login.disabled = true;
+    try {
+      const response = await fetch('/api/auth/admin-login', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ eventId, username, password }) });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Login Admin gagal.');
+      status('Login Admin berhasil untuk acara ' + eventId + '.');
+    } catch (error) { status(error.message || 'Login Admin gagal.', true); }
+    finally { login.disabled = false; }
+  });
   publish.addEventListener('click', async () => {
     const eventId = ($('#cloud-event-id').value || '').trim().toLowerCase();
-    const token = ($('#cloud-admin-token').value || '').trim();
     const coverFile = $('#cover-upload').files[0] || null;
     const videoFile = $('#video-upload').files[0] || null;
     if (!/^[a-z0-9][a-z0-9-]{2,63}$/.test(eventId)) return status('ID acara wajib 3–64 karakter: huruf kecil, angka, dan tanda hubung.', true);
-    if (!token) return status('Token Admin wajib diisi.', true);
     publish.disabled = true;
     try {
       const media = {};
@@ -21,7 +34,7 @@
         if (!file) continue;
         status('Meminta izin upload ' + kind + '…');
         const ticket = await fetch('/api/admin/upload-url', {
-          method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+          method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ eventId, kind, contentType: file.type, size: file.size })
         });
         const ticketData = await ticket.json();
@@ -34,7 +47,7 @@
       const value = id => ($('#' + id).value || '').trim();
       status('Menerbitkan konten undangan…');
       const response = await fetch('/api/admin/publish', {
-        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+        method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ eventId, invitation: {
           title: value('event-title'), personOne: value('person-one'), personTwo: value('person-two'),
           opening: value('opening-text'), date: value('event-date'), location: value('event-location'), closing: value('closing-text')

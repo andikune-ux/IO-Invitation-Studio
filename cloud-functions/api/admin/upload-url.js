@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { getStore } from "@edgeone/pages-blob";
-import { json, readJson, requireAdmin, validEventId } from "../../_lib/http.js";
+import { json, readJson, validEventId } from "../../_lib/http.js";
+import { requireEventAdmin } from "../../_lib/auth.js";
 
 const TYPES = {
   "image/jpeg": { ext: "jpg", max: 8 * 1024 * 1024 },
@@ -11,10 +12,10 @@ const TYPES = {
 };
 
 export async function onRequestPost({ request, env }) {
-  const auth = requireAdmin(request, env);
-  if (!auth.ok) return json({ error: auth.error }, auth.status);
   const body = await readJson(request);
   if (!body || !validEventId(body.eventId)) return json({ error: "eventId tidak valid." }, 400);
+  const auth = await requireEventAdmin(request, body.eventId);
+  if (!auth.ok) return auth.response;
   const type = TYPES[body.contentType];
   if (!type) return json({ error: "Format file tidak didukung." }, 415);
   if (!Number.isInteger(body.size) || body.size < 1 || body.size > type.max) {
