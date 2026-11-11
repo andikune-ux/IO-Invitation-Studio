@@ -27,9 +27,19 @@
   function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
   function makeAdminUrl(eventId,token){return location.origin+'/admin.html?event='+encodeURIComponent(eventId)+'#admin='+encodeURIComponent(token);}
   function revealLink(url){$('#created-link').textContent=url;$('#created-credentials').hidden=false;$('#created-credentials').scrollIntoView({behavior:'smooth',block:'center'});}
+  const RELIGION_CATEGORIES=new Set(["Pernikahan","Lamaran","Pertunangan","Keagamaan","Spiritual","Pengajian","Syukuran","Tasyakuran"]);
+  const categorySelect=$('#new-category'),religionField=$('#religion-field'),religionSelect=$('#new-religion');
+  function syncReligionField(){
+    const visible=RELIGION_CATEGORIES.has(categorySelect.value);
+    religionField.hidden=!visible;
+    if(!visible)religionSelect.value='';
+    religionSelect.required=false;
+  }
+  categorySelect.addEventListener('change',syncReligionField);
+  syncReligionField();
   $('#create-event-form').addEventListener('submit',async(event)=>{
     event.preventDefault();const button=$('button[type="submit"]',event.currentTarget);button.disabled=true;$('#created-credentials').hidden=true;setStatus('#create-status','Menyimpan event dan membuat akses Admin…');
-    const payload={eventId:$('#new-event-id').value.trim().toLowerCase(),eventTitle:$('#new-title').value.trim()};
+    const payload={eventId:$('#new-event-id').value.trim().toLowerCase(),eventTitle:$('#new-title').value.trim(),category:$('#new-category').value,religion:$('#new-religion').value||null};
     try{
       await api('/api/owner/admins',{method:'POST',body:JSON.stringify(payload)});
       const access=await api('/api/owner/admin-links',{method:'POST',body:JSON.stringify({eventId:payload.eventId})});
@@ -104,13 +114,13 @@
     const query=($('#event-search').value||'').trim().toLowerCase();
     const filter=$('#event-filter')?.value||'all';
     const events=cachedEvents.filter(e=>{
-      const matchesQuery=(e.title+' '+e.eventId).toLowerCase().includes(query);
+      const matchesQuery=(e.title+' '+e.eventId+' '+(e.category||'')+' '+(e.religion||'')).toLowerCase().includes(query);
       const matchesFilter=filter==='all'||(filter==='published'?Boolean(e.published):filter==='archived'?e.status==='archived':!e.published&&e.status!=='archived');
       return matchesQuery&&matchesFilter;
     });
     $('#event-count').textContent=events.length+' event';
     if(!events.length){$('#events-list').innerHTML='<div class="empty"><span>✧</span>'+(cachedEvents.length?'Tidak ada acara yang cocok.':'Belum ada acara. Buat event pertama di atas.')+'</div>';return;}
-    $('#events-list').innerHTML=events.map(e=>'<article class="event-card" data-event="'+escapeHtml(e.eventId)+'"><div><div class="event-title">'+escapeHtml(e.title)+'</div><div class="event-meta">ID: '+escapeHtml(e.eventId)+' · Dibuat: '+escapeHtml(e.createdAt?new Date(e.createdAt).toLocaleDateString('id-ID'):'—')+' · Diperbarui: '+escapeHtml(e.updatedAt?new Date(e.updatedAt).toLocaleString('id-ID'):'—')+'</div><div class="event-badges"><span class="badge '+(e.published?'good':'warn')+'">'+(e.published?'Undangan terbit':'Draft')+'</span><span class="badge">'+(e.status==='archived'?'Diarsipkan':'Aktif')+'</span><span class="badge '+(e.adminLink?.active?'good':'warn')+'">'+(e.adminLink?.active?'Admin link aktif':'Admin link belum aktif')+'</span>'+(e.admin?' <span class="badge warn">Akun Admin lama</span>':'')+'</div></div><div class="event-actions"><button data-action="rename">Ubah nama</button><button data-action="archive">'+(e.status==='archived'?'Aktifkan':'Arsipkan')+'</button><button data-action="'+(e.adminLink?.active?'rotate':'create-link')+'">'+(e.adminLink?.active?'Rotasi link':'Buat link Admin')+'</button>'+'<button data-action="edit">Edit undangan</button><button data-action="export">Backup ZIP</button>'+(e.adminLink?.active?'<button class="danger" data-action="revoke">Cabut link</button>':'')+'</div></article>').join('');
+    $('#events-list').innerHTML=events.map(e=>'<article class="event-card" data-event="'+escapeHtml(e.eventId)+'"><div><div class="event-title">'+escapeHtml(e.title)+'</div><div class="event-meta">ID: '+escapeHtml(e.eventId)+' · Dibuat: '+escapeHtml(e.createdAt?new Date(e.createdAt).toLocaleDateString('id-ID'):'—')+' · Diperbarui: '+escapeHtml(e.updatedAt?new Date(e.updatedAt).toLocaleString('id-ID'):'—')+'</div><div class="event-badges"><span class="badge category-badge">'+escapeHtml(e.category||'Kategori belum ditentukan')+'</span>'+(e.religion?'<span class="badge religion-badge">'+escapeHtml(e.religion)+'</span>':'')+'<span class="badge '+(e.published?'good':'warn')+'">'+(e.published?'Undangan terbit':'Draft')+'</span><span class="badge">'+(e.status==='archived'?'Diarsipkan':'Aktif')+'</span><span class="badge '+(e.adminLink?.active?'good':'warn')+'">'+(e.adminLink?.active?'Admin link aktif':'Admin link belum aktif')+'</span>'+(e.admin?' <span class="badge warn">Akun Admin lama</span>':'')+'</div></div><div class="event-actions"><button data-action="rename">Ubah nama</button><button data-action="archive">'+(e.status==='archived'?'Aktifkan':'Arsipkan')+'</button><button data-action="'+(e.adminLink?.active?'rotate':'create-link')+'">'+(e.adminLink?.active?'Rotasi link':'Buat link Admin')+'</button>'+'<button data-action="edit">Edit undangan</button><button data-action="export">Backup ZIP</button>'+(e.adminLink?.active?'<button class="danger" data-action="revoke">Cabut link</button>':'')+'</div></article>').join('');
   }
   async function loadEvents(){
     if(!authenticated)return;const list=$('#events-list');list.innerHTML='<div class="empty"><span>✧</span>Memuat acara…</div>';setStatus('#events-status','');
