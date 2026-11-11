@@ -25,7 +25,7 @@ export async function onRequestPost({ request }) {
     });
     // Remove the legacy password account when its event is migrated to link access.
     await db.delete(`auth/admins/${eventId}.json`).catch(() => {});
-    const { blobs = [] } = await db.list({ prefix: "auth/sessions/", consistency: "strong" });
+    const { blobs = [] } = await db.list({ prefix: "auth/sessions/", consistency: "strong" }).catch(() => ({ blobs: [] }));
     await Promise.all(blobs.map(async ({ key }) => {
       const session = await db.get(key, { type: "json", consistency: "strong" }).catch(() => null);
       if (session?.role === "admin" && session.eventId === eventId) await db.delete(key).catch(() => {});
