@@ -250,6 +250,10 @@
 
     const cloudEventInput = $('#cloud-event-id');
     const guestPreviewLink = $('#guest-preview-link');
+    const accessRequired = $('#editor-access-required');
+    const editorWorkspace = $('#editor-workspace');
+    const editorEventName = $('#editor-event-name');
+    const editorEventId = $('#editor-event-id');
     if (eventId) {
       if (cloudEventInput) cloudEventInput.value = eventId;
       if (guestPreviewLink) guestPreviewLink.href = './guest.html?event=' + encodeURIComponent(eventId);
@@ -257,9 +261,22 @@
       if (cloudStatus) cloudStatus.textContent = 'Menghubungkan editor ke acara ' + eventId + '…';
 
       const loadCloudContent = async () => {
+        const authRequest = fetch('/api/auth/me', { credentials: 'same-origin' });
+        const eventsRequest = fetch('/api/owner/events', { credentials: 'same-origin' });
         const draftRequest = fetch('/api/owner/events/' + encodeURIComponent(eventId) + '/draft', { credentials: 'same-origin' });
         const invitationRequest = fetch('/api/invitation/' + encodeURIComponent(eventId), { credentials: 'same-origin' });
-        const [draftResponse, invitationResponse] = await Promise.all([draftRequest, invitationRequest]);
+        const [authResponse, eventsResponse, draftResponse, invitationResponse] = await Promise.all([authRequest, eventsRequest, draftRequest, invitationRequest]);
+        const auth = authResponse.ok ? await authResponse.json() : null;
+        if (!auth?.authenticated || auth.user?.role !== 'owner') throw new Error('Sesi Owner tidak aktif. Login melalui Owner Dashboard, lalu pilih Edit undangan kembali.');
+        if (!eventsResponse.ok) throw new Error('Daftar acara Owner tidak dapat dibaca (' + eventsResponse.status + ').');
+        const eventsData = await eventsResponse.json();
+        const eventRecord = (eventsData.events || []).find(item => item.eventId === eventId);
+        if (!eventRecord) throw new Error('Acara tidak ditemukan atau akses Owner tidak tersedia. Kembali ke dashboard dan pilih acara yang benar.');
+        const canonicalTitle = eventRecord.title || eventId;
+        if (editorEventName) editorEventName.textContent = canonicalTitle;
+        if (editorEventId) editorEventId.textContent = eventId;
+        const titleInput = $('#event-title');
+        if (titleInput) titleInput.value = canonicalTitle;
         const draftResult = draftResponse.ok ? await draftResponse.json() : null;
         const invitation = invitationResponse.ok ? await invitationResponse.json() : null;
 
@@ -276,7 +293,6 @@
         const content = draftResult?.draft || invitation;
         if (content) {
           const values = {
-            'event-title': content.title,
             'person-one': content.personOne,
             'person-two': content.personTwo,
             'opening-text': content.opening,
@@ -289,6 +305,7 @@
             const input = $('#' + id);
             if (input && value !== undefined && value !== null) input.value = value;
           });
+          if (titleInput) titleInput.value = canonicalTitle;
           updatePreview();
         }
 
@@ -307,6 +324,8 @@
           const preview = $('#video-preview');
           if (preview) preview.replaceChildren(video);
         }
+        if (accessRequired) accessRequired.hidden = true;
+        if (editorWorkspace) editorWorkspace.hidden = false;
         if (cloudStatus) cloudStatus.textContent = draftResult?.draft
           ? 'Terhubung. Draft cloud berhasil dimuat untuk acara ' + eventId + '.'
           : invitation
@@ -316,14 +335,18 @@
       };
 
       loadCloudContent().catch((error) => {
+        if (accessRequired) { accessRequired.hidden = false; accessRequired.querySelector('p').textContent = error.message || 'Editor tidak dapat dibuka.'; }
+        if (editorWorkspace) editorWorkspace.hidden = true;
         if (cloudStatus) {
           cloudStatus.textContent = error.message || 'Editor gagal terhubung ke cloud.';
           cloudStatus.style.color = '#b42318';
         }
         toast(error.message || 'Editor gagal terhubung ke cloud.');
       });
-    } else if (cloudEventInput) {
-      cloudEventInput.value = '';
+    } else {
+      if (cloudEventInput) cloudEventInput.value = '';
+      if (accessRequired) { accessRequired.hidden = false; accessRequired.querySelector('p').textContent = 'Buka Owner Dashboard, login sebagai Owner, lalu tekan tombol Edit undangan pada acara yang ingin dikelola.'; }
+      if (editorWorkspace) editorWorkspace.hidden = true;
     }
 
     updatePreview();
