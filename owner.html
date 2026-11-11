@@ -50,6 +50,7 @@
           <article class="metric glass"><div class="metric-icon icon-violet">▦</div><span>Total acara</span><strong id="total-events">0</strong><small>Seluruh event di workspace</small></article>
           <article class="metric glass"><div class="metric-icon icon-blue">↗</div><span>Admin link aktif</span><strong id="active-admins">0</strong><small>Akses pengelola yang aktif</small></article>
           <article class="metric glass"><div class="metric-icon icon-green">✧</div><span>Undangan terbit</span><strong id="published-events">0</strong><small>Siap dibuka oleh tamu</small></article>
+          <article class="metric glass"><div class="metric-icon icon-amber">◷</div><span>Draft acara</span><strong id="draft-events">0</strong><small>Belum diterbitkan</small></article>
         </div>
         <section class="panel glass create-panel" id="create">
           <div class="section-title"><div><span class="eyebrow">NEW EXPERIENCE</span><h2>Buat event baru</h2><p>Mulai dengan nama acara dan ID unik. Akses Admin dibuat sebagai tautan rahasia.</p></div><span class="owner-only">OWNER ONLY <span>✦</span></span></div>
@@ -64,7 +65,7 @@
         </section>
         <section class="panel glass events-panel" id="events">
           <div class="section-title"><div><span class="eyebrow">EVENT MANAGEMENT</span><h2>Semua acara</h2><p>Kelola status event dan keamanan tautan Admin.</p></div><button id="refresh-events" class="button button-glass" type="button">↻ Refresh</button></div>
-          <div class="event-toolbar"><div class="search-wrap"><span>⌕</span><input id="event-search" type="search" placeholder="Cari nama atau ID acara…"></div><span id="event-count" class="count-chip">0 event</span></div>
+          <div class="event-toolbar"><div class="search-wrap"><span>⌕</span><input id="event-search" type="search" placeholder="Cari nama atau ID acara…"></div><select id="event-filter" class="event-filter" aria-label="Filter status acara"><option value="all">Semua status</option><option value="draft">Draft</option><option value="published">Terbit</option><option value="archived">Diarsipkan</option></select><span id="event-count" class="count-chip">0 event</span></div>
           <div id="events-list" class="events-list"><div class="empty"><span>✧</span>Memuat data acara…</div></div>
           <p id="events-status" class="status" role="status"></p>
         </section>
