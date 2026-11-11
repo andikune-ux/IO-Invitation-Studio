@@ -79,3 +79,27 @@ Sebelum fitur dipakai sungguhan, implementasikan dan uji:
 6. Pengujian akses lintas perangkat, upload, batas ukuran, izin, dan HTTPS.
 
 Jangan menaruh token rahasia atau kredensial storage di JavaScript frontend. Jangan mengizinkan endpoint upload anonim membuat key arbitrer.
+
+## Backend cloud (fondasi API, belum aktif sebelum deployment)
+
+Branch ini menambahkan Node.js Cloud Functions EdgeOne Makers:
+- `POST /api/admin/upload-url`: membuat presigned upload URL 5 menit untuk media acara.
+- `POST /api/admin/publish`: menyimpan data undangan berstatus published.
+- `GET /api/invitation/{eventId}`: membaca undangan yang sudah diterbitkan.
+- `GET /api/media?key=...`: menyajikan media yang direferensikan oleh undangan published.
+
+Penyimpanan memakai namespace Blob `io-invitation-media`. SDK resmi `@edgeone/pages-blob` digunakan dari Node.js Cloud Functions. Dokumentasi runtime/routing: https://pages.edgeone.ai/document/node-functions dan Blob: https://pages.edgeone.ai/document/blob-storage.
+
+### Konfigurasi wajib di EdgeOne sebelum API dapat dipakai
+1. Hubungkan project EdgeOne Makers ke repository ini dan pastikan root/build output sesuai project statis.
+2. Aktifkan Node.js Cloud Functions untuk direktori `cloud-functions/` (route file-based).
+3. Atur environment variable rahasia `IO_ADMIN_API_TOKEN` pada project EdgeOne. Buat token acak panjang di password manager; jangan commit token ke GitHub atau mengirimkannya di chat.
+4. Deploy ulang. Jika environment variable belum ada, endpoint Admin sengaja mengembalikan 503.
+5. Masukkan token pada panel Publikasi cloud di editor Admin. Token hanya dipakai dalam request saat sesi aktif dan tidak ditulis ke localStorage.
+
+**Batasan keamanan tahap ini:** token adalah token Owner tingkat platform, bukan login multi-Admin dan belum membatasi token ke event tertentu. Jangan membagikannya kepada Admin acara yang belum dipercaya. Sebelum produksi multi-tenant, ganti dengan autentikasi per Admin + otorisasi server-side berdasarkan event_id, rate limit, audit log, dan kebijakan retensi. URL publik undangan hanya mengembalikan record berstatus published.
+
+Blob Free Edition memiliki batas ukuran objek tunggal 25 MB. Foto dibatasi 8 MB dan video 25 MB di API. EdgeOne menyatakan Blob bukan CDN hosting publik; endpoint media di atas mem-proxy objek melalui Cloud Functions, sehingga beban egress/kuota perlu diuji sebelum penggunaan ramai. 
+
+### Status
+Kode API dan UI cloud sudah ditambahkan ke branch. Belum ada build, konfigurasi environment, deployment, upload sungguhan, atau pengujian lintas perangkat. Status tersebut tidak boleh dianggap aktif sebelum dites pada project EdgeOne yang benar.
