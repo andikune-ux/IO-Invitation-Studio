@@ -1,13 +1,14 @@
 import { getStore } from "@edgeone/pages-blob";
-import { json, readJson, requireAdmin, safeText, validEventId } from "../../_lib/http.js";
+import { json, readJson, safeText, validEventId } from "../../_lib/http.js";
+import { requireEventAdmin } from "../../_lib/auth.js";
 
 export async function onRequestPost({ request, env }) {
-  const auth = requireAdmin(request, env);
-  if (!auth.ok) return json({ error: auth.error }, auth.status);
   const body = await readJson(request);
   if (!body || !validEventId(body.eventId) || !body.invitation || typeof body.invitation !== "object") {
     return json({ error: "Data publikasi tidak lengkap atau eventId tidak valid." }, 400);
   }
+  const auth = await requireEventAdmin(request, body.eventId);
+  if (!auth.ok) return auth.response;
   const media = body.media || {};
   for (const kind of ["cover", "video"]) {
     const key = media[kind];
