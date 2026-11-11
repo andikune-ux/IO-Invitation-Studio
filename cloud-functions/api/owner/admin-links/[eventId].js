@@ -13,6 +13,8 @@ export async function onRequestPatch({ request, params }) {
   if (!validEventId(eventId)) return json({ error: "ID acara tidak valid." }, 400);
   const body = await readJson(request);
   if (!["rotate", "revoke"].includes(body?.action)) return json({ error: "Aksi harus rotate atau revoke." }, 400);
+  const durationMonths = Number(body?.durationMonths ?? 12);
+  if (body?.action === "rotate" && ![1, 3, 6, 9, 12].includes(durationMonths)) return json({ error: "Masa berlaku harus 1, 3, 6, 9, atau 12 bulan." }, 400);
   try {
     const db = getStore(STORE);
     const key = `auth/admin-links/${eventId}.json`;
@@ -25,9 +27,13 @@ export async function onRequestPatch({ request, params }) {
       return json({ ok: true, revoked: true });
     }
     const token = randomBytes(32).toString("base64url");
-    const now = new Date().toISOString();
-    await db.setJSON(key, { eventId, tokenHash: digest(token), revoked: false, createdAt: current.createdAt || now, rotatedAt: now });
-    return json({ ok: true, eventId, token, rotatedAt: now });
+    const now = new Date();
+    const day = now.getUTCDate(); now.setUTCDate(1); now.setUTCMonth(now.getUTCMonth() + durationMonths);
+    const lastDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0)).getUTCDate(); now.setUTCDate(Math.min(day, lastDay));
+    const expiresAt = now.toISOString();
+    const rotatedAt = new Date().toISOString();
+    await db.setJSON(key, { eventId, tokenHash: digest(token), revoked: false, durationMonths, createdAt: current.createdAt || rotatedAt, rotatedAt, expiresAt });
+    return json({ ok: true, eventId, token, durationMonths, expiresAt, rotatedAt });
   } catch {
     return json({ error: "Gagal memperbarui tautan Admin." }, 503);
   }
