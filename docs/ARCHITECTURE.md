@@ -53,7 +53,7 @@ Jangan menganggap wildcard domain milik provider dapat dikonfigurasi oleh pemili
 
 ## Status saat ini
 
-Dokumen ini menetapkan rancangan. Resolver, backend, database, autentikasi, DNS, TLS, dan deployment produksi belum dibuat atau diverifikasi.
+Dokumen ini menetapkan rancangan hostname. Resolver, registry hostname, autentikasi multi-Admin, DNS, TLS, dan deployment produksi belum dibuat atau diverifikasi. API cloud dasar telah ditambahkan di branch pengembangan, tetapi belum dideploy atau diuji.
 
 
 ## Editor undangan dan halaman Tamu (implementasi demo)
@@ -65,7 +65,7 @@ Branch `feat/admin-media-editor` menambahkan:
 - Preview langsung dan halaman `guest.html`.
 - Draft teks menggunakan `localStorage`; file media demo menggunakan IndexedDB pada origin browser yang sama.
 
-**Batasan yang disengaja:** ini belum menjadi sistem publikasi. Data browser tidak otomatis tersedia pada hostname/subdomain lain atau perangkat lain. Jangan menampilkan status "published" dan jangan menganggap upload sudah masuk cloud.
+**Batasan demo lokal:** draft lokal tidak otomatis tersedia pada hostname/subdomain lain atau perangkat lain. Publikasi cloud merupakan alur terpisah yang memerlukan API dan konfigurasi EdgeOne sesuai bagian berikutnya.
 
 ## Tahap backend yang masih wajib
 
