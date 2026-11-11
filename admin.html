@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#e9eef7">
+<meta name="referrer" content="no-referrer"><meta name="robots" content="noindex,nofollow">
+<title>Guest Manager · IO Invitation Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./admin.css?v=guest-manager-glass-1"><script src="./admin.js?v=guest-manager-glass-1" defer></script>
+</head>
+<body><div class="glow"></div><main class="admin-shell">
+<header class="admin-head glass"><a class="brand" href="./index.html"><span class="brand-icon">IO</span><span><b>Invitation Studio</b><small>EVENT ADMIN ACCESS</small></span></a><span class="access-state"><i></i> Secure link session</span></header>
+<section class="welcome"><span class="eyebrow">GUEST MANAGEMENT</span><h1>Daftar tamu<span>.</span></h1><p>Kelola nama tamu dan bagikan tautan undangan personal. Desain dan konten utama acara dikelola oleh Owner.</p></section>
+<section class="event-strip glass"><div><small>EVENT ID</small><b id="event-id">—</b></div><div><small>TOTAL TAMU</small><b id="guest-total">0</b></div><div><small>AKSES</small><b>Admin acara</b></div></section>
+<section class="panel glass"><div class="panel-head"><div><span class="eyebrow">ADD RECIPIENT</span><h2>Tambah tamu</h2><p>Setiap tamu mendapatkan link unik.</p></div><span class="mini-icon">＋</span></div>
+<form id="guest-form"><label for="guest-name">Nama tamu / keluarga</label><div class="add-row"><input id="guest-name" maxlength="100" required placeholder="Contoh: Budi & Wati"><button type="submit" class="primary">Tambah tamu <span>→</span></button></div><p id="form-status" class="status" role="status"></p></form></section>
+<section class="panel glass"><div class="panel-head list-head"><div><span class="eyebrow">YOUR INVITATION LIST</span><h2>Semua tamu</h2><p>Salin link personal untuk dibagikan lewat WhatsApp atau media lain.</p></div><button id="refresh" class="soft-button" type="button">↻ Refresh</button></div>
+<div class="search"><span>⌕</span><input id="search" type="search" placeholder="Cari nama tamu…"></div>
+<div id="guest-list" class="guest-list"><div class="empty">Memuat daftar tamu…</div></div><p id="list-status" class="status" role="status"></p></section>
+<footer>IO Invitation Studio <span>✦</span> Guest management workspace</footer></main>
+<div id="toast" class="toast" role="status" aria-live="polite"></div></body></html>
