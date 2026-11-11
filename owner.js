@@ -69,6 +69,13 @@
       const event=cachedEvents.find(item=>item.eventId===eventId);
       if(!event)throw new Error("Data acara tidak ditemukan. Refresh daftar acara.");
       const files=[{name:"event.json",data:new TextEncoder().encode(JSON.stringify(event,null,2))}];
+      const draftResponse=await fetch("/api/owner/events/"+encodeURIComponent(eventId)+"/draft",{credentials:"same-origin"});
+      if(draftResponse.ok){
+        const draftResult=await draftResponse.json();
+        if(draftResult?.draft)files.push({name:"draft.json",data:new TextEncoder().encode(JSON.stringify(draftResult.draft,null,2))});
+      }else if(draftResponse.status!==404){
+        throw new Error("Draft cloud tidak dapat dibaca ("+draftResponse.status+"). Backup dibatalkan agar data tidak terlewat.");
+      }
       let invitation=null;
       try{
         const response=await fetch("/api/invitation/"+encodeURIComponent(eventId),{credentials:"same-origin"});
@@ -95,17 +102,23 @@
 
   function renderEvents(){
     const query=($('#event-search').value||'').trim().toLowerCase();
-    const events=cachedEvents.filter(e=>(e.title+' '+e.eventId).toLowerCase().includes(query));
+    const filter=$('#event-filter')?.value||'all';
+    const events=cachedEvents.filter(e=>{
+      const matchesQuery=(e.title+' '+e.eventId).toLowerCase().includes(query);
+      const matchesFilter=filter==='all'||(filter==='published'?Boolean(e.published):filter==='archived'?e.status==='archived':!e.published&&e.status!=='archived');
+      return matchesQuery&&matchesFilter;
+    });
     $('#event-count').textContent=events.length+' event';
     if(!events.length){$('#events-list').innerHTML='<div class="empty"><span>✧</span>'+(cachedEvents.length?'Tidak ada acara yang cocok.':'Belum ada acara. Buat event pertama di atas.')+'</div>';return;}
-    $('#events-list').innerHTML=events.map(e=>'<article class="event-card" data-event="'+escapeHtml(e.eventId)+'"><div><div class="event-title">'+escapeHtml(e.title)+'</div><div class="event-meta">ID: '+escapeHtml(e.eventId)+' · Dibuat: '+escapeHtml(e.createdAt?new Date(e.createdAt).toLocaleDateString('id-ID'):'—')+'</div><div class="event-badges"><span class="badge '+(e.published?'good':'warn')+'">'+(e.published?'Undangan terbit':'Draft')+'</span><span class="badge">'+(e.status==='archived'?'Diarsipkan':'Aktif')+'</span><span class="badge '+(e.adminLink?.active?'good':'warn')+'">'+(e.adminLink?.active?'Admin link aktif':'Admin link belum aktif')+'</span>'+(e.admin?' <span class="badge warn">Akun Admin lama</span>':'')+'</div></div><div class="event-actions"><button data-action="rename">Ubah nama</button><button data-action="archive">'+(e.status==='archived'?'Aktifkan':'Arsipkan')+'</button><button data-action="'+(e.adminLink?.active?'rotate':'create-link')+'">'+(e.adminLink?.active?'Rotasi link':'Buat link Admin')+'</button>'+'<button data-action="edit">Edit undangan</button><button data-action="export">Backup ZIP</button>'+(e.adminLink?.active?'<button class="danger" data-action="revoke">Cabut link</button>':'')+'</div></article>').join('');
+    $('#events-list').innerHTML=events.map(e=>'<article class="event-card" data-event="'+escapeHtml(e.eventId)+'"><div><div class="event-title">'+escapeHtml(e.title)+'</div><div class="event-meta">ID: '+escapeHtml(e.eventId)+' · Dibuat: '+escapeHtml(e.createdAt?new Date(e.createdAt).toLocaleDateString('id-ID'):'—')+' · Diperbarui: '+escapeHtml(e.updatedAt?new Date(e.updatedAt).toLocaleString('id-ID'):'—')+'</div><div class="event-badges"><span class="badge '+(e.published?'good':'warn')+'">'+(e.published?'Undangan terbit':'Draft')+'</span><span class="badge">'+(e.status==='archived'?'Diarsipkan':'Aktif')+'</span><span class="badge '+(e.adminLink?.active?'good':'warn')+'">'+(e.adminLink?.active?'Admin link aktif':'Admin link belum aktif')+'</span>'+(e.admin?' <span class="badge warn">Akun Admin lama</span>':'')+'</div></div><div class="event-actions"><button data-action="rename">Ubah nama</button><button data-action="archive">'+(e.status==='archived'?'Aktifkan':'Arsipkan')+'</button><button data-action="'+(e.adminLink?.active?'rotate':'create-link')+'">'+(e.adminLink?.active?'Rotasi link':'Buat link Admin')+'</button>'+'<button data-action="edit">Edit undangan</button><button data-action="export">Backup ZIP</button>'+(e.adminLink?.active?'<button class="danger" data-action="revoke">Cabut link</button>':'')+'</div></article>').join('');
   }
   async function loadEvents(){
     if(!authenticated)return;const list=$('#events-list');list.innerHTML='<div class="empty"><span>✧</span>Memuat acara…</div>';setStatus('#events-status','');
-    try{const {events=[]}=await api('/api/owner/events');cachedEvents=events;$('#total-events').textContent=events.length;$('#active-admins').textContent=events.filter(e=>e.adminLink?.active).length;$('#published-events').textContent=events.filter(e=>e.published).length;renderEvents();}
+    try{const {events=[]}=await api('/api/owner/events');cachedEvents=events;$('#total-events').textContent=events.length;$('#active-admins').textContent=events.filter(e=>e.adminLink?.active).length;$('#published-events').textContent=events.filter(e=>e.published).length;$('#draft-events').textContent=events.filter(e=>!e.published&&e.status!=='archived').length;renderEvents();}
     catch(error){list.innerHTML='<div class="empty">Tidak dapat memuat data acara.</div>';setStatus('#events-status',error.message,true);}
   }
   $('#event-search').addEventListener('input',renderEvents);
+  $('#event-filter').addEventListener('change',renderEvents);
   $('#refresh-events').addEventListener('click',loadEvents);
   $('#events-list').addEventListener('click',async(event)=>{
     const button=event.target.closest('button[data-action]');if(!button)return;const card=button.closest('[data-event]');const eventId=card.dataset.event;const action=button.dataset.action;button.disabled=true;
