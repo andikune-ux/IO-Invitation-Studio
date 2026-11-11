@@ -8,13 +8,11 @@ export async function onRequestGet({ params }) {
     const store = getStore("io-invitation-media");
     const invitation = await store.get(`events/${eventId}/invitation.json`, { type: "json", consistency: "strong" });
     if (!invitation || invitation.status !== "published") return json({ error: "Undangan belum diterbitkan." }, 404);
-    return json({
-      ...invitation,
-      mediaUrls: {
-        cover: invitation.media?.cover ? `/api/media?key=${encodeURIComponent(invitation.media.cover)}` : null,
-        video: invitation.media?.video ? `/api/media?key=${encodeURIComponent(invitation.media.video)}` : null
-      }
-    }, 200);
+    const mediaUrls = {};
+    for (const [kind, key] of Object.entries(invitation.media || {})) {
+      mediaUrls[kind] = key ? `/api/media?key=${encodeURIComponent(key)}` : null;
+    }
+    return json({ ...invitation, mediaUrls }, 200);
   } catch {
     return json({ error: "Penyimpanan belum siap." }, 503);
   }
