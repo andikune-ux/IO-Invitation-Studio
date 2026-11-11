@@ -11,6 +11,15 @@
     if (!response.ok) throw new Error(data.error || 'Permintaan gagal ('+response.status+').');
     return data;
   }
+  $('#toggle-owner-token').addEventListener('click', () => {
+    const input = $('#owner-token');
+    const visible = input.type === 'password';
+    input.type = visible ? 'text' : 'password';
+    const button = $('#toggle-owner-token');
+    button.textContent = visible ? 'Sembunyikan' : 'Tampilkan';
+    button.setAttribute('aria-label', visible ? 'Sembunyikan token' : 'Tampilkan token');
+    button.setAttribute('aria-pressed', String(visible));
+  });
   function showApp() { authenticated=true; loginView.hidden=true; appView.hidden=false; $('#logout').hidden=false; loadEvents(); }
   function hideApp() { authenticated=false; loginView.hidden=false; appView.hidden=true; $('#logout').hidden=true; $('#owner-token').value=''; }
   async function checkSession() {
