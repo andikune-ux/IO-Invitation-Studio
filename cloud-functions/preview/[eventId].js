@@ -1,5 +1,5 @@
 import { getStore } from "@edgeone/pages-blob";
-import { validEventId } from "../../_lib/http.js";
+import { validEventId } from "../_lib/http.js";
 const escapeHtml=value=>String(value||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 export async function onRequestGet({request,params}){
  const eventId=params?.eventId;
