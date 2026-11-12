@@ -29,7 +29,7 @@ const CATEGORY={
 };
 
 const THEME_PRESETS={
- "Pernikahan":[{id:"wedding-heritage",label:"Royal Heritage · Premium"},{id:"wedding-botanical",label:"Botanical Romance · Premium"},{id:"wedding-architectural",label:"Palace Arch · Premium"},{id:"wedding-celestial",label:"Celestial Vows · Premium"},{id:"wedding-atelier",label:"Classic Atelier · Premium"}],
+ "Pernikahan":[{id:"wedding-editorial",label:"Editorial Romance · New"},{id:"wedding-heritage",label:"Royal Heritage · Premium"},{id:"wedding-botanical",label:"Botanical Romance · Premium"},{id:"wedding-architectural",label:"Palace Arch · Premium"},{id:"wedding-celestial",label:"Celestial Vows · Premium"},{id:"wedding-atelier",label:"Classic Atelier · Premium"}],
  "Lamaran":[{id:"proposal-heritage",label:"Blush Atelier · Premium"},{id:"proposal-botanical",label:"Garden Promise · Premium"},{id:"proposal-architectural",label:"Champagne Bloom · Premium"},{id:"proposal-celestial",label:"Pearl Keepsake · Premium"},{id:"proposal-atelier",label:"Rosewood Elegance · Premium"}],
  "Pertunangan":[{id:"engagement-heritage",label:"Eternal Knot · Premium"},{id:"engagement-botanical",label:"Sapphire Promise · Premium"},{id:"engagement-architectural",label:"Pearl Garden · Premium"},{id:"engagement-celestial",label:"Golden Geometry · Premium"},{id:"engagement-atelier",label:"Velvet Ceremony · Premium"}],
  "Khitanan / Sunatan":[{id:"khitan-heritage",label:"Royal Nusantara · Premium"},{id:"khitan-botanical",label:"Sky Parade · Premium"},{id:"khitan-architectural",label:"Little Sultan · Premium"},{id:"khitan-celestial",label:"Navy Celebration · Premium"},{id:"khitan-atelier",label:"Garden Festive · Premium"}],
