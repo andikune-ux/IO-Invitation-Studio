@@ -1,10 +1,9 @@
 import { getStore } from "@edgeone/pages-blob";
-import { randomBytes, randomUUID, createHash } from "node:crypto";
+import { randomUUID } from "node:crypto";
 import { json, readJson, safeText, validEventId } from "../../_lib/http.js";
 import { requireEventAdmin } from "../../_lib/auth.js";
 
 const STORE = "io-invitation-media";
-const digest = (value) => createHash("sha256").update(value).digest("hex");
 
 export async function onRequestGet({ request }) {
   const url = new URL(request.url);
@@ -18,7 +17,14 @@ export async function onRequestGet({ request }) {
     const guests = await Promise.all(blobs.map(async ({ key }) => {
       const guest = await db.get(key, { type: "json", consistency: "strong" });
       if (!guest) return null;
-      return { guestId: guest.guestId, name: guest.name, createdAt: guest.createdAt, rsvp: guest.rsvp || "pending" };
+      return {
+        guestId: guest.guestId,
+        name: guest.name,
+        createdAt: guest.createdAt,
+        rsvp: guest.rsvp || "pending",
+        linkActive: guest.linkActive !== false,
+        linkExpiresAt: guest.linkExpiresAt || null
+      };
     }));
     return json({ ok: true, guests: guests.filter(Boolean) });
   } catch { return json({ error: "Gagal membaca daftar tamu." }, 503); }
@@ -34,11 +40,12 @@ export async function onRequestPost({ request }) {
   try {
     const db = getStore(STORE);
     const guestId = randomUUID();
-    const token = randomBytes(24).toString("base64url");
     const createdAt = new Date().toISOString();
     await db.setJSON(`events/${eventId}/guests/${guestId}.json`, {
-      guestId, eventId, name, tokenHash: digest(token), rsvp: "pending", createdAt
+      guestId, eventId, name, rsvp: "pending", linkActive: true, createdAt
     });
-    return json({ ok: true, guest: { guestId, name, createdAt, rsvp: "pending" }, token }, 201);
+    // The random UUID guestId is the stable, high-entropy link identifier.
+    // No rotating bearer token is needed for newly issued guest links.
+    return json({ ok: true, guest: { guestId, name, createdAt, rsvp: "pending", linkActive: true } }, 201);
   } catch { return json({ error: "Gagal menyimpan tamu." }, 503); }
 }
