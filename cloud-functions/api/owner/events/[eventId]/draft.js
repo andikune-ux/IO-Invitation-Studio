@@ -48,6 +48,7 @@ export async function onRequestPut({ request, params }) {
       eventId,
       category: meta.category || null,
       title: safeText(body.title, 100),
+      theme: safeText(body.theme, 40),
       personOne: safeText(body.personOne, 100),
       personTwo: safeText(body.personTwo, 100),
       opening: safeText(body.opening, 500),
