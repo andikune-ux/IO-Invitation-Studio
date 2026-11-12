@@ -53,7 +53,7 @@ const THEME_PRESETS={
  "Lain-lain":[{id:"general-heritage",label:"Signature Luxe · Premium"},{id:"general-botanical",label:"Modern Canvas · Premium"},{id:"general-architectural",label:"Botanical Frame · Premium"},{id:"general-celestial",label:"Golden Editorial · Premium"},{id:"general-atelier",label:"Midnight Atelier · Premium"}],
 };
 const defaultTheme=category=>(THEME_PRESETS[category]||THEME_PRESETS['Lain-lain'])[0].id;
-const fillThemeOptions=(category,selected)=>{const select=$('#event-theme');if(!select)return;select.replaceChildren();(THEME_PRESETS[category]||THEME_PRESETS['Lain-lain']).forEach(item=>{const o=document.createElement('option');o.value=item.id;o.textContent=item.label;select.append(o)});select.value=(THEME_PRESETS[category]||THEME_PRESETS['Lain-lain']).some(x=>x.id===selected)?selected:defaultTheme(category);};
+const fillThemeOptions=(category,selected)=>{const select=$('#event-theme');if(!select)return;select.replaceChildren();(THEME_PRESETS[category]||THEME_PRESETS['Lain-lain']).forEach((item,index)=>{const o=document.createElement('option');o.value=item.id;o.textContent='V'+(index+1)+' · '+item.label.replace(/\s*·\s*(New|Premium)$/,'');select.append(o)});select.value=(THEME_PRESETS[category]||THEME_PRESETS['Lain-lain']).some(x=>x.id===selected)?selected:defaultTheme(category);};
 
 const religionOpening=(religion,category)=>{
  const faith=String(religion||'Universal').toLowerCase();
