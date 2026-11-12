@@ -76,11 +76,16 @@ export const getSession = async (request) => {
 export const requireEventAdmin = async (request, eventId) => {
   if (!originAllowed(request)) return { ok: false, response: json({ error: "Origin tidak diizinkan." }, 403) };
   if (!validEventId(eventId)) return { ok: false, response: json({ error: "ID acara tidak valid." }, 400) };
-  // Admin access is event-ID based, like opening an invitation URL.
-  // The event ID is an identifier, not a secret credential.
-  const meta = await store().get(`events/${eventId}/meta.json`, { type: "json", consistency: "strong" });
+  const db = store();
+  const [meta, access] = await Promise.all([
+    db.get(`events/${eventId}/meta.json`, { type: "json", consistency: "strong" }),
+    db.get(`auth/admin-links/${eventId}.json`, { type: "json", consistency: "strong" })
+  ]);
   if (!meta || meta.status === "archived") return { ok: false, response: json({ error: "Acara ini diarsipkan atau tidak tersedia untuk dikelola." }, 403) };
-  return { ok: true, session: { role: "admin", eventId, access: "event-id" } };
+  if (!access || access.revoked) return { ok: false, response: json({ error: "Akses Admin untuk acara ini belum aktif atau telah dicabut Owner." }, 403) };
+  const expiry = access.expiresAt ? Date.parse(access.expiresAt) : NaN;
+  if (access.expiresAt && (!Number.isFinite(expiry) || expiry <= Date.now())) return { ok: false, response: json({ error: "Masa berlaku akses Admin telah berakhir. Hubungi Owner acara." }, 403) };
+  return { ok: true, session: { role: "admin", eventId, access: "event-id", expiresAt: access.expiresAt || null } };
 };
 
 export const requireOwner = async (request) => {
