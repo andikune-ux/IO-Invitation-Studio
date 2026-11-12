@@ -38,7 +38,7 @@
   });
   $('#logout').addEventListener('click',async()=>{try{await api('/api/auth/logout',{method:'POST'});}finally{hideApp();}});
   function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-  function makeAdminUrl(eventId,token){return location.origin+'/admin.html?event='+encodeURIComponent(eventId)+'#admin='+encodeURIComponent(token);}
+  function makeAdminUrl(eventId){return location.origin+'/admin.html?event='+encodeURIComponent(eventId);}
   function revealLink(url){$('#created-link').textContent=url;$('#created-credentials').hidden=false;$('#created-credentials').scrollIntoView({behavior:'smooth',block:'center'});}
   const RELIGION_CATEGORIES=new Set(["Pernikahan","Lamaran","Pertunangan","Keagamaan","Spiritual","Pengajian","Syukuran","Tasyakuran"]);
   const categorySelect=$('#new-category'),religionField=$('#religion-field'),religionSelect=$('#new-religion');
@@ -51,13 +51,12 @@
   categorySelect.addEventListener('change',syncReligionField);
   syncReligionField();
   $('#create-event-form').addEventListener('submit',async(event)=>{
-    event.preventDefault();const button=$('button[type="submit"]',event.currentTarget);button.disabled=true;$('#created-credentials').hidden=true;setStatus('#create-status','Menyimpan event dan membuat akses Admin…');
-    const payload={eventId:$('#new-event-id').value.trim().toLowerCase(),eventTitle:$('#new-title').value.trim(),category:$('#new-category').value,religion:$('#new-religion').value||null,durationMonths:Number($('#default-link-duration').value)};
+    event.preventDefault();const button=$('button[type="submit"]',event.currentTarget);button.disabled=true;$('#created-credentials').hidden=true;setStatus('#create-status','Menyimpan acara…');
+    const payload={eventId:$('#new-event-id').value.trim().toLowerCase(),eventTitle:$('#new-title').value.trim(),category:$('#new-category').value,religion:$('#new-religion').value||null};
     try{
       await api('/api/owner/admins',{method:'POST',body:JSON.stringify(payload)});
-      const access=await api('/api/owner/admin-links',{method:'POST',body:JSON.stringify({eventId:payload.eventId,durationMonths:payload.durationMonths})});
-      revealLink(makeAdminUrl(payload.eventId,access.token));
-      setStatus('#create-status','Event berhasil dibuat. Link Admin siap dibagikan.');
+      revealLink(makeAdminUrl(payload.eventId));
+      setStatus('#create-status','Event berhasil dibuat. Link Admin siap disalin dan dibagikan.');
       event.currentTarget.reset();await loadEvents();
     }catch(error){setStatus('#create-status',error.message+' Jika event sudah tersimpan, buat/rotasi link dari daftar acara.',true);await loadEvents();}
     finally{button.disabled=false;}
@@ -133,11 +132,11 @@
     });
     $('#event-count').textContent=events.length+' event';
     if(!events.length){$('#events-list').innerHTML='<div class="empty"><span>✧</span>'+(cachedEvents.length?'Tidak ada acara yang cocok.':'Belum ada acara. Buat event pertama di atas.')+'</div>';return;}
-    $('#events-list').innerHTML=events.map(e=>'<article class="event-card" data-event="'+escapeHtml(e.eventId)+'"><div><div class="event-title">'+escapeHtml(e.title)+'</div><div class="event-meta">ID: '+escapeHtml(e.eventId)+' · Dibuat: '+escapeHtml(e.createdAt?new Date(e.createdAt).toLocaleDateString('id-ID'):'—')+' · Diperbarui: '+escapeHtml(e.updatedAt?new Date(e.updatedAt).toLocaleString('id-ID'):'—')+'</div><div class="event-badges"><span class="badge category-badge">'+escapeHtml(e.category||'Kategori belum ditentukan')+'</span>'+(e.religion?'<span class="badge religion-badge">'+escapeHtml(e.religion)+'</span>':'')+'<span class="badge '+(e.published?'good':'warn')+'">'+(e.published?'Undangan terbit':'Draft')+'</span><span class="badge">'+(e.status==='archived'?'Diarsipkan':'Aktif')+'</span><span class="badge '+(e.adminLink?.active?'good':'warn')+'">'+(e.adminLink?.active?'Admin link aktif':(e.adminLink?.expired?'Link kedaluwarsa':'Admin link belum aktif'))+'</span>'+(e.adminLink?.expiresAt?'<span class="badge expiry-badge">Berlaku sampai '+escapeHtml(new Date(e.adminLink.expiresAt).toLocaleDateString('id-ID'))+'</span>':'')+(e.admin?' <span class="badge warn">Akun Admin lama</span>':'')+'</div></div><div class="event-actions"><label class="link-duration-control"><span>Masa berlaku link</span><select data-duration aria-label="Masa berlaku link Admin">'+[1,3,6,9,12].map(n=>'<option value="'+n+'"'+(Number(e.adminLink?.durationMonths||12)===n?' selected':'')+'>'+n+' bulan</option>').join('')+'</select></label><button data-action="rename">Ubah nama</button><button data-action="archive">'+(e.status==='archived'?'Aktifkan':'Arsipkan')+'</button><button data-action="'+(e.adminLink?.active?'rotate':'create-link')+'">'+(e.adminLink?.active?'Rotasi link':'Buat link Admin')+'</button>'+'<button data-action="edit">Edit undangan</button><button data-action="export">Backup ZIP</button><button class="danger" data-action="delete">Hapus undangan</button>'+(e.adminLink?.active?'<button class="danger" data-action="revoke">Cabut link</button>':'')+'</div></article>').join('');
+    $('#events-list').innerHTML=events.map(e=>'<article class="event-card" data-event="'+escapeHtml(e.eventId)+'"><div><div class="event-title">'+escapeHtml(e.title)+'</div><div class="event-meta">ID: '+escapeHtml(e.eventId)+' · Dibuat: '+escapeHtml(e.createdAt?new Date(e.createdAt).toLocaleDateString('id-ID'):'—')+' · Diperbarui: '+escapeHtml(e.updatedAt?new Date(e.updatedAt).toLocaleString('id-ID'):'—')+'</div><div class="event-badges"><span class="badge category-badge">'+escapeHtml(e.category||'Kategori belum ditentukan')+'</span>'+(e.religion?'<span class="badge religion-badge">'+escapeHtml(e.religion)+'</span>':'')+'<span class="badge '+(e.published?'good':'warn')+'">'+(e.published?'Undangan terbit':'Draft')+'</span><span class="badge">'+(e.status==='archived'?'Diarsipkan':'Aktif')+'</span><span class="badge good">Admin tersedia</span>+(e.admin?' <span class="badge warn">Akun Admin lama</span>':'')+'</div></div><div class="event-actions"><button data-action="copy-admin">Salin Link Admin</button><button data-action="open-admin">Buka Admin</button><button data-action="rename">Ubah nama</button><button data-action="archive">'+(e.status==='archived'?'Aktifkan':'Arsipkan')+'</button><button data-action="'+(e.adminLink?.active?'rotate':'create-link')+'">'+(e.adminLink?.active?'Rotasi link':'Buat link Admin')+'</button>'+'<button data-action="edit">Edit undangan</button><button data-action="export">Backup ZIP</button><button class="danger" data-action="delete">Hapus undangan</button>'+(e.adminLink?.active?'<button class="danger" data-action="revoke">Cabut link</button>':'')+'</div></article>').join('');
   }
   async function loadEvents(){
     if(!authenticated)return;const list=$('#events-list');list.innerHTML='<div class="empty"><span>✧</span>Memuat acara…</div>';setStatus('#events-status','');
-    try{const {events=[]}=await api('/api/owner/events');cachedEvents=events;$('#total-events').textContent=events.length;$('#active-admins').textContent=events.filter(e=>e.adminLink?.active).length;$('#published-events').textContent=events.filter(e=>e.published).length;$('#draft-events').textContent=events.filter(e=>!e.published&&e.status!=='archived').length;renderEvents();}
+    try{const {events=[]}=await api('/api/owner/events');cachedEvents=events;$('#total-events').textContent=events.length;$('#active-admins').textContent=events.length;$('#published-events').textContent=events.filter(e=>e.published).length;$('#draft-events').textContent=events.filter(e=>!e.published&&e.status!=='archived').length;renderEvents();}
     catch(error){list.innerHTML='<div class="empty">Tidak dapat memuat data acara.</div>';setStatus('#events-status',error.message,true);}
   }
   $('#event-search').addEventListener('input',renderEvents);
@@ -151,8 +150,8 @@
       if(action==='export'){await exportEventZip(eventId,button);return;}
       if(action==='rename'){const current=card.querySelector('.event-title').textContent;const title=prompt('Nama acara baru:',current);if(title===null)return;if(!title.trim())throw new Error('Nama acara tidak boleh kosong.');await api('/api/owner/events/'+encodeURIComponent(eventId),{method:'PATCH',body:JSON.stringify({title:title.trim()})});}
       if(action==='archive'){const archiving=button.textContent.trim()==='Arsipkan';if(!confirm(archiving?'Arsipkan acara ini? Acara tidak dihapus.':'Aktifkan kembali acara ini?'))return;await api('/api/owner/events/'+encodeURIComponent(eventId),{method:'PATCH',body:JSON.stringify({status:archiving?'archived':'draft'})});}
-      if(action==='create-link'||action==='rotate'){if(action==='rotate'&&!confirm('Rotasi link Admin? Link lama langsung tidak berlaku.'))return;const result=action==='create-link'?await api('/api/owner/admin-links',{method:'POST',body:JSON.stringify({eventId,durationMonths:Number(card.querySelector('[data-duration]').value)})}):await api('/api/owner/admin-links/'+encodeURIComponent(eventId),{method:'PATCH',body:JSON.stringify({action:'rotate',durationMonths:Number(card.querySelector('[data-duration]').value)})});revealLink(makeAdminUrl(eventId,result.token));toast('Tautan Admin baru berhasil dibuat.');}
-      if(action==='revoke'){if(!confirm('Cabut akses Admin? Pemegang link tidak bisa mengelola acara ini lagi.'))return;await api('/api/owner/admin-links/'+encodeURIComponent(eventId),{method:'PATCH',body:JSON.stringify({action:'revoke'})});toast('Akses Admin dicabut.');}
+      if(action==='copy-admin'){await navigator.clipboard.writeText(makeAdminUrl(eventId));toast('Link Admin berhasil disalin.');}
+      if(action==='open-admin'){window.open(makeAdminUrl(eventId),'_blank','noopener');}
       await loadEvents();
     }catch(error){setStatus('#events-status',error.message,true);}finally{button.disabled=false;}
   });
