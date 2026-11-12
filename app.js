@@ -125,7 +125,7 @@ async function saveCloud(){
    const sent=await fetch(uploadInfo.uploadUrl,{method:'PUT',headers:{'Content-Type':file.type},body:file});if(!sent.ok)throw new Error('Upload '+kind+' gagal ('+sent.status+').');
    cloudMedia[kind]=uploadInfo.key;
   }
-  const res=await fetch('/api/owner/events/'+encodeURIComponent(eventId)+'/draft',{method:'PUT',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:$('#event-title').value,theme:$('#event-theme').value,personOne:$('#person-one').value,personTwo:$('#person-two').value,opening:$('#opening-text').value,date:$('#event-date').value||$('#akad-date').value,akadDate:$('#akad-date').value,receptionDate:$('#reception-date').value,location:$('#event-location').value,closing:$('#closing-text').value,mediaUrl:$('#media-url').value,content:draft.content,media:cloudMedia})});
+  const res=await fetch('/api/owner/events/'+encodeURIComponent(eventId)+'/draft',{method:'PUT',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:$('#event-title').value,theme:$('#event-theme').value,personOne:$('#person-one').value,personTwo:$('#person-two').value,opening:$('#opening-text').value,date:$('#event-date').value||$('#akad-date').value,akadDate:$('#akad-date').value,receptionDate:$('#reception-date').value,location:$('#event-location').value,closing:$('#closing-text').value,mediaUrl:$('#media-url')?.value||'',content:draft.content,media:cloudMedia})});
   const data=await res.json().catch(()=>({}));if(!res.ok)throw new Error(data.error||'Gagal menyimpan draft cloud');
   mediaKeys=cloudMedia;saveLocal();toast('Draft tersimpan di cloud dan link tamu sudah dapat dibuka.');
 }
