@@ -1,4 +1,5 @@
 import { getStore } from "@edgeone/pages-blob";
+import { recordOperationalError } from "../../_lib/monitoring.js";
 import { json, validEventId } from "../../_lib/http.js";
 import { getGuestAccessExpiry } from "../../_lib/guest-expiry.js";
 import { requireOwner } from "../../_lib/auth.js";
@@ -22,7 +23,8 @@ export async function onRequestGet({ request, params }) {
       mediaUrls[kind] = key && !String(key).includes(":") ? `/api/media?key=${encodeURIComponent(key)}` : null;
     }
     return json({ ...invitation, status: "published", guestAccessExpiresAt: guestExpiry?.expiresAt || null, mediaUrls }, 200);
-  } catch {
+  } catch (error) {
+    await recordOperationalError(request, "/api/invitation/:eventId", error, 503);
     return json({ error: "Penyimpanan belum siap." }, 503);
   }
 }
