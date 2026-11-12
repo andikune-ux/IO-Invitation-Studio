@@ -1,4 +1,5 @@
 import { getStore } from "@edgeone/pages-blob";
+import { recordOperationalError } from "../../_lib/monitoring.js";
 import { json, readJson } from "../../_lib/http.js";
 import { requireOwner } from "../../_lib/auth.js";
 
@@ -15,7 +16,8 @@ export async function onRequestGet({ request }) {
     const settings = await store.get(KEY, { type: "json", consistency: "strong" }) || {};
     const statusColors = Object.fromEntries(Object.entries(DEFAULTS).map(([key, value]) => [key, HEX.test(settings.statusColors?.[key] || "") ? settings.statusColors[key] : value]));
     return json({ ok: true, settings: { statusColors } });
-  } catch {
+  } catch (error) {
+    await recordOperationalError(request, "/api/owner/settings GET", error, 503);
     return json({ error: "Pengaturan Owner tidak dapat dibaca." }, 503);
   }
 }
@@ -36,7 +38,8 @@ export async function onRequestPut({ request }) {
     const settings = { statusColors, updatedAt: new Date().toISOString() };
     await store.setJSON(KEY, settings);
     return json({ ok: true, settings });
-  } catch {
+  } catch (error) {
+    await recordOperationalError(request, "/api/owner/settings PUT", error, 503);
     return json({ error: "Pengaturan warna gagal disimpan." }, 503);
   }
 }
