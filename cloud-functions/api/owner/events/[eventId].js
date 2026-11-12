@@ -1,6 +1,7 @@
 import { getStore } from "@edgeone/pages-blob";
 import { json, readJson, safeText, validEventId } from "../../../_lib/http.js";
 import { requireOwner } from "../../../_lib/auth.js";
+import { extendGuestAccess, getGuestAccessExpiry } from "../../../_lib/guest-expiry.js";
 
 export async function onRequestPatch({ request, params }) {
   const auth = await requireOwner(request);
@@ -8,7 +9,7 @@ export async function onRequestPatch({ request, params }) {
   const eventId = params?.eventId;
   if (!validEventId(eventId)) return json({ error: "ID acara tidak valid." }, 400);
   const body = await readJson(request);
-  if (!body || (body.title === undefined && body.status === undefined && body.category === undefined && body.religion === undefined)) return json({ error: "Tidak ada perubahan yang dikirim." }, 400);
+  if (!body || (body.title === undefined && body.status === undefined && body.category === undefined && body.religion === undefined && body.guestAccessExtensionMonths === undefined && body.guestAccessReset !== true)) return json({ error: "Tidak ada perubahan yang dikirim." }, 400);
   const store = getStore("io-invitation-media");
   try {
     const key = `events/${eventId}/meta.json`;
@@ -34,9 +35,19 @@ export async function onRequestPatch({ request, params }) {
       if (!["draft", "archived"].includes(body.status)) return json({ error: "Status hanya boleh draft atau archived." }, 400);
       meta.status = body.status;
     }
+    if (body.guestAccessExtensionMonths !== undefined) {
+      const months = Number(body.guestAccessExtensionMonths);
+      if (![1, 3, 6, 12].includes(months)) return json({ error: "Perpanjangan undangan harus 1, 3, 6, atau 12 bulan." }, 400);
+      const invitation = await store.get(`events/${eventId}/invitation.json`, { type: "json", consistency: "strong" });
+      if (!invitation || invitation.status !== "published") return json({ error: "Terbitkan undangan sebelum memperpanjang akses tamu." }, 409);
+      meta.guestAccessExpiresAt = extendGuestAccess(meta, invitation, months);
+    }
+    if (body.guestAccessReset === true) delete meta.guestAccessExpiresAt;
     meta.updatedAt = new Date().toISOString();
     await store.setJSON(key, meta);
-    return json({ ok: true, event: { eventId, title: meta.title, category: meta.category || null, religion: meta.religion || null, status: meta.status, updatedAt: meta.updatedAt } });
+    const invitation = await store.get(`events/${eventId}/invitation.json`, { type: "json", consistency: "strong" });
+    const guestExpiry = getGuestAccessExpiry(invitation || {}, meta);
+    return json({ ok: true, event: { eventId, title: meta.title, category: meta.category || null, religion: meta.religion || null, status: meta.status, guestAccessExpiresAt: guestExpiry?.expiresAt || null, updatedAt: meta.updatedAt } });
   } catch {
     return json({ error: "Gagal memperbarui acara." }, 503);
   }
