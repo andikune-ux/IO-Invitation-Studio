@@ -1,4 +1,5 @@
 import { getStore } from "@edgeone/pages-blob";
+import { recordOperationalError } from "../../_lib/monitoring.js";
 import { json, readJson, safeText, validEventId } from "../../_lib/http.js";
 import { requireOwner } from "../../_lib/auth.js";
 
@@ -137,7 +138,8 @@ export async function onRequestPost({ request }) {
     }
     await store.setJSON(`events/${eventId}/invitation.json`, invitation);
     return json({ ok: true, eventId, publishedAt: invitation.publishedAt });
-  } catch {
+  } catch (error) {
+    await recordOperationalError(request, "/api/admin/publish", error, 503);
     return json({ error: "Gagal memverifikasi media atau menyimpan undangan ke Blob Storage." }, 503);
   }
 }
