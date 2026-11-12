@@ -23,7 +23,7 @@ button.addEventListener('click',async()=>{
   if(!media.hero&&!keys.hero)throw Error('Foto Utama wajib diunggah sebelum undangan diterbitkan.');
   const content=editor.readContent();
   status('Menerbitkan seluruh konten undangan…');
-  const response=await fetch('/api/admin/publish',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({eventId,invitation:{title:value('event-title'),personOne:value('person-one'),personTwo:value('person-two'),opening:value('opening-text'),date:value('event-date')||value('akad-date'),akadDate:value('akad-date'),receptionDate:value('reception-date'),location:value('event-location'),closing:value('closing-text'),mediaUrl:value('media-url')},content,media})});
+  const response=await fetch('/api/admin/publish',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({eventId,invitation:{title:value('event-title'),theme:value('event-theme'),personOne:value('person-one'),personTwo:value('person-two'),opening:value('opening-text'),date:value('event-date')||value('akad-date'),akadDate:value('akad-date'),receptionDate:value('reception-date'),location:value('event-location'),closing:value('closing-text'),mediaUrl:value('media-url')},content,media})});
   const result=await response.json().catch(()=>({}));if(!response.ok)throw Error(result.error||'Publikasi gagal.');
   const link=$('#cloud-guest-link');link.href='/preview/'+encodeURIComponent(eventId);link.hidden=false;
   editor.mediaKeys={...keys,...media};editor.saveLocal();
