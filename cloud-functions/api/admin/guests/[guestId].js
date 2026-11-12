@@ -16,6 +16,16 @@ export async function onRequestPatch({ request, params }) {
     const guest = await db.get(key, { type: "json", consistency: "strong" });
     if (!guest) return json({ error: "Tamu tidak ditemukan." }, 404);
 
+    if (body?.action === "migrate-link") {
+      // Switch legacy token-hash links to stable guestId links. Old URLs remain
+      // compatible because the resolver accepts an optional legacy fragment.
+      delete guest.tokenHash;
+      guest.linkActive = true;
+      guest.updatedAt = new Date().toISOString();
+      await db.setJSON(key, guest);
+      return json({ ok: true, guestId, migrated: true });
+    }
+
     if (body?.action === "revoke-link" || body?.action === "restore-link") {
       guest.linkActive = body.action === "restore-link";
       guest.linkRevokedAt = guest.linkActive ? null : new Date().toISOString();
