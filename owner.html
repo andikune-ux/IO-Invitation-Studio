@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./owner.css?v=guest-expiry-status-v1">
-  <script src="./owner.js?v=guest-expiry-controls-v1" defer></script>
+  <link rel="stylesheet" href="./owner.css?v=owner-health-colors-v2">
+  <script src="./owner.js?v=owner-health-colors-v2" defer></script>
 </head>
 <body>
   <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
@@ -50,6 +50,25 @@
           <article class="metric glass"><div class="metric-icon icon-green">✧</div><span>Undangan terbit</span><strong id="published-events">0</strong><small>Siap dibuka oleh tamu</small></article>
           <article class="metric glass"><div class="metric-icon icon-amber">◷</div><span>Draft acara</span><strong id="draft-events">0</strong><small>Belum diterbitkan</small></article>
         </div>
+        <section class="panel glass health-panel" id="health">
+          <div class="section-title"><div><span class="eyebrow">ACCESS HEALTH</span><h2>Kondisi akses & masa aktif</h2><p>Ringkasan dihitung dari status acara dan metadata undangan yang tersimpan.</p></div><button id="save-status-colors" class="button button-glass" type="button">Simpan warna</button></div>
+          <div class="health-grid" id="health-grid" aria-live="polite">
+            <article class="health-card"><span class="health-dot" data-status-dot="active"></span><div><b>Aktif</b><strong id="health-active">0</strong><small>Akses tamu masih berlaku</small></div></article>
+            <article class="health-card"><span class="health-dot" data-status-dot="expired"></span><div><b>Kedaluwarsa</b><strong id="health-expired">0</strong><small>Perlu perpanjangan Owner</small></div></article>
+            <article class="health-card"><span class="health-dot" data-status-dot="pending"></span><div><b>Belum terbit / tanggal belum ada</b><strong id="health-pending">0</strong><small>Perlu dilengkapi atau dipublikasikan</small></div></article>
+            <article class="health-card"><span class="health-dot" data-status-dot="archived"></span><div><b>Diarsipkan</b><strong id="health-archived">0</strong><small>Acara nonaktif</small></div></article>
+          </div>
+          <div class="status-color-settings">
+            <div><b>Warna indikator status</b><small>Pengaturan tersimpan di cloud Owner dan digunakan di perangkat berikutnya.</small></div>
+            <label>Aktif <input type="color" data-status-color="active" value="#20a477"></label>
+            <label>Kedaluwarsa <input type="color" data-status-color="expired" value="#d94c5c"></label>
+            <label>Perlu ditinjau <input type="color" data-status-color="pending" value="#d59a36"></label>
+            <label>Diarsipkan <input type="color" data-status-color="archived" value="#9299aa"></label>
+          </div>
+          <p class="health-footnote">Catatan: panel ini memantau status akses dan kelengkapan data acara. Log kegagalan runtime EdgeOne (request ID, stack trace, dan durasi) tidak tersedia dari API aplikasi saat ini, sehingga tidak ditampilkan sebagai data palsu.</p>
+          <div id="health-details" class="health-details"></div>
+          <p id="health-status" class="status" role="status"></p>
+        </section>
         <section class="panel glass create-panel" id="create">
           <div class="section-title"><div><span class="eyebrow">NEW EXPERIENCE</span><h2>Buat event baru</h2><p>Mulai dengan nama acara dan ID unik. Link Admin menggunakan ID acara. Owner tetap mengatur masa berlaku dan dapat mencabut akses kapan saja.</p></div><span class="owner-only">OWNER ONLY <span>✦</span></span></div>
           <form id="create-event-form" class="create-grid">
