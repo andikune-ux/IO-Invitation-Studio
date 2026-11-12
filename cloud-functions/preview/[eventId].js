@@ -52,6 +52,7 @@ export async function onRequestGet({ request, params }) {
     const incoming = new URL(request.url);
     const previewUrl = new URL(`/api/preview/${encodeURIComponent(eventId)}`, PUBLIC_ORIGIN);
     const targetUrl = new URL("/guest.html", PUBLIC_ORIGIN);
+    targetUrl.searchParams.set("event", eventId);
 
     // Preserve guest-specific query values. The invitation token is in the URL
     // fragment and is preserved by the client-side redirect below.
