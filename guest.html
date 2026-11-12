@@ -683,12 +683,15 @@ music.addEventListener('pause',()=>updateMusicControl(false));music.addEventList
  const body=document.body;
  if(body.dataset.theme!=="wedding-editorial")return;
  const svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220"><defs><linearGradient id="p" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff" stop-opacity=".92"/><stop offset=".48" stop-color="var(--flower-a)" stop-opacity=".48"/><stop offset="1" stop-color="var(--flower-b)" stop-opacity=".72"/></linearGradient><linearGradient id="s" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="var(--flower-a)" stop-opacity=".16"/></linearGradient><filter id="g"><feGaussianBlur stdDeviation="2"/></filter></defs><g transform="translate(110 110)" stroke="#fff" stroke-opacity=".8" stroke-width="1.4"><g fill="url(#p)"><ellipse rx="25" ry="57" cy="-42"/><ellipse rx="25" ry="57" cy="-42" transform="rotate(60)"/><ellipse rx="25" ry="57" cy="-42" transform="rotate(120)"/><ellipse rx="25" ry="57" cy="-42" transform="rotate(180)"/><ellipse rx="25" ry="57" cy="-42" transform="rotate(240)"/><ellipse rx="25" ry="57" cy="-42" transform="rotate(300)"/></g><g fill="url(#s)" transform="scale(.66)"><ellipse rx="20" ry="48" cy="-35"/><ellipse rx="20" ry="48" cy="-35" transform="rotate(72)"/><ellipse rx="20" ry="48" cy="-35" transform="rotate(144)"/><ellipse rx="20" ry="48" cy="-35" transform="rotate(216)"/><ellipse rx="20" ry="48" cy="-35" transform="rotate(288)"/></g><circle r="13" fill="#fff" fill-opacity=".72"/><circle r="6" fill="var(--flower-b)" fill-opacity=".72"/></g><path d="M110 165 Q84 190 62 208 M110 165 Q138 186 160 207" fill="none" stroke="#fff" stroke-opacity=".65" stroke-width="3"/></svg>';
- const data='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+ function flowerData(a,b){
+  const art=svg.replaceAll('var(--flower-a)',a||'#c7a8ef').replaceAll('var(--flower-b)',b||'#f2b8d0');
+  return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(art);
+ }
  function addFlowers(){
   if(document.querySelector('.liquid-floral-layer'))return;
   const host=document.querySelector('.guest-card');if(!host)return;
   const layer=document.createElement('div');layer.className='liquid-floral-layer';layer.setAttribute('aria-hidden','true');
-  ['one','two','three'].forEach(c=>{const img=document.createElement('img');img.className='liquid-flower '+c;img.alt='';img.src=data;layer.appendChild(img)});
+  ['one','two','three'].forEach(c=>{const img=document.createElement('img');img.className='liquid-flower '+c;img.alt='';img.src=flowerData();layer.appendChild(img)});
   host.prepend(layer);
  }
  function applyPalette(image){
@@ -703,6 +706,7 @@ music.addEventListener('pause',()=>updateMusicControl(false));music.addEventList
    const colors=chosen.map(c=>'#'+[c.r,c.g,c.b].map(v=>Math.round(v).toString(16).padStart(2,'0')).join(''));
    body.style.setProperty('--lg-a',colors[0]);body.style.setProperty('--lg-b',colors[1]);body.style.setProperty('--lg-c',colors[2]);
    body.style.setProperty('--flower-a',colors[0]);body.style.setProperty('--flower-b',colors[1]);
+   document.querySelectorAll('.liquid-flower').forEach(img=>{img.src=flowerData(colors[0],colors[1])});
   }catch(e){/* Cross-origin images may block canvas sampling; retain elegant fallback palette. */}
  }
  function init(){
