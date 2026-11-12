@@ -1,41 +1,38 @@
 # IO Invitation Studio
 
-Platform undangan digital multi-acara dengan pemisahan tiga peran: Owner, Admin acara, dan Tamu.
+Platform undangan digital multi-acara dengan tiga peran: Owner, Admin acara, dan Tamu.
 
 ## Model akses
 
-- **Owner** login melalui secret `IO_ADMIN_API_TOKEN` dan memiliki kendali penuh atas event, desain, template, media, domain, publikasi, dan pengaturan platform.
-- **Admin acara** tidak memiliki username/password. Owner menerbitkan link rahasia khusus event. Admin hanya dapat mengelola daftar tamu: tambah, ubah nama, hapus, dan menerbitkan ulang link undangan personal.
-- **Tamu** membuka undangan publik melalui link personal tanpa login.
+- **Owner** login menggunakan secret server-side `IO_ADMIN_API_TOKEN` dan mengelola acara, desain, media, publikasi, serta akses Admin.
+- **Admin acara** menggunakan link `/admin.html?event={eventId}`. Akses dibatasi pada satu event dan dikendalikan Owner melalui masa berlaku, aktivasi, dan pencabutan.
+- **Tamu** membuka undangan terbit dan link personal melalui `/guest.html?event={eventId}&guestId={guestId}`. ID tamu berupa UUID acak dan dapat dicabut dari Guest Manager.
 
-Admin link memakai token acak 256-bit. Backend menyimpan hash token, membatasi token pada satu event, dan mendukung rotasi serta pencabutan. Token Admin tidak memiliki izin untuk mengedit desain, upload media, atau menerbitkan konten utama undangan.
+**Catatan keamanan Admin:** event ID adalah identifier sekaligus kunci akses Admin pada model saat ini. Siapa pun yang mengetahui ID event dapat mengakses Guest Manager selama akses Admin aktif. Owner harus membatasi distribusi URL dan segera mencabut akses bila bocor. Masa berlaku bukan pengganti autentikasi berbasis secret.
 
-## Domain
+## Fitur undangan
 
-Domain Owner target: `undangandigital-iODigitalInvitation.edgeone.dev`.
+- Editor konten dan tema sesuai kategori acara.
+- Foto utama, foto sampul, galeri, video, musik latar, dan efek suara.
+- Musik diputar setelah tamu menekan tombol Buka Undangan. Browser tetap dapat menolak playback jika gesture tidak dianggap valid atau file gagal dimuat.
+- Jadwal akad dan resepsi; countdown pernikahan mengacu ke akad bila tersedia, jika tidak ke resepsi.
+- Pratinjau Google Maps, alamat, dan patokan lokasi.
+- Rekening hadiah dengan logo/ikon bank dan tombol salin nomor rekening.
+- RSVP Hadir/Tidak Hadir dan buku tamu publik untuk ucapan.
+- Footer promosi dan ikon WhatsApp, TikTok, Instagram; URL promosi dan akun sosial dapat diisi Owner.
 
-Contoh hostname Admin/Tamu yang direncanakan masih berupa format target. Wildcard DNS, routing, dan TLS harus diuji sebelum hostname tersebut dianggap aktif.
+## Penyimpanan dan publikasi
 
-## Owner Control Center
-
-Buka `/owner.html` untuk login Owner. Saat ini tersedia:
-- Ringkasan event, Admin link aktif, dan undangan terbit.
-- Buat event dan terbitkan link Admin.
-- Cari event, ubah nama, arsipkan/aktifkan.
-- Rotasi dan cabut link Admin.
-
-## Admin Guest Manager
-
-Owner memberikan link ke `/admin.html?event={eventId}#admin={secret}`. Halaman Admin hanya menyediakan manajemen daftar tamu dan link personal. Token disimpan sebagai hash di Blob Storage dan fragmen URL dihapus dari address bar setelah dibaca.
-
-Link tamu personal menggunakan `/api/preview/{eventId}?guestId={guestId}#invite={secret}` agar pratinjau media sosial memakai Foto Utama. Halaman preview meneruskan tamu ke `/guest.html` dan mempertahankan token undangan pada fragmen URL. Guest token divalidasi server-side sebelum nama penerima ditampilkan.
+- Static UI: HTML/CSS/JavaScript.
+- Backend: EdgeOne Node.js Cloud Functions pada `cloud-functions/`.
+- Blob namespace: `io-invitation-media`.
+- Secret Owner: `IO_ADMIN_API_TOKEN` (server-side only).
+- Endpoint publik hanya membaca `invitation.json` berstatus `published`; draft tidak ditampilkan ke tamu.
+- Media publik hanya dapat diambil bila direferensikan oleh undangan terbit.
+- RSVP dan buku tamu disimpan per event di Blob Storage.
 
 ## Pengembangan dan deployment
 
-- Static UI: HTML/CSS/JavaScript.
-- Backend: EdgeOne Node.js Cloud Functions pada direktori `cloud-functions/`.
-- Blob namespace: `io-invitation-media`.
-- Secret Owner: `IO_ADMIN_API_TOKEN` (server-side only).
-- `npm run check` memeriksa sintaks JavaScript, bukan integrasi live atau deployment EdgeOne.
+`npm run check` memeriksa sintaks JavaScript dan skrip pemeriksaan Guest page. Ini bukan pengujian integrasi Blob Storage, keamanan runtime, atau bukti bahwa deployment EdgeOne Production sudah selesai.
 
-Lihat `docs/ARCHITECTURE.md` dan `docs/OWNER-ADMIN-AUTH.md` untuk detail endpoint, batasan, dan daftar uji deployment.
+Sebelum produksi, uji Owner login, Admin revoke/expiry, guest link revoke, upload semua media termasuk audio, publish, draft isolation, RSVP, guestbook, backup/restore, dan isolasi antar-event.
