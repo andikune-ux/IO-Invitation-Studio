@@ -1,6 +1,7 @@
 import { getStore } from "@edgeone/pages-blob";
 import { json, validEventId } from "../_lib/http.js";
 import { requireOwner } from "../_lib/auth.js";
+import { getGuestAccessExpiry } from "../_lib/guest-expiry.js";
 
 const TYPES = { jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", webp: "image/webp", mp4: "video/mp4", webm: "video/webm", mp3: "audio/mpeg", m4a: "audio/mp4", aac: "audio/aac", ogg: "audio/ogg", wav: "audio/wav", weba: "audio/webm" };
 
@@ -18,6 +19,11 @@ export async function onRequestGet({ request }) {
       store.get(`events/${match[1]}/draft.json`, { type: "json", consistency: "strong" })
     ]);
     const publishedKeys = Object.values(invitation?.status === "published" ? invitation.media || {} : {});
+    const expiry = getGuestAccessExpiry(invitation || {}, meta);
+    if (invitation?.status === "published" && expiry && Date.parse(expiry.expiresAt) <= Date.now()) {
+      const owner = await requireOwner(request);
+      if (!owner.ok) return json({ error: "Masa aktif media undangan telah berakhir.", expiresAt: expiry.expiresAt }, 410);
+    }
     let allowed = publishedKeys.includes(key);
     if (!allowed && Object.values(draft?.media || {}).includes(key)) {
       const owner = await requireOwner(request);
@@ -29,7 +35,7 @@ export async function onRequestGet({ request }) {
     return new Response(content, {
       headers: {
         "Content-Type": TYPES[match[3]],
-        "Cache-Control": "public, max-age=300",
+        "Cache-Control": "private, no-store",
         "X-Content-Type-Options": "nosniff"
       }
     });
