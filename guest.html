@@ -201,9 +201,10 @@ body[data-theme="general-atelier"]{--paper:#f7f0e3;--card:#fffdf8;--ink:#463523;
 </main>
 <section id="guest-empty" class="guest-empty"><h1 id="guest-error-title">Memuat undangan…</h1><p id="guest-error">Mohon tunggu sebentar.</p><p class="guest-help">Silakan hubungi pengundang untuk mendapatkan tautan undangan yang benar.</p></section>
 <script>
+let invitationLoaded=false,bgmReady=false;
 (async()=>{
  const $=id=>document.getElementById(id),params=new URLSearchParams(location.search),eventId=params.get('event'),guestId=params.get('guestId'),hash=new URLSearchParams(location.hash.replace(/^#/,'')),inviteToken=hash.get('invite')||'',recipient=params.get('to');
- const set=(id,v)=>{const n=$(id);if(n)n.textContent=v||''},show=(id,on=true)=>{const n=$(id);if(n)n.hidden=!on},img=(id,url,alt)=>{if(!url)return;$(id).src=url;$(id).alt=alt||''};let invitationLoaded=false,bgmReady=false;
+ const set=(id,v)=>{const n=$(id);if(n)n.textContent=v||''},show=(id,on=true)=>{const n=$(id);if(n)n.hidden=!on},img=(id,url,alt)=>{if(!url)return;$(id).src=url;$(id).alt=alt||''};
  const safeMap=url=>{try{const u=new URL(url);return ['google.com','www.google.com','maps.google.com','maps.app.goo.gl'].includes(u.hostname)?u.href:''}catch{return ''}};
  const familyLabels={groomFather:'Ayah mempelai pria',groomMother:'Ibu mempelai pria',brideFather:'Ayah mempelai wanita',brideMother:'Ibu mempelai wanita',father:'Ayah',mother:'Ibu',host:'Penyelenggara',family:'Keluarga'};
  const categoryView={
