@@ -18,7 +18,7 @@ button.addEventListener('click',async()=>{
   const keys={...editor.mediaKeys},media={};
   for(const [kind,key] of Object.entries(keys)){
    if(!key)continue;
-   if(key.startsWith(eventId+':')){const file=await getFile(key);if(!file)throw Error('File '+kind+' tidak ditemukan di penyimpanan perangkat. Pilih ulang fotonya.');media[kind]=await upload(file,kind,eventId)}
+   if(key.startsWith(eventId+':')){const file=await getFile(key);if(!file)throw Error('File '+kind+' tidak ditemukan di penyimpanan perangkat. Pilih ulang medianya.');media[kind]=await upload(file,kind,eventId)}else if(key.startsWith('events/'+eventId+'/media/')){media[kind]=key}
   }
   if(!media.hero&&!keys.hero)throw Error('Foto Utama wajib diunggah sebelum undangan diterbitkan.');
   const content=editor.readContent();
@@ -27,7 +27,7 @@ button.addEventListener('click',async()=>{
   const result=await response.json().catch(()=>({}));if(!response.ok)throw Error(result.error||'Publikasi gagal.');
   const link=$('#cloud-guest-link');link.href='/preview/'+encodeURIComponent(eventId);link.hidden=false;
   editor.mediaKeys={...keys,...media};editor.saveLocal();
-  status('Undangan berhasil diterbitkan. Foto Utama, Foto Sampul, Video, dan konten lainnya telah diproses. Link tamu: '+location.origin+link.getAttribute('href'));
+  status('Undangan berhasil diterbitkan. Foto, video, efek suara, musik, dan seluruh konten undangan telah diproses. Link tamu: '+location.origin+link.getAttribute('href'));
  }catch(e){status(e.message||'Publikasi gagal. Periksa konfigurasi backend.',true)}
  finally{button.disabled=!ownerReady}
 });
