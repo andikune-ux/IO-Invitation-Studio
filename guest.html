@@ -540,6 +540,55 @@ body[data-theme="wedding-editorial"] .guest-footer{padding:34px 18px 26px;text-a
 }
 
 </style>
+
+/* Editorial Romance — liquid crystal floral finish (scoped; legacy themes untouched) */
+body[data-theme="wedding-editorial"]{
+ --lg-a:#c7a8ef;--lg-b:#f2b8d0;--lg-c:#9edbd7;
+ --paper:#f6f2f8;--card:rgba(255,255,255,.78);--accent:var(--lg-a);--accent-dark:#4a3d58;
+ --gold:rgba(255,255,255,.82);--line:rgba(255,255,255,.55);
+ background:
+  radial-gradient(ellipse at 12% 8%,color-mix(in srgb,var(--lg-a) 30%,transparent),transparent 42%),
+  radial-gradient(ellipse at 88% 28%,color-mix(in srgb,var(--lg-b) 27%,transparent),transparent 40%),
+  radial-gradient(ellipse at 50% 92%,color-mix(in srgb,var(--lg-c) 25%,transparent),transparent 45%),#f8f6fa;
+}
+body[data-theme="wedding-editorial"] .guest-section,
+body[data-theme="wedding-editorial"] .guest-bank{
+ background:linear-gradient(135deg,rgba(255,255,255,.78),rgba(255,255,255,.48));
+ border:1px solid rgba(255,255,255,.76);
+ box-shadow:0 18px 55px rgba(54,43,76,.09),inset 0 1px 0 rgba(255,255,255,.92);
+ backdrop-filter:blur(22px) saturate(1.35);-webkit-backdrop-filter:blur(22px) saturate(1.35);
+}
+body[data-theme="wedding-editorial"] .guest-section:before{
+ content:"";position:absolute;inset:-35% -20%;pointer-events:none;opacity:.42;
+ background:radial-gradient(ellipse at 18% 20%,var(--lg-a),transparent 32%),radial-gradient(ellipse at 82% 72%,var(--lg-b),transparent 30%);
+ filter:blur(38px);z-index:0
+}
+body[data-theme="wedding-editorial"] .guest-section>*{position:relative;z-index:1}
+body[data-theme="wedding-editorial"] .guest-action{
+ background:linear-gradient(125deg,color-mix(in srgb,var(--lg-a) 75%,white),color-mix(in srgb,var(--lg-b) 72%,white),color-mix(in srgb,var(--lg-c) 65%,white));
+ color:#40384b;border:1px solid rgba(255,255,255,.88);
+ box-shadow:0 8px 24px color-mix(in srgb,var(--lg-a) 22%,transparent),inset 0 1px 0 #fff;
+ backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)
+}
+body[data-theme="wedding-editorial"] .guest-countdown div{
+ background:linear-gradient(145deg,rgba(255,255,255,.72),rgba(255,255,255,.32));
+ border:1px solid rgba(255,255,255,.78);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+ box-shadow:inset 0 1px 0 #fff,0 8px 25px #41344a12
+}
+body[data-theme="wedding-editorial"] .guest-card:before{border-color:rgba(255,255,255,.48)}
+.liquid-floral-layer{position:absolute;inset:0;z-index:3;pointer-events:none;overflow:hidden}
+.liquid-flower{position:absolute;width:clamp(104px,27vw,190px);height:auto;opacity:.68;filter:drop-shadow(0 12px 20px rgba(80,65,100,.16));}
+.liquid-flower.one{top:7%;left:-28px;transform:rotate(-18deg)}
+.liquid-flower.two{right:-30px;top:39%;width:clamp(90px,22vw,150px);transform:rotate(22deg);opacity:.52}
+.liquid-flower.three{left:-34px;bottom:5%;width:clamp(92px,23vw,156px);transform:rotate(16deg);opacity:.45}
+@media(prefers-reduced-motion:no-preference){
+ .liquid-flower{animation:crystal-drift 11s ease-in-out infinite alternate}
+ .liquid-flower.two{animation-delay:-4s}.liquid-flower.three{animation-delay:-7s}
+ @keyframes crystal-drift{from{translate:0 -5px}to{translate:0 9px}}
+}
+@media(max-width:600px){.liquid-flower{opacity:.4}.liquid-flower.one{top:9%}}
+@media(prefers-reduced-motion:reduce){.liquid-flower{animation:none}}
+
 </head>
 <body>
 <section id="guest-envelope" class="guest-envelope" aria-label="Sampul undangan"><div class="envelope-glow"></div><div class="envelope-card"><div class="envelope-topline">A SPECIAL INVITATION</div><div class="envelope-ornament" aria-hidden="true"><span>✦</span><i></i><span>✦</span></div><p class="envelope-to">Kepada Yth.</p><h1 id="envelope-recipient">Tamu Undangan</h1><p class="envelope-caption">Dengan penuh kebahagiaan, kami mengundang Anda untuk hadir.</p><div class="envelope-illustration" aria-hidden="true"><div class="envelope-back"></div><div class="envelope-letter"><span>✧</span><b>YOU ARE INVITED</b></div><div class="envelope-pocket"></div><div class="envelope-seal">✦</div></div><button id="open-invitation" class="envelope-open" type="button">Buka Undangan <span>→</span></button><small class="envelope-footnote">Sent with love · IO Invitation Studio</small></div></section><div id="guest-audio-controls" class="guest-audio-controls" hidden><button id="guest-audio-toggle" class="vinyl-toggle" type="button" aria-label="Jeda musik" title="Jeda musik"><span class="vinyl-record is-playing" aria-hidden="true"><i></i></span><span class="audio-state">Musik diputar</span></button></div><audio id="guest-opening-sfx" preload="auto"></audio><audio id="guest-background-music" preload="auto" loop></audio>
@@ -627,5 +676,45 @@ openButton.addEventListener('click',()=>{if(!invitationLoaded)return;openButton.
 audioToggle?.addEventListener('click',()=>{if(music.paused){music.play().then(()=>updateMusicControl(true)).catch(()=>updateMusicControl(false))}else{music.pause();updateMusicControl(false)}});
 music.addEventListener('pause',()=>updateMusicControl(false));music.addEventListener('play',()=>updateMusicControl(true));
 </script>
+
+<script>
+/* Editorial-only photo palette extraction and translucent floral SVG ornaments */
+(function(){
+ const body=document.body;
+ if(body.dataset.theme!=="wedding-editorial")return;
+ const svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220"><defs><linearGradient id="p" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff" stop-opacity=".92"/><stop offset=".48" stop-color="var(--flower-a)" stop-opacity=".48"/><stop offset="1" stop-color="var(--flower-b)" stop-opacity=".72"/></linearGradient><linearGradient id="s" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="var(--flower-a)" stop-opacity=".16"/></linearGradient><filter id="g"><feGaussianBlur stdDeviation="2"/></filter></defs><g transform="translate(110 110)" stroke="#fff" stroke-opacity=".8" stroke-width="1.4"><g fill="url(#p)"><ellipse rx="25" ry="57" cy="-42"/><ellipse rx="25" ry="57" cy="-42" transform="rotate(60)"/><ellipse rx="25" ry="57" cy="-42" transform="rotate(120)"/><ellipse rx="25" ry="57" cy="-42" transform="rotate(180)"/><ellipse rx="25" ry="57" cy="-42" transform="rotate(240)"/><ellipse rx="25" ry="57" cy="-42" transform="rotate(300)"/></g><g fill="url(#s)" transform="scale(.66)"><ellipse rx="20" ry="48" cy="-35"/><ellipse rx="20" ry="48" cy="-35" transform="rotate(72)"/><ellipse rx="20" ry="48" cy="-35" transform="rotate(144)"/><ellipse rx="20" ry="48" cy="-35" transform="rotate(216)"/><ellipse rx="20" ry="48" cy="-35" transform="rotate(288)"/></g><circle r="13" fill="#fff" fill-opacity=".72"/><circle r="6" fill="var(--flower-b)" fill-opacity=".72"/></g><path d="M110 165 Q84 190 62 208 M110 165 Q138 186 160 207" fill="none" stroke="#fff" stroke-opacity=".65" stroke-width="3"/></svg>';
+ const data='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+ function addFlowers(){
+  if(document.querySelector('.liquid-floral-layer'))return;
+  const host=document.querySelector('.guest-card');if(!host)return;
+  const layer=document.createElement('div');layer.className='liquid-floral-layer';layer.setAttribute('aria-hidden','true');
+  ['one','two','three'].forEach(c=>{const img=document.createElement('img');img.className='liquid-flower '+c;img.alt='';img.src=data;layer.appendChild(img)});
+  host.prepend(layer);
+ }
+ function applyPalette(image){
+  try{
+   const canvas=document.createElement('canvas');canvas.width=36;canvas.height=36;
+   const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.drawImage(image,0,0,36,36);
+   const px=ctx.getImageData(0,0,36,36).data, bins=[];
+   for(let i=0;i<px.length;i+=16){const r=px[i],g=px[i+1],b=px[i+2],sat=Math.max(r,g,b)-Math.min(r,g,b),light=(r+g+b)/3;if(light>35&&light<245)bins.push({r,g,b,sat,light})}
+   if(!bins.length)return;
+   bins.sort((a,b)=>b.sat-a.sat);
+   const chosen=[bins[Math.floor(bins.length*.12)],bins[Math.floor(bins.length*.48)],bins[Math.floor(bins.length*.82)]];
+   const colors=chosen.map(c=>'#'+[c.r,c.g,c.b].map(v=>Math.round(v).toString(16).padStart(2,'0')).join(''));
+   body.style.setProperty('--lg-a',colors[0]);body.style.setProperty('--lg-b',colors[1]);body.style.setProperty('--lg-c',colors[2]);
+   body.style.setProperty('--flower-a',colors[0]);body.style.setProperty('--flower-b',colors[1]);
+  }catch(e){/* Cross-origin images may block canvas sampling; retain elegant fallback palette. */}
+ }
+ function init(){
+  addFlowers();
+  const cover=document.getElementById('guest-hero');
+  if(cover&&cover.complete&&cover.naturalWidth)applyPalette(cover);
+  else if(cover){cover.addEventListener('load',()=>applyPalette(cover),{once:true})}
+  if(cover&&window.MutationObserver)new MutationObserver(()=>{if(cover.complete&&cover.naturalWidth)applyPalette(cover)}).observe(cover,{attributes:true,attributeFilter:['src']});
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+})();
+</script>
+
 </body>
 </html>
