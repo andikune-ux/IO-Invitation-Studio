@@ -1,6 +1,7 @@
 import { getStore } from "@edgeone/pages-blob";
 import { createHash, timingSafeEqual } from "node:crypto";
 import { json, validEventId } from "../../_lib/http.js";
+import { getGuestAccessExpiry } from "../../_lib/guest-expiry.js";
 
 const digest = (value) => createHash("sha256").update(value).digest("hex");
 const equal = (a,b) => { const x=Buffer.from(String(a||"")),y=Buffer.from(String(b||""));return x.length===y.length&&timingSafeEqual(x,y); };
@@ -15,7 +16,15 @@ export async function onRequestGet({ request }) {
   }
   try {
     const db = getStore("io-invitation-media");
-    const guest = await db.get(`events/${eventId}/guests/${guestId}.json`, { type: "json", consistency: "strong" });
+    const [guest, meta, invitation] = await Promise.all([
+      db.get(`events/${eventId}/guests/${guestId}.json`, { type: "json", consistency: "strong" }),
+      db.get(`events/${eventId}/meta.json`, { type: "json", consistency: "strong" }),
+      db.get(`events/${eventId}/invitation.json`, { type: "json", consistency: "strong" })
+    ]);
+    const expiry = getGuestAccessExpiry(invitation || {}, meta || {});
+    if (invitation?.status === "published" && expiry && Date.parse(expiry.expiresAt) <= Date.now()) {
+      return json({ error: "Masa aktif undangan tamu telah berakhir.", expiresAt: expiry.expiresAt }, 410);
+    }
     if (!guest || guest.linkActive === false) return json({ error: "Tautan tamu tidak valid, sudah dicabut, atau tidak tersedia." }, 404);
     if (guest.linkExpiresAt && Date.parse(guest.linkExpiresAt) <= Date.now()) {
       return json({ error: "Masa berlaku tautan undangan telah berakhir." }, 410);
