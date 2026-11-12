@@ -13,12 +13,7 @@ export async function onRequestDelete({ request, params }) {
     const meta = await store.get(metaKey, { type: "json", consistency: "strong" });
     if (!meta) return json({ error: "Acara tidak ditemukan." }, 404);
 
-    // All event-owned records and media live under this exact event prefix.
-    const { blobs = [] } = await store.list({ prefix: `events/${eventId}/`, consistency: "strong" });
-    const eventKeys = blobs.map(({ key }) => key).filter(key => key.startsWith(`events/${eventId}/`));
-    await Promise.all(eventKeys.map(key => store.delete(key)));
-
-    // Remove the event's Admin credentials and invalidate existing Admin sessions.
+    // Revoke access first. The event metadata is deleted last so a failed cleanup can be retried.
     await Promise.all([
       store.delete(`auth/admin-links/${eventId}.json`).catch(() => {}),
       store.delete(`auth/admins/${eventId}.json`).catch(() => {})
@@ -28,7 +23,13 @@ export async function onRequestDelete({ request, params }) {
       const session = await store.get(key, { type: "json", consistency: "strong" }).catch(() => null);
       if (session?.role === "admin" && session.eventId === eventId) await store.delete(key);
     }));
-    return json({ ok: true, eventId, deletedRecords: eventKeys.length });
+
+    // Delete only this event's records, guests/RSVP and media objects.
+    const { blobs = [] } = await store.list({ prefix: `events/${eventId}/`, consistency: "strong" });
+    const eventKeys = blobs.map(({ key }) => key).filter(key => key.startsWith(`events/${eventId}/`) && key !== metaKey);
+    await Promise.all(eventKeys.map(key => store.delete(key)));
+    await store.delete(metaKey);
+    return json({ ok: true, eventId, deletedRecords: eventKeys.length + 1 });
   } catch {
     return json({ error: "Penghapusan acara belum selesai. Silakan coba lagi atau periksa Blob Storage." }, 503);
   }
