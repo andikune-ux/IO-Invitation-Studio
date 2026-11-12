@@ -1,4 +1,5 @@
 import { getStore } from "@edgeone/pages-blob";
+import { recordOperationalError } from "../../_lib/monitoring.js";
 import { createHash, timingSafeEqual } from "node:crypto";
 import { json, validEventId } from "../../_lib/http.js";
 import { getGuestAccessExpiry } from "../../_lib/guest-expiry.js";
@@ -35,5 +36,5 @@ export async function onRequestGet({ request }) {
       return json({ error: "Token undangan tidak valid." }, 404);
     }
 return json({ ok: true, guest: { guestId, name: guest.name } });
-  } catch { return json({ error: "Data tamu belum tersedia." }, 503); }
+  } catch (error) { await recordOperationalError(request, "/api/guest/resolve", error, 503); return json({ error: "Data tamu belum tersedia." }, 503); }
 }
