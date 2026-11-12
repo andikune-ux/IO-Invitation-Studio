@@ -23,7 +23,8 @@ export async function onRequestGet({ request }) {
         createdAt: guest.createdAt,
         rsvp: guest.rsvp || "pending",
         linkActive: guest.linkActive !== false,
-        linkExpiresAt: guest.linkExpiresAt || null
+        linkExpiresAt: guest.linkExpiresAt || null,
+        legacyTokenRequired: Boolean(guest.tokenHash)
       };
     }));
     return json({ ok: true, guests: guests.filter(Boolean) });
