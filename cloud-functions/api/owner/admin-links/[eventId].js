@@ -1,4 +1,5 @@
 import { getStore } from "@edgeone/pages-blob";
+import { recordOperationalError } from "../../../_lib/monitoring.js";
 import { json, readJson, validEventId } from "../../../_lib/http.js";
 import { requireOwner } from "../../../_lib/auth.js";
 
@@ -31,7 +32,8 @@ export async function onRequestPatch({ request, params }) {
     const rotatedAt = new Date().toISOString();
     await db.setJSON(key, { eventId, revoked: false, durationMonths, createdAt: current.createdAt || rotatedAt, rotatedAt, updatedAt: rotatedAt, expiresAt });
     return json({ ok: true, eventId, revoked: false, durationMonths, expiresAt, rotatedAt });
-  } catch {
+  } catch (error) {
+    await recordOperationalError(request, "/api/owner/admin-links/:eventId PATCH", error, 503);
     return json({ error: "Gagal memperbarui tautan Admin." }, 503);
   }
 }
