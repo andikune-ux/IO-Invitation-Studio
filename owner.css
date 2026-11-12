@@ -32,3 +32,21 @@
 
 /* Owner operational error feed */
 .runtime-panel{display:grid;gap:8px;margin-top:16px;padding:14px;border:1px solid #ffffffc9;border-radius:15px;background:#ffffff65}.runtime-panel>b{font-size:11px}.runtime-panel>small{font-size:9px;color:#858da3}.runtime-errors{display:grid;gap:8px}.runtime-error{padding:11px 12px;border:1px solid #f1d9dc;border-radius:12px;background:#fff8f8}.runtime-error>div{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}.runtime-error b{font-size:10px;color:#9f3e4b}.runtime-code{font-size:9px;color:#8a7780}.runtime-error p{font-size:10px;color:#665a60;margin:5px 0;overflow-wrap:anywhere}.runtime-error small,.runtime-empty{font-size:9px;color:#8e8790}.runtime-empty{padding:12px;border-radius:10px;background:#ffffff8a}
+
+/* Compact event access indicator */
+.event-heading{display:flex;align-items:center;justify-content:flex-start;gap:7px;min-width:0}
+.event-title{line-height:1.25}
+.access-indicator{display:inline-block;flex:0 0 8px;width:8px;height:8px;border-radius:50%;box-shadow:0 0 0 3px #9299aa20}
+.access-indicator--active{background:#20a477;box-shadow:0 0 0 3px #20a47720}
+.access-indicator--expired{background:#d94c5c;box-shadow:0 0 0 3px #d94c5c20}
+.access-indicator--pending{background:#d59a36;box-shadow:0 0 0 3px #d59a3620}
+.access-indicator--archived{background:#9299aa;box-shadow:0 0 0 3px #9299aa20}
+.event-category{margin-top:3px;color:#858da3;font-size:10px;line-height:1.35}
+.event-access-status{margin-top:3px;font-size:10px;line-height:1.4;font-weight:700}
+.event-access-status--active{color:#25815e}
+.event-access-status--expired{color:#b42336}
+.event-access-status--pending{color:#956000}
+.event-access-status--archived{color:#858da3}
+.system-logs-panel{scroll-margin-top:18px}
+.runtime-errors{display:grid;gap:8px}
+@media(max-width:720px){.event-heading{gap:7px}.event-category,.event-access-status{font-size:10px}}

@@ -28,7 +28,7 @@
       });db.close();
     }catch{}
   }
-  function showApp() { authenticated=true; loginView.hidden=true; appView.hidden=false; $('#logout').hidden=false; loadOwnerSettings().finally(loadEvents); }
+  function showApp() { authenticated=true; loginView.hidden=true; appView.hidden=false; $('#logout').hidden=false; loadEvents(); }
   function hideApp() { authenticated=false; loginView.hidden=false; appView.hidden=true; $('#logout').hidden=true; $('#owner-token').value=''; }
   async function checkSession() { try { const data=await api('/api/auth/me'); if(data.authenticated && data.user?.role==='owner') showApp(); } catch {} }
   loginForm.addEventListener('submit', async (event) => {
@@ -124,57 +124,12 @@
     finally{button.disabled=false;button.textContent=original;}
   }
 
-  const DEFAULT_STATUS_COLORS={active:"#20a477",expired:"#d94c5c",pending:"#d59a36",archived:"#9299aa"};
-  let statusColors={...DEFAULT_STATUS_COLORS};
-  function applyStatusColors(){
-    Object.entries(statusColors).forEach(([key,color])=>{
-      document.documentElement.style.setProperty("--status-"+key,color);
-      const input=document.querySelector('[data-status-color="'+key+'"]');if(input)input.value=color;
-    });
-  }
-  async function loadOwnerSettings(){
-    try{
-      const data=await api("/api/owner/settings");
-      statusColors={...DEFAULT_STATUS_COLORS,...(data.settings?.statusColors||{})};
-      applyStatusColors();
-    }catch(error){setStatus("#health-status","Pengaturan warna belum dapat dimuat: "+error.message,true);}
-  }
-  $("#save-status-colors").addEventListener("click",async()=>{
-    const colors={};
-    document.querySelectorAll("[data-status-color]").forEach(input=>{colors[input.dataset.statusColor]=input.value;});
-    const button=$("#save-status-colors");button.disabled=true;
-    try{
-      const data=await api("/api/owner/settings",{method:"PUT",body:JSON.stringify({statusColors:colors})});
-      statusColors={...DEFAULT_STATUS_COLORS,...data.settings.statusColors};applyStatusColors();
-      setStatus("#health-status","Warna indikator berhasil disimpan ke cloud Owner.");toast("Pengaturan warna tersimpan.");
-    }catch(error){setStatus("#health-status",error.message,true);}
-    finally{button.disabled=false;}
-  });
-  document.querySelectorAll("[data-status-color]").forEach(input=>input.addEventListener("input",()=>{
-    statusColors[input.dataset.statusColor]=input.value;applyStatusColors();
-  }));
-  function renderHealth(){
-    const counts={active:0,expired:0,pending:0,archived:0};
-    const issues=[];
-    cachedEvents.forEach(e=>{
-      const g=e.guestAccess||{};
-      if(e.status==="archived"){counts.archived++;return;}
-      if(!e.published||g.status==="not_published"||g.status==="date_missing"){counts.pending++;issues.push({event:e,kind:"pending",message:!e.published?"Undangan belum dipublikasikan":"Tanggal acara belum tersedia; masa aktif otomatis belum dapat dihitung."});return;}
-      if(g.status==="expired"){counts.expired++;issues.push({event:e,kind:"expired",message:g.reason||"Masa aktif undangan telah berakhir."});return;}
-      if(g.status==="active"){counts.active++;return;}
-      counts.pending++;issues.push({event:e,kind:"pending",message:"Status akses belum dapat dipastikan dari metadata."});
-    });
-    Object.entries(counts).forEach(([key,value])=>{const node=$("#health-"+key);if(node)node.textContent=value;});
-    const detail=$("#health-details");
-    detail.innerHTML=issues.length?'<b>Perlu perhatian</b>'+issues.map(({event,kind,message})=>'<div class="health-issue"><span class="health-dot" data-status-dot="'+kind+'"></span><div><strong>'+escapeHtml(event.title)+'</strong><small>'+escapeHtml(event.eventId)+' · '+escapeHtml(message)+'</small>'+(event.guestAccess?.expiresAt?'<small>Kedaluwarsa: '+escapeHtml(new Date(event.guestAccess.expiresAt).toLocaleString("id-ID",{timeZone:"Asia/Jakarta"}))+' WIB</small>':'')+'</div><button type="button" data-health-edit="'+escapeHtml(event.eventId)+'">Buka acara</button></div>').join(''):'<div class="health-clear">Semua acara memiliki status akses yang teridentifikasi. Tetap lakukan pemeriksaan berkala.</div>';
-    detail.querySelectorAll("[data-health-edit]").forEach(button=>button.addEventListener("click",()=>location.href="./index.html?event="+encodeURIComponent(button.dataset.healthEdit)));
+  function renderOperationalLogs(){
     const runtime=$("#runtime-errors");
-    if(runtime){
-      if(cachedOperationalErrors===null)runtime.innerHTML='<div class="runtime-empty">Log operasional tidak dapat dimuat saat ini.</div>';
-      else if(!cachedOperationalErrors.length)runtime.innerHTML='<div class="runtime-empty">Belum ada kegagalan aplikasi yang tercatat.</div>';
-      else runtime.innerHTML=cachedOperationalErrors.slice(0,20).map(log=>'<article class="runtime-error"><div><b>'+escapeHtml(log.endpoint||"Endpoint tidak diketahui")+'</b><span class="runtime-code">HTTP '+escapeHtml(log.status)+' · '+escapeHtml(log.requestId||log.id||"—")+'</span></div><p>'+escapeHtml(log.message||"Kesalahan tanpa pesan")+'</p><small>'+escapeHtml(log.createdAt?new Date(log.createdAt).toLocaleString("id-ID",{timeZone:"Asia/Jakarta"}):"—")+' WIB</small></article>').join('');
-    }
-    applyStatusColors();
+    if(!runtime)return;
+    if(cachedOperationalErrors===null)runtime.innerHTML='<div class="runtime-empty">Log operasional tidak dapat dimuat saat ini.</div>';
+    else if(!cachedOperationalErrors.length)runtime.innerHTML='<div class="runtime-empty">Belum ada kegagalan aplikasi yang tercatat.</div>';
+    else runtime.innerHTML=cachedOperationalErrors.slice(0,20).map(log=>'<article class="runtime-error"><div><b>'+escapeHtml(log.endpoint||"Endpoint tidak diketahui")+'</b><span class="runtime-code">HTTP '+escapeHtml(log.status)+' · '+escapeHtml(log.requestId||log.id||"—")+'</span></div><p>'+escapeHtml(log.message||"Kesalahan tanpa pesan")+'</p><small>'+escapeHtml(log.createdAt?new Date(log.createdAt).toLocaleString("id-ID",{timeZone:"Asia/Jakarta"}):"—")+' WIB</small></article>').join('');
   }
   function renderEvents(){
     const query=($('#event-search').value||'').trim().toLowerCase();
@@ -187,13 +142,13 @@
     $('#event-count').textContent=events.length+' event';
     if(!events.length){$('#events-list').innerHTML='<div class="empty"><span>✧</span>'+(cachedEvents.length?'Tidak ada acara yang cocok.':'Belum ada acara. Buat event pertama di atas.')+'</div>';return;}
     $('#events-list').innerHTML=events.map(e=>{
-      const link=e.adminLink||{},legacyAdmin=e.admin||null,hasLink=Boolean(e.adminLink),active=Boolean(link.active),legacyActive=Boolean(legacyAdmin&&!legacyAdmin.disabled),expiry=link.expiresAt?new Date(link.expiresAt).toLocaleDateString('id-ID',{timeZone:'Asia/Jakarta'}):'—';const guest=e.guestAccess||{},guestExpiry=guest.expiresAt?new Date(guest.expiresAt).toLocaleDateString('id-ID',{timeZone:'Asia/Jakarta'}):'—';const guestBadge=guest.status==='expired'?'<span class="badge guest-expired">Tamu kedaluwarsa</span>':guest.status==='active'?'<span class="badge guest-active">Undangan tamu aktif</span>':guest.status==='not_published'?'<span class="badge warn">Belum dipublikasikan</span>':'<span class="badge guest-pending">Tanggal acara belum tersedia</span>';
-      return '<article class="event-card" data-event="'+escapeHtml(e.eventId)+'"><div><div class="event-title">'+escapeHtml(e.title)+'</div><div class="event-meta">ID: '+escapeHtml(e.eventId)+' · Dibuat: '+escapeHtml(e.createdAt?new Date(e.createdAt).toLocaleDateString('id-ID'):'—')+' · Diperbarui: '+escapeHtml(e.updatedAt?new Date(e.updatedAt).toLocaleString('id-ID'):'—')+'</div><div class="event-badges"><span class="badge category-badge">'+escapeHtml(e.category||'Kategori belum ditentukan')+'</span>'+(e.religion?'<span class="badge religion-badge">'+escapeHtml(e.religion)+'</span>':'')+'<span class="badge '+(e.published?'good':'warn')+'">'+(e.published?'Undangan terbit':'Draft')+'</span><span class="badge">'+(e.status==='archived'?'Diarsipkan':'Aktif')+'</span><span class="badge '+(active?'good':'warn')+'">'+(hasLink?(active?'Admin aktif':link.expired?'Admin kedaluwarsa':link.revoked?'Admin dicabut':'Admin belum aktif'):legacyAdmin?(legacyActive?'Admin akun aktif':'Admin akun dinonaktifkan'):'Admin belum aktif')+'</span>'+(link.expiresAt?'<span class="badge expiry-badge">Admin sampai '+escapeHtml(expiry)+'</span>':'')+guestBadge+(guest.expiresAt?'<span class="badge '+(guest.status==='expired'?'guest-expired':'expiry-badge')+'">Tamu sampai '+escapeHtml(guestExpiry)+'</span>':'')+'</div>'+(guest.reason?'<small class="guest-expiry-reason">'+escapeHtml(guest.reason)+'</small>':'')+(guest.eventDate?'<small class="guest-expiry-reason">Tanggal acara: '+escapeHtml(new Date(guest.eventDate+'T00:00:00+07:00').toLocaleDateString('id-ID',{timeZone:'Asia/Jakarta'}))+' WIB</small>':'')+'</div><div class="event-actions"><button data-action="copy-admin">Salin Link Admin</button><button data-action="open-admin">Buka Admin</button><label class="link-duration-control"><span>Masa berlaku</span><select data-duration aria-label="Masa berlaku Admin">'+[1,3,6,9,12].map(n=>'<option value="'+n+'"'+(Number(link.durationMonths||12)===n?' selected':'')+'>'+n+' bulan</option>').join('')+'</select></label>'+(e.published?'<label class="link-duration-control"><span>Perpanjang tamu</span><select data-guest-duration aria-label="Perpanjangan undangan tamu"><option value="1">1 bulan</option><option value="3">3 bulan</option><option value="6">6 bulan</option><option value="12">12 bulan</option></select></label><button data-action="extend-guest">Perpanjang undangan</button>'+(guest.source==='owner_extension'?'<button data-action="reset-guest-expiry">Kembali ke H+1 bulan</button>':''):'')+(hasLink?(active?'<button data-action="extend">Perpanjang akses Admin</button><button class="danger" data-action="revoke">Cabut akses</button>':'<button data-action="activate">Aktifkan akses</button>'):legacyAdmin?'<button data-action="'+(legacyActive?'admin-disable':'admin-enable')+'">'+(legacyActive?'Nonaktifkan Admin':'Aktifkan Admin')+'</button><button data-action="admin-reset-password">Reset password Admin</button>':'<button data-action="activate">Buat akses Admin</button>')+'<button data-action="rename">Ubah nama</button><button data-action="archive">'+(e.status==='archived'?'Aktifkan acara':'Arsipkan')+'</button><button data-action="edit">Edit undangan</button><button data-action="export">Backup ZIP</button><button class="danger" data-action="delete">Hapus undangan</button></div></article>';
+      const link=e.adminLink||{},legacyAdmin=e.admin||null,hasLink=Boolean(e.adminLink),active=Boolean(link.active),legacyActive=Boolean(legacyAdmin&&!legacyAdmin.disabled),expiry=link.expiresAt?new Date(link.expiresAt).toLocaleDateString('id-ID',{timeZone:'Asia/Jakarta'}):'—';const guest=e.guestAccess||{},guestExpiry=guest.expiresAt?new Date(guest.expiresAt).toLocaleDateString('id-ID',{timeZone:'Asia/Jakarta'}):'—';const accessStatus=e.status==='archived'?'archived':guest.status==='expired'?'expired':!e.published||guest.status==='not_published'||guest.status==='date_missing'?'pending':guest.status==='active'?'active':'pending';const accessLabel={active:'Aktif',expired:'Kedaluwarsa',pending:'Perlu ditinjau',archived:'Diarsipkan'}[accessStatus];const accessDetail=accessStatus==='archived'?'Acara diarsipkan':accessStatus==='expired'?(guest.reason||'Masa aktif undangan telah berakhir.')+' · Berakhir '+(guest.expiresAt?guestExpiry:''):accessStatus==='active'?'Aktif · '+(guest.expiresAt?'Berlaku sampai '+guestExpiry:'Akses undangan tersedia'):!e.published?'Belum diterbitkan':guest.status==='date_missing'?'Tanggal acara belum tersedia':guest.reason||'Status akses belum dapat dipastikan';
+      return '<article class="event-card" data-event="'+escapeHtml(e.eventId)+'"><div><div class="event-heading"><div class="event-title">'+escapeHtml(e.title)+'</div><span class="access-indicator access-indicator--'+accessStatus+'" title="Status akses: '+accessLabel+'" aria-label="Status akses: '+accessLabel+'"></span></div><div class="event-category">'+escapeHtml(e.category||'Kategori belum ditentukan')+'</div><div class="event-access-status event-access-status--'+accessStatus+'">'+escapeHtml(accessDetail)+'</div><div class="event-meta">ID: '+escapeHtml(e.eventId)+' · Dibuat: '+escapeHtml(e.createdAt?new Date(e.createdAt).toLocaleDateString('id-ID'):'—')+' · Diperbarui: '+escapeHtml(e.updatedAt?new Date(e.updatedAt).toLocaleString('id-ID'):'—')+'</div><div class="event-badges">'+(e.religion?'<span class="badge religion-badge">'+escapeHtml(e.religion)+'</span>':'')+'<span class="badge '+(e.published?'good':'warn')+'">'+(e.published?'Undangan terbit':'Draft')+'</span><span class="badge">'+(e.status==='archived'?'Diarsipkan':'Aktif')+'</span><span class="badge '+(active?'good':'warn')+'">'+(hasLink?(active?'Admin aktif':link.expired?'Admin kedaluwarsa':link.revoked?'Admin dicabut':'Admin belum aktif'):legacyAdmin?(legacyActive?'Admin akun aktif':'Admin akun dinonaktifkan'):'Admin belum aktif')+'</span>'+(link.expiresAt?'<span class="badge expiry-badge">Admin sampai '+escapeHtml(expiry)+'</span>':'')+'</div>'+'</div><div class="event-actions"><button data-action="copy-admin">Salin Link Admin</button><button data-action="open-admin">Buka Admin</button><label class="link-duration-control"><span>Masa berlaku</span><select data-duration aria-label="Masa berlaku Admin">'+[1,3,6,9,12].map(n=>'<option value="'+n+'"'+(Number(link.durationMonths||12)===n?' selected':'')+'>'+n+' bulan</option>').join('')+'</select></label>'+(e.published?'<label class="link-duration-control"><span>Perpanjang tamu</span><select data-guest-duration aria-label="Perpanjangan undangan tamu"><option value="1">1 bulan</option><option value="3">3 bulan</option><option value="6">6 bulan</option><option value="12">12 bulan</option></select></label><button data-action="extend-guest">Perpanjang undangan</button>'+(guest.source==='owner_extension'?'<button data-action="reset-guest-expiry">Kembali ke H+1 bulan</button>':''):'')+(hasLink?(active?'<button data-action="extend">Perpanjang akses Admin</button><button class="danger" data-action="revoke">Cabut akses</button>':'<button data-action="activate">Aktifkan akses</button>'):legacyAdmin?'<button data-action="'+(legacyActive?'admin-disable':'admin-enable')+'">'+(legacyActive?'Nonaktifkan Admin':'Aktifkan Admin')+'</button><button data-action="admin-reset-password">Reset password Admin</button>':'<button data-action="activate">Buat akses Admin</button>')+'<button data-action="rename">Ubah nama</button><button data-action="archive">'+(e.status==='archived'?'Aktifkan acara':'Arsipkan')+'</button><button data-action="edit">Edit undangan</button><button data-action="export">Backup ZIP</button><button class="danger" data-action="delete">Hapus undangan</button></div></article>';
     }).join('');
   }
   async function loadEvents(){
     if(!authenticated)return;const list=$('#events-list');list.innerHTML='<div class="empty"><span>✧</span>Memuat acara…</div>';setStatus('#events-status','');
-    try{const {events=[]}=await api('/api/owner/events');cachedEvents=events;try{const monitor=await api('/api/owner/monitoring');cachedOperationalErrors=monitor.logs||[];}catch{cachedOperationalErrors=null;}$('#total-events').textContent=events.length;$('#active-admins').textContent=events.filter(e=>e.adminLink?.active||(e.admin&&!e.admin.disabled)).length;$('#published-events').textContent=events.filter(e=>e.published).length;$('#draft-events').textContent=events.filter(e=>!e.published&&e.status!=='archived').length;renderHealth();renderEvents();}
+    try{const {events=[]}=await api('/api/owner/events');cachedEvents=events;try{const monitor=await api('/api/owner/monitoring');cachedOperationalErrors=monitor.logs||[];}catch{cachedOperationalErrors=null;}$('#total-events').textContent=events.length;$('#active-admins').textContent=events.filter(e=>e.adminLink?.active||(e.admin&&!e.admin.disabled)).length;$('#published-events').textContent=events.filter(e=>e.published).length;$('#draft-events').textContent=events.filter(e=>!e.published&&e.status!=='archived').length;renderOperationalLogs();renderEvents();}
     catch(error){list.innerHTML='<div class="empty">Tidak dapat memuat data acara.</div>';setStatus('#events-status',error.message,true);}
   }
   $('#event-search').addEventListener('input',renderEvents);
