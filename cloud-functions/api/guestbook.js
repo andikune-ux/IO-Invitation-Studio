@@ -40,15 +40,17 @@ export async function onRequestPost({request}){
   try{
     const db=getStore(STORE);
     if(!await publishedEvent(db,eventId))return json({error:"Undangan belum tersedia."},404);
+    let displayName=name;
     if(guestId){
       const key=`events/${eventId}/guests/${guestId}.json`;
       const guest=await db.get(key,{type:"json",consistency:"strong"});
       if(!guest||guest.linkActive===false)return json({error:"Tautan tamu tidak aktif."},403);
       const token=(request.headers.get("Authorization")||"").replace(/^Bearer\s+/i,"").trim();
       if(guest.tokenHash&&(!token||!equal(guest.tokenHash,digest(token))))return json({error:"Token tamu tidak valid."},403);
+      displayName=guest.name;
       guest.rsvp=rsvp;guest.rsvpUpdatedAt=new Date().toISOString();await db.setJSON(key,guest);
     }
-    const entry={id:randomUUID(),eventId,name:guestId?(await db.get(`events/${eventId}/guests/${guestId}.json`,{type:"json",consistency:"strong"})).name:name,message,rsvp,createdAt:new Date().toISOString()};
+    const entry={id:randomUUID(),eventId,name:displayName,message,rsvp,createdAt:new Date().toISOString()};
     await db.setJSON(`events/${eventId}/guestbook/${entry.id}.json`,entry);
     const {blobs=[]}=await db.list({prefix:`events/${eventId}/guestbook/`,consistency:"strong"});
     const entries=(await Promise.all(blobs.map(async({key})=>db.get(key,{type:"json",consistency:"strong"}))))
