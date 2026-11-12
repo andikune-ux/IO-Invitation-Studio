@@ -39,6 +39,7 @@
   $('#logout').addEventListener('click',async()=>{try{await api('/api/auth/logout',{method:'POST'});}finally{hideApp();}});
   function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
   function makeAdminUrl(eventId){return location.origin+'/admin.html?event='+encodeURIComponent(eventId);}
+  async function copyText(value){if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(value);return;}const field=document.createElement('textarea');field.value=value;field.style.position='fixed';field.style.opacity='0';document.body.appendChild(field);field.select();const ok=document.execCommand('copy');field.remove();if(!ok)throw new Error('Clipboard tidak tersedia. Salin link dari kolom yang ditampilkan.');}
   function revealLink(url){$('#created-link').textContent=url;$('#created-credentials').hidden=false;$('#created-credentials').scrollIntoView({behavior:'smooth',block:'center'});}
   const RELIGION_CATEGORIES=new Set(["Pernikahan","Lamaran","Pertunangan","Keagamaan","Spiritual","Pengajian","Syukuran","Tasyakuran"]);
   const categorySelect=$('#new-category'),religionField=$('#religion-field'),religionSelect=$('#new-religion');
@@ -58,7 +59,7 @@
       revealLink(makeAdminUrl(payload.eventId));
       setStatus('#create-status','Event berhasil dibuat. Link Admin siap disalin dan dibagikan.');
       event.currentTarget.reset();await loadEvents();
-    }catch(error){setStatus('#create-status',error.message+' Jika event sudah tersimpan, buat/rotasi link dari daftar acara.',true);await loadEvents();}
+    }catch(error){setStatus('#create-status',error.message+' Jika event sudah tersimpan, refresh daftar acara lalu salin link Admin.',true);await loadEvents();}
     finally{button.disabled=false;}
   });
   $('#hide-credentials').addEventListener('click',()=>{$('#created-link').textContent='';$('#created-credentials').hidden=true;});
@@ -150,7 +151,7 @@
       if(action==='export'){await exportEventZip(eventId,button);return;}
       if(action==='rename'){const current=card.querySelector('.event-title').textContent;const title=prompt('Nama acara baru:',current);if(title===null)return;if(!title.trim())throw new Error('Nama acara tidak boleh kosong.');await api('/api/owner/events/'+encodeURIComponent(eventId),{method:'PATCH',body:JSON.stringify({title:title.trim()})});}
       if(action==='archive'){const archiving=button.textContent.trim()==='Arsipkan';if(!confirm(archiving?'Arsipkan acara ini? Acara tidak dihapus.':'Aktifkan kembali acara ini?'))return;await api('/api/owner/events/'+encodeURIComponent(eventId),{method:'PATCH',body:JSON.stringify({status:archiving?'archived':'draft'})});}
-      if(action==='copy-admin'){await navigator.clipboard.writeText(makeAdminUrl(eventId));toast('Link Admin berhasil disalin.');}
+      if(action==='copy-admin'){await copyText(makeAdminUrl(eventId));toast('Link Admin berhasil disalin.');}
       if(action==='open-admin'){window.open(makeAdminUrl(eventId),'_blank','noopener');}
       await loadEvents();
     }catch(error){setStatus('#events-status',error.message,true);}finally{button.disabled=false;}
