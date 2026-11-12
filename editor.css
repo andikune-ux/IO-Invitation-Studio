@@ -224,3 +224,6 @@ body.editor-page{margin:0;min-height:100vh;background:linear-gradient(135deg,#e9
 .editor-page .invitation-preview[data-theme="general-atelier"]{background:linear-gradient(145deg,#fffdf8,#f7f0e3);color:#463523;border-color:#d5bd8a;position:relative}.editor-page .invitation-preview[data-theme="general-atelier"] .preview-copy small{color:#a77b3f}.editor-page .invitation-preview[data-theme="general-atelier"] .preview-copy h2,.editor-page .invitation-preview[data-theme="general-atelier"] .preview-copy h3{color:#463523}
 
 .editor-page .media-preview audio{display:block;width:100%;margin-top:10px}
+
+/* Theme-aware invitation CTA preview and accent picker */
+.editor-page .theme-accent-control{display:grid;gap:7px;margin-top:8px;font-size:11px;font-weight:700;color:#68718a}.editor-page .theme-accent-row{display:flex;align-items:center;gap:10px}.editor-page #theme-accent{width:48px;height:38px;padding:3px;border:1px solid #fff;border-radius:10px;background:#fff;cursor:pointer}.editor-page .theme-accent-row .secondary-button{width:auto}.editor-page .preview-theme-action{display:inline-flex;align-items:center;justify-content:center;margin:8px auto 0;padding:9px 15px;border-radius:30px;background:var(--editor-theme-accent,#9b7845);color:#fff;text-decoration:none;font:700 10px "DM Sans",sans-serif;box-shadow:0 6px 14px #00000016}

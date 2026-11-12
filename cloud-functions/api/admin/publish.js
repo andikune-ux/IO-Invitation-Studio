@@ -41,7 +41,8 @@ const cleanContent = (input) => {
         bankAccounts: Array.isArray(entry.bankAccounts) ? entry.bankAccounts.slice(0, 2).map(account => ({ bank: cleanText(account?.bank, 120), manualBank: cleanText(account?.manualBank, 120), holder: cleanText(account?.holder, 120), number: cleanText(account?.number, 40) })) : [],
         featuredCount: Number.isInteger(entry.featuredCount) ? Math.min(6, Math.max(0, entry.featuredCount)) : 0,
         mapUrl: cleanText(entry.mapUrl, 1000),
-        storyEnabled: entry.storyEnabled !== false
+        storyEnabled: entry.storyEnabled !== false,
+        themeAccent: typeof entry.themeAccent === 'string' && /^#[0-9a-fA-F]{6}$/.test(entry.themeAccent) ? entry.themeAccent.toLowerCase() : ''
       };
     }
   }
@@ -54,7 +55,8 @@ const cleanContent = (input) => {
   const allowedTimeZones = new Set(["Asia/Jakarta","Asia/Makassar","Asia/Jayapura"]);
   const timeZone = allowedTimeZones.has(source.timeZone) ? source.timeZone : "Asia/Jakarta";
   for (const [key, entry] of Object.entries(categoryData)) entry.timeZone = allowedTimeZones.has(source.categoryData?.[key]?.timeZone) ? source.categoryData[key].timeZone : timeZone;
-  return { family, bankAccounts, stories, storyEnabled: source.storyEnabled !== false, featuredCount, mapUrl: cleanText(source.mapUrl, 1000), locationLandmark: cleanText(source.locationLandmark, 300), promoUrl: cleanText(source.promoUrl, 1000), socials, timeZone, categoryData };
+  const themeAccent = typeof source.themeAccent === 'string' && /^#[0-9a-fA-F]{6}$/.test(source.themeAccent) ? source.themeAccent.toLowerCase() : '';
+  return { family, bankAccounts, stories, storyEnabled: source.storyEnabled !== false, themeAccent, featuredCount, mapUrl: cleanText(source.mapUrl, 1000), locationLandmark: cleanText(source.locationLandmark, 300), promoUrl: cleanText(source.promoUrl, 1000), socials, timeZone, categoryData };
 };
 const validMediaKey = (key, eventId, kind) => typeof key === "string" &&
   key.startsWith(`events/${eventId}/media/${kind}-`) &&
