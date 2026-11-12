@@ -92,3 +92,21 @@ body.editor-page{margin:0;min-height:100vh;background:linear-gradient(135deg,#e9
 .editor-page .story-switch input:checked+.story-switch-track{background:#16a36a}
 .editor-page .story-switch input:checked+.story-switch-track::after{transform:translateX(16px)}
 .editor-page .story-switch input:focus-visible+.story-switch-track{outline:3px solid #16a36a55;outline-offset:3px}
+
+/* Live preview mirrors the selected guest theme */
+.editor-page .invitation-preview[data-theme]{border-radius:22px;border:1px solid #e8dfcf;box-shadow:0 18px 42px #28372e18;transition:background .2s,color .2s}
+.editor-page .invitation-preview[data-theme] .preview-copy{padding:30px 20px 34px}
+.editor-page .invitation-preview[data-theme="ivory-gold"]{background:#fffdf8;color:#5d4429;border-color:#e9deca}
+.editor-page .invitation-preview[data-theme="emerald-gold"],.editor-page .invitation-preview[data-theme="forest"]{background:#fffefa;color:#173e30;border-color:#dce6dc}
+.editor-page .invitation-preview[data-theme="midnight-gold"]{background:#1b2430;color:#f4ecdc;border-color:#39414a}
+.editor-page .invitation-preview[data-theme="blush-rose"]{background:#fffafd;color:#704553;border-color:#efdae1}
+.editor-page .invitation-preview[data-theme="champagne"]{background:#fffdf9;color:#5b4932;border-color:#e7dfd1}
+.editor-page .invitation-preview[data-theme="royal-blue"],.editor-page .invitation-preview[data-theme="navy-gold"]{background:#fff;color:#213d62;border-color:#dce5f0}
+.editor-page .invitation-preview[data-theme="sage-gold"]{background:#fffefa;color:#435c45;border-color:#dfe7d9}
+.editor-page .invitation-preview[data-theme="sky-celebration"],.editor-page .invitation-preview[data-theme="soft-sky"]{background:#fff;color:#315f82;border-color:#dceaf3}
+.editor-page .invitation-preview[data-theme="lavender"]{background:#fff;color:#5b5278;border-color:#e5e0ef}
+.editor-page .invitation-preview[data-theme="confetti-luxe"]{background:#fffdfa;color:#70472f;border-color:#eadfd3}
+.editor-page .invitation-preview[data-theme="burgundy"]{background:#fffdfb;color:#5e303c;border-color:#e9d9dc}
+.editor-page .invitation-preview[data-theme="charcoal"]{background:#fff;color:#303c46;border-color:#dce0e3}
+.editor-page .invitation-preview[data-theme="midnight-gold"] .preview-copy p{color:#d2c8b4}
+.editor-page .invitation-preview[data-theme] .preview-copy small{color:#b18b4d}
