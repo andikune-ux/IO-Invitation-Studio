@@ -26,7 +26,11 @@ export async function onRequestGet({ request, params }) {
     const meta = await store.get(`events/${eventId}/meta.json`, { type: "json", consistency: "strong" });
     if (!meta) return json({ error: "Acara tidak ditemukan." }, 404);
     const draft = await store.get(`events/${eventId}/draft.json`, { type: "json", consistency: "strong" });
-    return json({ ok: true, draft: draft || null });
+    const mediaUrls = {};
+    for (const [kind, key] of Object.entries(draft?.media || {})) {
+      mediaUrls[kind] = key && !String(key).includes(":") ? `/api/media?key=${encodeURIComponent(key)}` : null;
+    }
+    return json({ ok: true, draft: draft ? { ...draft, mediaUrls } : null });
   } catch {
     return json({ error: "Gagal membaca draft acara." }, 503);
   }
