@@ -15,6 +15,19 @@
     const input = $('#owner-token'), visible = input.type === 'password';
     input.type = visible ? 'text' : 'password'; $('#toggle-owner-token').textContent = visible ? 'Tutup' : 'Lihat';
   });
+  async function clearLocalEventData(eventId){
+    try{localStorage.removeItem('io-invitation-draft:'+eventId);}catch{}
+    try{
+      const request=indexedDB.open('io-invitation-media-demo',1);
+      const db=await new Promise((resolve,reject)=>{request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error)});
+      if(!db.objectStoreNames.contains('media')){db.close();return;}
+      await new Promise((resolve,reject)=>{
+        const tx=db.transaction('media','readwrite'),store=tx.objectStore('media'),keys=store.getAllKeys();
+        keys.onsuccess=()=>keys.result.filter(key=>typeof key==='string'&&key.startsWith(eventId+':')).forEach(key=>store.delete(key));
+        tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);
+      });db.close();
+    }catch{}
+  }
   function showApp() { authenticated=true; loginView.hidden=true; appView.hidden=false; $('#logout').hidden=false; loadEvents(); }
   function hideApp() { authenticated=false; loginView.hidden=false; appView.hidden=true; $('#logout').hidden=true; $('#owner-token').value=''; }
   async function checkSession() { try { const data=await api('/api/auth/me'); if(data.authenticated && data.user?.role==='owner') showApp(); } catch {} }
@@ -134,7 +147,7 @@
     const button=event.target.closest('button[data-action]');if(!button)return;const card=button.closest('[data-event]');const eventId=card.dataset.event;const action=button.dataset.action;button.disabled=true;
     try{
       if(action==='edit'){location.href='./index.html?event='+encodeURIComponent(eventId);return;}
-      if(action==='delete'){const title=card.querySelector('.event-title').textContent;if(!confirm('HAPUS PERMANEN undangan “'+title+'”? Seluruh konten, daftar tamu, RSVP, link Admin/Guest, foto, video, efek suara, dan musik acara ini akan dihapus dari cloud. Tindakan ini tidak dapat dibatalkan.'))return;const typed=prompt('Ketik ID acara untuk konfirmasi penghapusan:\n'+eventId);if(typed!==eventId)throw new Error('ID acara tidak cocok. Penghapusan dibatalkan.');await api('/api/owner/events/'+encodeURIComponent(eventId)+'/delete',{method:'DELETE'});toast('Undangan dan seluruh data acara berhasil dihapus.');await loadEvents();return;}
+      if(action==='delete'){const title=card.querySelector('.event-title').textContent;if(!confirm('HAPUS PERMANEN undangan “'+title+'”? Seluruh konten, daftar tamu, RSVP, link Admin/Guest, foto, video, efek suara, dan musik acara ini akan dihapus dari cloud. Tindakan ini tidak dapat dibatalkan.'))return;const typed=prompt('Ketik ID acara untuk konfirmasi penghapusan:\n'+eventId);if(typed!==eventId)throw new Error('ID acara tidak cocok. Penghapusan dibatalkan.');await api('/api/owner/events/'+encodeURIComponent(eventId)+'/delete',{method:'DELETE'});await clearLocalEventData(eventId);toast('Undangan dan seluruh data acara berhasil dihapus.');await loadEvents();return;}
       if(action==='export'){await exportEventZip(eventId,button);return;}
       if(action==='rename'){const current=card.querySelector('.event-title').textContent;const title=prompt('Nama acara baru:',current);if(title===null)return;if(!title.trim())throw new Error('Nama acara tidak boleh kosong.');await api('/api/owner/events/'+encodeURIComponent(eventId),{method:'PATCH',body:JSON.stringify({title:title.trim()})});}
       if(action==='archive'){const archiving=button.textContent.trim()==='Arsipkan';if(!confirm(archiving?'Arsipkan acara ini? Acara tidak dihapus.':'Aktifkan kembali acara ini?'))return;await api('/api/owner/events/'+encodeURIComponent(eventId),{method:'PATCH',body:JSON.stringify({status:archiving?'archived':'draft'})});}
