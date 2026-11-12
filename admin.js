@@ -11,7 +11,7 @@ if(!valid){status('list-status','Link Admin tidak valid atau sudah dicabut. Mint
 let guests=[],issuedLinks={};
 const api=async(url,options={})=>{const r=await fetch(url,{...options,headers:{...headers,...(options.headers||{})}});const d=await r.json().catch(()=>({error:'Respons server tidak valid.'}));if(!r.ok)throw new Error(d.error||'Permintaan gagal.');return d};
 const PUBLIC_ORIGIN='https://io-invitation-studio.edgeone.dev';
-const inviteUrl=g=>PUBLIC_ORIGIN+'/guest.html?event='+encodeURIComponent(eventId)+'&guestId='+encodeURIComponent(g.guestId)+'#invite='+encodeURIComponent(g.token);
+const inviteUrl=g=>PUBLIC_ORIGIN+'/preview/'+encodeURIComponent(eventId)+'?guestId='+encodeURIComponent(g.guestId)+'#invite='+encodeURIComponent(g.token);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 async function copyLink(url){if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(url);return;}const el=document.createElement('textarea');el.value=url;el.style.position='fixed';el.style.opacity='0';document.body.appendChild(el);el.select();const ok=document.execCommand('copy');el.remove();if(!ok)throw new Error('Tidak bisa menyalin otomatis. Tekan dan tahan link untuk menyalin.');}
 async function shareLink(url,name){const shareData={title:'Undangan untuk '+name,text:'Dengan hormat, kami mengundang Anda. Silakan buka undangan berikut:',url};if(navigator.share){await navigator.share(shareData);return;}window.open('https://wa.me/?text='+encodeURIComponent(shareData.text+' '+url),'_blank','noopener');}
