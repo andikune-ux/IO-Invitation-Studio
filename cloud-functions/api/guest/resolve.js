@@ -25,9 +25,6 @@ export async function onRequestGet({ request }) {
     if (guest.tokenHash && (!token || !equal(guest.tokenHash, digest(token)))) {
       return json({ error: "Token undangan tidak valid." }, 404);
     }
-    if (!guest.tokenHash && token) {
-      return json({ error: "Tautan undangan tidak valid." }, 404);
-    }
-    return json({ ok: true, guest: { guestId, name: guest.name } });
+return json({ ok: true, guest: { guestId, name: guest.name } });
   } catch { return json({ error: "Data tamu belum tersedia." }, 503); }
 }
