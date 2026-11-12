@@ -49,7 +49,7 @@ const cleanContent = (input) => {
 };
 const validMediaKey = (key, eventId, kind) => typeof key === "string" &&
   key.startsWith(`events/${eventId}/media/${kind}-`) &&
-  /^events\/[a-z0-9][a-z0-9-]{2,63}\/media\/[a-z0-9-]+\.(jpg|jpeg|png|webp|mp4|webm)$/.test(key);
+  /^events\/[a-z0-9][a-z0-9-]{2,63}\/media\/[a-z0-9-]+\.(jpg|jpeg|png|webp|mp4|webm|mp3|m4a|aac|ogg|wav)$/.test(key);
 
 export async function onRequestPost({ request }) {
   const body = await readJson(request);
