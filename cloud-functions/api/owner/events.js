@@ -1,6 +1,7 @@
 import { getStore } from "@edgeone/pages-blob";
 import { json } from "../../_lib/http.js";
 import { requireOwner } from "../../_lib/auth.js";
+import { getGuestAccessExpiry } from "../../_lib/guest-expiry.js";
 
 const STORE_NAME = "io-invitation-media";
 
@@ -29,6 +30,7 @@ export async function onRequestGet({ request }) {
         updatedAt: meta.updatedAt || null,
         published: invitation?.status === "published",
         publishedAt: invitation?.publishedAt || null,
+        guestAccess: (() => { const expiry = getGuestAccessExpiry(invitation || {}, meta); return { status: invitation?.status !== "published" ? "not_published" : !expiry ? "date_missing" : Date.parse(expiry.expiresAt) <= Date.now() ? "expired" : "active", expiresAt: expiry?.expiresAt || null, eventDate: expiry?.eventDate || null, source: expiry?.source || null, reason: expiry && Date.parse(expiry.expiresAt) <= Date.now() ? "Lewat satu bulan kalender dari tanggal acara." : null }; })(),
         admin: admin ? { legacy: true, username: admin.username, displayName: admin.displayName, disabled: Boolean(admin.disabled) } : null,
         adminLink: adminLink ? { revoked: Boolean(adminLink.revoked), active: !adminLink.revoked && (!adminLink.expiresAt || (Number.isFinite(Date.parse(adminLink.expiresAt)) && Date.parse(adminLink.expiresAt) > Date.now())), expired: Boolean(adminLink.expiresAt && (!Number.isFinite(Date.parse(adminLink.expiresAt)) || Date.parse(adminLink.expiresAt) <= Date.now())), durationMonths: adminLink.durationMonths || null, expiresAt: adminLink.expiresAt || null, createdAt: adminLink.createdAt || null } : null
       };
