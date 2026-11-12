@@ -16,7 +16,7 @@ const TYPES = {
   "audio/aac": { ext: "aac", max: 15 * 1024 * 1024, kind: "audio" },
   "audio/ogg": { ext: "ogg", max: 15 * 1024 * 1024, kind: "audio" },
   "audio/wav": { ext: "wav", max: 15 * 1024 * 1024, kind: "audio" },
-  "audio/webm": { ext: "webm", max: 15 * 1024 * 1024, kind: "audio" }
+  "audio/webm": { ext: "weba", max: 15 * 1024 * 1024, kind: "audio" }
 };
 
 export async function onRequestPost({ request }) {
