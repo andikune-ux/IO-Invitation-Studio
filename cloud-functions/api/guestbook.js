@@ -1,6 +1,7 @@
 import { getStore } from "@edgeone/pages-blob";
 import { createHash, timingSafeEqual, randomUUID } from "node:crypto";
 import { json, readJson, safeText, validEventId } from "../_lib/http.js";
+import { getGuestAccessExpiry } from "../_lib/guest-expiry.js";
 
 const STORE = "io-invitation-media";
 const digest = value => createHash("sha256").update(value).digest("hex");
@@ -16,14 +17,18 @@ async function publishedEvent(db,eventId){
     db.get(`events/${eventId}/meta.json`,{type:"json",consistency:"strong"}),
     db.get(`events/${eventId}/invitation.json`,{type:"json",consistency:"strong"})
   ]);
-  return Boolean(meta && meta.status!=="archived" && invitation && invitation.status==="published");
+  if(!meta || meta.status==="archived" || !invitation || invitation.status!=="published")return null;
+  const expiry=getGuestAccessExpiry(invitation,meta);
+  return {expired:Boolean(expiry && Date.parse(expiry.expiresAt)<=Date.now()),expiresAt:expiry?.expiresAt||null};
 }
 export async function onRequestGet({request}){
   const eventId=new URL(request.url).searchParams.get("eventId")||"";
   if(!validEventId(eventId))return json({error:"ID acara tidak valid."},400);
   try{
     const db=getStore(STORE);
-    if(!await publishedEvent(db,eventId))return json({error:"Undangan belum tersedia."},404);
+    const access=await publishedEvent(db,eventId);
+    if(!access)return json({error:"Undangan belum tersedia."},404);
+    if(access.expired)return json({error:"Masa aktif undangan telah berakhir.",expiresAt:access.expiresAt},410);
     const {blobs=[]}=await db.list({prefix:`events/${eventId}/guestbook/`,consistency:"strong"});
     const entries=(await Promise.all(blobs.map(async({key})=>db.get(key,{type:"json",consistency:"strong"}))))
       .filter(Boolean).sort((a,b)=>Date.parse(b.createdAt||0)-Date.parse(a.createdAt||0)).slice(0,100)
@@ -39,7 +44,9 @@ export async function onRequestPost({request}){
   if(guestId&&!validGuestId(guestId))return json({error:"ID tamu tidak valid."},400);
   try{
     const db=getStore(STORE);
-    if(!await publishedEvent(db,eventId))return json({error:"Undangan belum tersedia."},404);
+    const access=await publishedEvent(db,eventId);
+    if(!access)return json({error:"Undangan belum tersedia."},404);
+    if(access.expired)return json({error:"Masa aktif undangan telah berakhir.",expiresAt:access.expiresAt},410);
     let displayName=name;
     if(guestId){
       const key=`events/${eventId}/guests/${guestId}.json`;
