@@ -25,5 +25,37 @@ document.addEventListener('click',async e=>{
  const linkBtn=e.target.closest('[data-link-action]');if(linkBtn){const key=linkBtn.dataset.key,url=key==='created'?$('#created-link').dataset.url:issuedLinks[key],g=key==='created'?{name:$('#created-link').dataset.name}:guests.find(x=>x.guestId===key);if(!url||!g)return;try{if(linkBtn.dataset.linkAction==='copy'){await copyLink(url);toast('Link berhasil disalin.');}else{await shareLink(url,g.name);}}catch(err){if(err.name!=='AbortError')toast(err.message||'Gagal membagikan link.');}return;}
  const b=e.target.closest('button[data-action]');if(!b)return;const row=b.closest('[data-id]'),id=row.dataset.id,g=guests.find(x=>x.guestId===id);if(!g)return;b.disabled=true;try{if(b.dataset.action==='generate'){await generateFor(g);return;}if(b.dataset.action==='revoke-link'||b.dataset.action==='restore-link'){const action=b.dataset.action;if(action==='revoke-link'&&!confirm('Cabut akses link undangan untuk '+g.name+'? Link lama akan berhenti berfungsi.'))return;await api('/api/admin/guests/'+encodeURIComponent(id),{method:'PATCH',body:JSON.stringify({eventId,action})});delete issuedLinks[id];toast(action==='revoke-link'?'Akses link berhasil dicabut.':'Akses link dipulihkan.');await load();return;}if(b.dataset.action==='edit'){const name=prompt('Nama tamu dan pasangan:',g.name);if(name===null)return;if(!name.trim())throw new Error('Nama tidak boleh kosong.');await api('/api/admin/guests/'+encodeURIComponent(id),{method:'PATCH',body:JSON.stringify({eventId,name:name.trim()})});delete issuedLinks[id];toast('Nama tamu diperbarui.');}if(b.dataset.action==='delete'){if(!confirm('Hapus tamu '+g.name+'? Link undangannya juga tidak berlaku lagi.'))return;await api('/api/admin/guests/'+encodeURIComponent(id)+'?eventId='+encodeURIComponent(eventId),{method:'DELETE'});delete issuedLinks[id];toast('Tamu dihapus.');}await load();}catch(err){status('list-status',err.message,true);}finally{b.disabled=false;}
 });
+
+let guestbookEntries=[];
+function renderAdminGuestbook(){
+ const host=$('#admin-guestbook-list');if(!host)return;
+ $('#guestbook-admin-total').textContent=guestbookEntries.length;
+ if(!guestbookEntries.length){host.innerHTML='<div class="empty">Belum ada komentar atau ucapan dari tamu.</div>';return;}
+ host.innerHTML=guestbookEntries.map(entry=>'<article class="admin-guestbook-card" data-entry-id="'+esc(entry.id)+'"><div class="admin-guestbook-head"><div><b>'+esc(entry.name||'Tamu')+'</b><small>'+esc(entry.createdAt?new Date(entry.createdAt).toLocaleString('id-ID'):'Waktu tidak tersedia')+'</small></div><span class="guestbook-status '+(entry.rsvp==='tidak_hadir'?'absent':'')+'">'+(entry.rsvp==='tidak_hadir'?'Tidak Hadir':'Hadir')+'</span></div>'+(entry.message?'<p class="admin-guest-message">'+esc(entry.message)+'</p>':'<p class="admin-guest-message muted">Tamu tidak menulis pesan.</p>')+(entry.reply?'<div class="admin-existing-reply"><small>Balasan Admin · '+esc(entry.repliedAt?new Date(entry.repliedAt).toLocaleString('id-ID'):'')+'</small><p>'+esc(entry.reply)+'</p></div>':'')+'<form class="admin-reply-form"><label for="reply-'+esc(entry.id)+'">'+(entry.reply?'Ubah balasan':'Balas komentar')+'</label><textarea id="reply-'+esc(entry.id)+'" name="reply" maxlength="1000" required placeholder="Tulis balasan yang akan dilihat tamu…">'+esc(entry.reply||'')+'</textarea><div class="admin-reply-actions"><button type="submit" class="make-link">'+(entry.reply?'Simpan perubahan':'Kirim balasan')+'</button>'+(entry.reply?'<button type="button" class="minor delete" data-reply-action="delete">Hapus balasan</button>':'')+'</div></form></article>').join('');
+}
+async function loadAdminGuestbook(){
+ const host=$('#admin-guestbook-list');if(!host)return;
+ try{const d=await api('/api/guestbook?eventId='+encodeURIComponent(eventId),{headers:{}});guestbookEntries=d.entries||[];renderAdminGuestbook();status('guestbook-admin-status','');}
+ catch(e){status('guestbook-admin-status',e.message,true);if(!guestbookEntries.length)host.innerHTML='<div class="empty">Komentar belum dapat dimuat.</div>';}
+}
+const guestbookHost=$('#admin-guestbook-list');
+if(guestbookHost){
+ $('#guestbook-refresh').addEventListener('click',loadAdminGuestbook);
+ guestbookHost.addEventListener('submit',async e=>{
+  const form=e.target.closest('.admin-reply-form');if(!form)return;e.preventDefault();
+  const card=form.closest('[data-entry-id]'),id=card.dataset.entryId,button=form.querySelector('button[type=submit]');
+  button.disabled=true;status('guestbook-admin-status','Menyimpan balasan…');
+  try{await api('/api/guestbook/'+encodeURIComponent(id),{method:'PATCH',body:JSON.stringify({eventId,reply:form.elements.reply.value.trim()})});toast('Balasan berhasil dikirim ke undangan tamu.');await loadAdminGuestbook();}
+  catch(err){status('guestbook-admin-status',err.message,true);}finally{button.disabled=false;}
+ });
+ guestbookHost.addEventListener('click',async e=>{
+  const button=e.target.closest('[data-reply-action="delete"]');if(!button)return;
+  const card=button.closest('[data-entry-id]');if(!confirm('Hapus balasan Admin untuk komentar ini?'))return;
+  button.disabled=true;try{await api('/api/guestbook/'+encodeURIComponent(card.dataset.entryId),{method:'PATCH',body:JSON.stringify({eventId,action:'delete-reply'})});toast('Balasan dihapus.');await loadAdminGuestbook();}
+  catch(err){status('guestbook-admin-status',err.message,true);}finally{button.disabled=false;}
+ });
+ loadAdminGuestbook();
+}
+
 load();
 })();
