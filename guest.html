@@ -696,19 +696,11 @@ music.addEventListener('pause',()=>updateMusicControl(false));music.addEventList
   host.prepend(layer);
  }
  function applyPalette(image){
-  try{
-   const canvas=document.createElement('canvas');canvas.width=36;canvas.height=36;
-   const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.drawImage(image,0,0,36,36);
-   const px=ctx.getImageData(0,0,36,36).data, bins=[];
-   for(let i=0;i<px.length;i+=16){const r=px[i],g=px[i+1],b=px[i+2],sat=Math.max(r,g,b)-Math.min(r,g,b),light=(r+g+b)/3;if(light>35&&light<245)bins.push({r,g,b,sat,light})}
-   if(!bins.length)return;
-   bins.sort((a,b)=>b.sat-a.sat);
-   const chosen=[bins[Math.floor(bins.length*.12)],bins[Math.floor(bins.length*.48)],bins[Math.floor(bins.length*.82)]];
-   const colors=chosen.map(c=>'#'+[c.r,c.g,c.b].map(v=>Math.round(v).toString(16).padStart(2,'0')).join(''));
-   body.style.setProperty('--lg-a',colors[0]);body.style.setProperty('--lg-b',colors[1]);body.style.setProperty('--lg-c',colors[2]);
-   body.style.setProperty('--flower-a',colors[0]);body.style.setProperty('--flower-b',colors[1]);
-   document.querySelectorAll('.liquid-flower').forEach(img=>{img.src=flowerData(colors[0],colors[1])});
-  }catch(e){/* Cross-origin images may block canvas sampling; retain elegant fallback palette. */}
+  /* Keep Editorial Romance colors intentional and consistent; never sample random photo hues. */
+  const a='#c7a8ef',b='#f2b8d0',c='#9edbd7';
+  body.style.setProperty('--lg-a',a);body.style.setProperty('--lg-b',b);body.style.setProperty('--lg-c',c);
+  body.style.setProperty('--flower-a',a);body.style.setProperty('--flower-b',b);
+  document.querySelectorAll('.liquid-flower').forEach(img=>{img.src=flowerData(a,b)});
  }
  function init(){
   addFlowers();
