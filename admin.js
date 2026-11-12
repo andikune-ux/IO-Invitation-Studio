@@ -54,7 +54,7 @@ if(guestbookHost){
   button.disabled=true;try{await api('/api/guestbook/'+encodeURIComponent(card.dataset.entryId),{method:'PATCH',body:JSON.stringify({eventId,action:'delete-reply'})});toast('Balasan dihapus.');await loadAdminGuestbook();}
   catch(err){status('guestbook-admin-status',err.message,true);}finally{button.disabled=false;}
  });
- loadAdminGuestbook();
+ loadAdminGuestbook();window.addEventListener("focus",loadAdminGuestbook);document.addEventListener("visibilitychange",()=>{if(!document.hidden)loadAdminGuestbook()});setInterval(loadAdminGuestbook,30000);
 }
 
 load();
