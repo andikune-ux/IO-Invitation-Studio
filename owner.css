@@ -24,3 +24,5 @@
 .link-duration-control select:focus{border-color:#9e97e8;box-shadow:0 0 0 3px #8178e522}
 .event-badges .expiry-badge{background:#e8f2ff;color:#5279a9}
 @media(max-width:520px){.link-duration-control{width:100%;max-width:180px}}
+
+.badge.guest-active{background:#e1f7ed;color:#16845a;border-color:#bdebd7}.badge.guest-expired{background:#ffe4e7;color:#b42336;border-color:#ffc5cc}.badge.guest-pending{background:#fff1d8;color:#956000;border-color:#f5dfae}.guest-expiry-reason{display:block;margin-top:7px;color:#b42336;font-size:10px;font-weight:700}.event-badges{row-gap:7px}
