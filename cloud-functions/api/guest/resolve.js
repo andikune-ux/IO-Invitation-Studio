@@ -9,7 +9,7 @@ export async function onRequestGet({ request }) {
   const url = new URL(request.url);
   const eventId = url.searchParams.get("eventId") || "";
   const guestId = url.searchParams.get("guestId") || "";
-  const token = (request.headers.get("Authorization") || "").replace(/^Bearer\\s+/i, "").trim();
+  const token = (request.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "").trim();
   if (!validEventId(eventId) || !/^[0-9a-f-]{36}$/i.test(guestId) || (token && (token.length < 30 || token.length > 200))) {
     return json({ error: "Tautan tamu tidak valid." }, 400);
   }
