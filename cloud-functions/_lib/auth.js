@@ -75,19 +75,12 @@ export const getSession = async (request) => {
 
 export const requireEventAdmin = async (request, eventId) => {
   if (!originAllowed(request)) return { ok: false, response: json({ error: "Origin tidak diizinkan." }, 403) };
-  const authorization = request.headers.get("Authorization") || "";
-  const bearer = authorization.match(/^Bearer\s+(.+)$/i)?.[1]?.trim() || "";
-  let identity = null;
-  if (bearer && bearer.length >= 40 && bearer.length <= 200) {
-    const link = await store().get(`auth/admin-links/${eventId}.json`, { type: "json", consistency: "strong" });
-    if (link && !link.revoked && (!link.expiresAt || (Number.isFinite(Date.parse(link.expiresAt)) && Date.parse(link.expiresAt) > Date.now())) && safeEqual(link.tokenHash || "", digest(bearer))) {
-      identity = { role: "admin", eventId, access: "link" };
-    }
-  }
-   if (!identity) return { ok: false, response: json({ error: "Tautan Admin tidak valid atau sudah dicabut." }, 401) };
+  if (!validEventId(eventId)) return { ok: false, response: json({ error: "ID acara tidak valid." }, 400) };
+  // Admin access is event-ID based, like opening an invitation URL.
+  // The event ID is an identifier, not a secret credential.
   const meta = await store().get(`events/${eventId}/meta.json`, { type: "json", consistency: "strong" });
   if (!meta || meta.status === "archived") return { ok: false, response: json({ error: "Acara ini diarsipkan atau tidak tersedia untuk dikelola." }, 403) };
-  return { ok: true, session: identity };
+  return { ok: true, session: { role: "admin", eventId, access: "event-id" } };
 };
 
 export const requireOwner = async (request) => {
