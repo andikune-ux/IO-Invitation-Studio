@@ -1,73 +1,50 @@
 # IO Invitation Studio — arsitektur platform
 
-## Domain platform
+## Domain dan deployment
 
-Domain Owner yang dipilih untuk target akhir:
+Domain production yang pernah digunakan: `https://io-invitation-studio.edgeone.dev`. Pastikan DNS, routing, TLS, dan deployment terbaru diuji langsung sebelum menyatakan perubahan aktif.
 
-`undangandigital-iODigitalInvitation.edgeone.dev`
+## Model peran dan akses
 
-Deployment yang sebelumnya diverifikasi dari percakapan menggunakan alamat project EdgeOne:
+1. **Owner** — login dengan secret EdgeOne `IO_ADMIN_API_TOKEN`; mengelola event, akses Admin, desain, media, dan publikasi.
+2. **Admin acara** — membuka `/admin.html?event={eventId}`; akses hanya ke Guest Manager event tersebut.
+3. **Guest** — membuka undangan publik melalui `/guest.html?event={eventId}` atau link personal dengan `guestId`.
 
-`io-invitation-studio.edgeone.dev`
+**Batas keamanan Admin saat ini:** event ID dipakai sebagai identifier sekaligus kunci akses Admin. Siapa pun yang mengetahui ID event dapat mengelola daftar tamu selama akses Admin aktif. Owner dapat mengatur masa berlaku, mengaktifkan kembali, atau mencabut akses, tetapi model ini tidak setara dengan secret token atau autentikasi akun. Jangan membagikan URL Admin secara publik.
 
-Jangan menganggap domain target dan seluruh subdomain sudah aktif sebelum DNS, routing, dan TLS diuji langsung.
+Owner menggunakan sesi cookie HttpOnly. Guest personal link baru memakai UUID acak; link legacy dengan token hash tetap diverifikasi melalui Authorization Bearer header.
 
-## Pola hostname target
+## API utama
 
-- Owner: `undangandigital-iODigitalInvitation.edgeone.dev`
-- Admin: `{slug-penyelenggara}-{kategori}.{OWNER_DOMAIN}`
-- Tamu: `{slug-tamu}-{slug-penyelenggara}-{kategori}.{OWNER_DOMAIN}`
+- `POST /api/auth/owner-login` — autentikasi Owner.
+- `GET /api/owner/events` — daftar event Owner.
+- `POST /api/owner/admin-links` dan `PATCH /api/owner/admin-links/{eventId}` — akses Admin.
+- `GET/POST /api/admin/guests` — daftar dan tambah tamu.
+- `PATCH/DELETE /api/admin/guests/{guestId}` — ubah, cabut/pulihkan link, atau hapus tamu.
+- `GET /api/guest/resolve` — validasi link tamu personal.
+- `GET /api/invitation/{eventId}` — hanya membaca undangan published.
+- `GET /api/media?key=...` — menyajikan media yang direferensikan undangan published, termasuk audio.
+- `GET/POST /api/guestbook?eventId=...` — buku tamu publik dan RSVP per event.
 
-Hostname Admin/Tamu memerlukan registry hostname eksplisit. Jangan menebak role dari jumlah titik atau memecah nama hanya berdasarkan tanda hubung karena nama bisa bertabrakan.
+## Draft, publikasi, dan media
 
-Registry target: `hostname` unik, `role`, `event_id`, `guest_id` (nullable), `status`, dan `expires_at`.
+Draft tersimpan di `events/{eventId}/draft.json` dan hanya dibaca melalui endpoint Owner. Halaman publik membaca `events/{eventId}/invitation.json` dengan status `published`; perubahan draft tidak boleh terlihat sebelum diterbitkan.
 
-## Model peran
+Media publik harus tercantum pada `media` di undangan published. Endpoint media memvalidasi event, status published, dan referensi media sebelum mengirim file. Format yang didukung: JPG, JPEG, PNG, WEBP, MP4, WebM, MP3, M4A, AAC, OGG, WAV, dan audio WebM.
 
-1. **Owner** — login dengan secret EdgeOne `IO_ADMIN_API_TOKEN`; mengelola event, akses Admin, desain, media, domain, publikasi, dan pengaturan platform.
-2. **Admin acara** — tidak memiliki akun/password. Owner menerbitkan URL rahasia dengan token acak 256-bit yang hanya berlaku untuk satu event. Admin dapat mengelola konten dan media event itu melalui editor.
-3. **Guest** — tanpa login; membuka undangan publik dan mengirim RSVP bila fitur tersedia.
+## Konten undangan
 
-Admin token dikirim melalui Authorization Bearer header. Token dibaca dari URL fragment oleh editor dan fragmen dihapus dari address bar. Backend hanya menyimpan SHA-256 token digest. Owner dapat merotasi atau mencabut token; rotasi membuat token lama tidak berlaku. Endpoint Admin menolak token yang tidak valid, dicabut, atau milik event lain. Token Admin tidak dapat mengakses endpoint Owner.
+Konten tersimpan mencakup keluarga, rekening hadiah, galeri, cerita, URL Maps, patokan lokasi, URL promosi, dan akun WhatsApp/TikTok/Instagram. Jadwal pernikahan ditampilkan terpisah; countdown mengacu ke akad jika tersedia, jika tidak ke resepsi. RSVP dan ucapan publik menyimpan nama, status hadir/tidak hadir, pesan, serta waktu kirim.
 
-Saat event lama pertama kali diberi Admin link, akun/password Admin lama dan sesi Admin lama untuk event tersebut dihapus. Endpoint login password lama mengembalikan HTTP 410.
+## Verifikasi sebelum produksi
 
-## Cloud Functions dan Blob Storage
+1. Login Owner dan isolasi endpoint Owner.
+2. Uji link Admin aktif, kedaluwarsa, dicabut, dan dipulihkan.
+3. Uji CRUD tamu, revoke guest link, dan link legacy.
+4. Uji upload serta pemutaran audio, gambar, dan video.
+5. Simpan draft dan pastikan tamu tetap melihat versi published lama.
+6. Terbitkan versi baru dan pastikan halaman tamu menampilkan versi terbaru.
+7. Uji peta, alamat, patokan lokasi, rekening, RSVP, buku tamu publik, serta footer sosial.
+8. Uji backup/restore dan isolasi data antar-event.
 
-Namespace Blob: `io-invitation-media`.
-
-- `POST /api/auth/owner-login` — Owner secret ke sesi Owner HttpOnly.
-- `POST /api/owner/admins` — membuat metadata event.
-- `GET /api/owner/events` — daftar event dan status publikasi/link.
-- `PATCH /api/owner/events/{eventId}` — ubah nama atau arsipkan/aktifkan event.
-- `POST /api/owner/admin-links` — buat Admin link event.
-- `PATCH /api/owner/admin-links/{eventId}` — rotasi atau cabut Admin link.
-- `POST /api/admin/upload-url` — Admin link meminta URL upload sementara.
-- `POST /api/admin/publish` — Admin link menerbitkan konten undangan.
-- `GET /api/invitation/{eventId}` — mengambil undangan yang telah diterbitkan.
-- `GET /api/media?key=...` — menyajikan media yang direferensikan oleh undangan published.
-
-Foto dibatasi 8 MB dan video 25 MB. Endpoint media mem-proxy Blob melalui Cloud Functions; uji kuota dan egress sebelum acara dengan trafik tinggi.
-
-## Owner Control Center
-
-`/owner.html` adalah ruang kendali Owner dengan desain soft-neumorphism dan iOS-inspired liquid glass. Fungsi yang sudah diimplementasikan pada tahap ini:
-- Login Owner dan sesi terlindungi.
-- Ringkasan jumlah event, Admin link aktif, dan undangan terbit.
-- Buat event dan terbitkan Admin link satu kali.
-- Cari dan daftar event.
-- Ubah nama, arsipkan, aktifkan kembali.
-- Rotasi dan cabut Admin link.
-
-Fitur lanjutan seperti Template Studio, Media Library, Guest Manager/RSVP, Analytics, Distribution Center, Domain Manager, Finance, Backup/Restore, audit log, dan pengaturan sistem masih menjadi roadmap. Jangan menampilkan kontrol yang belum memiliki backend sebagai fitur aktif.
-
-## Batasan dan verifikasi deployment
-
-Sebelum produksi:
-1. Pastikan Cloud Functions aktif pada project EdgeOne yang terhubung ke repository ini.
-2. Konfigurasikan `IO_ADMIN_API_TOKEN` sebagai secret server-side.
-3. Pastikan Blob Storage namespace tersedia.
-4. Uji login Owner, create event, issuance link, upload foto/video, publish, link rotation, revoke, serta isolasi akses antar-event.
-5. Uji domain target, wildcard DNS, routing, dan sertifikat TLS.
-
-GitHub Actions `npm run check` hanya memeriksa sintaks JavaScript; bukan pengujian integrasi Blob, keamanan runtime, atau deployment EdgeOne.
+`npm run check` memeriksa sintaks JavaScript dan pemeriksaan skrip halaman tamu. Itu bukan pengujian integrasi Blob Storage, keamanan runtime, atau bukti deployment EdgeOne.
