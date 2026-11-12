@@ -2,7 +2,7 @@ import { getStore } from "@edgeone/pages-blob";
 import { json, readJson, safeText, validEventId } from "../../_lib/http.js";
 import { requireOwner } from "../../_lib/auth.js";
 
-const MEDIA_KINDS = ["cover", "hero", "groom", "bride", "child", "video", ...Array.from({ length: 6 }, (_, i) => "gallery-" + (i + 1)), ...Array.from({ length: 3 }, (_, i) => "story-" + (i + 1))];
+const MEDIA_KINDS = ["cover", "hero", "groom", "bride", "child", "video", "opening-sfx", "background-music", ...Array.from({ length: 6 }, (_, i) => "gallery-" + (i + 1)), ...Array.from({ length: 3 }, (_, i) => "story-" + (i + 1))];
 const cleanText = (value, max = 1500) => typeof value === "string" ? value.trim().slice(0, max) : "";
 const cleanContent = (input) => {
   const source = input && typeof input === "object" && !Array.isArray(input) ? input : {};
@@ -80,13 +80,13 @@ export async function onRequestPost({ request }) {
       if (!key) { finalMedia[kind] = null; continue; }
       if (!validMediaKey(key, eventId, kind)) return json({ error: "Media tersimpan tidak valid." }, 400);
       const ext = key.split(".").pop();
-      const isVideo = kind === "video";
-      if (isVideo ? !["mp4", "webm"].includes(ext) : !["jpg", "jpeg", "png", "webp"].includes(ext)) {
+      const isVideo = kind === "video", isAudio = kind === "opening-sfx" || kind === "background-music";
+      if (isVideo ? !["mp4", "webm"].includes(ext) : isAudio ? !["mp3", "m4a", "aac", "ogg", "wav", "webm"].includes(ext) : !["jpg", "jpeg", "png", "webp"].includes(ext)) {
         return json({ error: "Ekstensi file tidak sesuai jenis media." }, 400);
       }
       const uploaded = await store.get(key, { type: "arrayBuffer", consistency: "strong" });
       if (!uploaded) return json({ error: "File " + kind + " belum selesai diunggah." }, 400);
-      const max = isVideo ? 25 * 1024 * 1024 : 8 * 1024 * 1024;
+      const max = isVideo ? 25 * 1024 * 1024 : isAudio ? 15 * 1024 * 1024 : 8 * 1024 * 1024;
       if (uploaded.byteLength > max) return json({ error: "Ukuran file " + kind + " melebihi batas." }, 413);
       finalMedia[kind] = key;
     }
