@@ -470,6 +470,75 @@ body[data-theme="wedding-editorial"] #guest-profiles .guest-profile:nth-child(ev
  body[data-theme="wedding-editorial"] #guest-profiles .guest-profile:before{font-size:12px}
 }
 
+
+
+/* Editorial Romance — precision finishing pass 3 */
+body[data-theme="wedding-editorial"] .guest-card{max-width:760px;overflow:clip;background:#f5f1eb}
+body[data-theme="wedding-editorial"] .guest-hero-wrap{height:100svh;min-height:640px;max-height:960px}
+body[data-theme="wedding-editorial"] .guest-hero-wrap img{object-position:center 32%;filter:saturate(.88) contrast(1.04)}
+body[data-theme="wedding-editorial"] .guest-copy{margin-top:-285px;padding-bottom:58px}
+body[data-theme="wedding-editorial"] #guest-title{font-size:clamp(62px,15vw,108px);line-height:.86}
+body[data-theme="wedding-editorial"] #guest-opening{max-width:520px;margin:16px auto;color:#fff;font-size:clamp(16px,3vw,19px);letter-spacing:.01em}
+body[data-theme="wedding-editorial"] #guest-names{margin:12px 0 4px;font-size:clamp(39px,9vw,66px)}
+body[data-theme="wedding-editorial"] #guest-family{display:flex;justify-content:center;gap:7px 20px;max-width:580px;margin:12px auto 0}
+body[data-theme="wedding-editorial"] #guest-family p{color:#fff;font:500 14px/1.5 "Cormorant Garamond",serif}
+body[data-theme="wedding-editorial"] #guest-countdown-section{min-height:420px;padding:70px 24px;background-color:#51463b;background-position:center 42%;background-blend-mode:normal}
+body[data-theme="wedding-editorial"] #guest-countdown-section:after{background:linear-gradient(180deg,#17151365,#17151388)}
+body[data-theme="wedding-editorial"] #guest-countdown-heading{position:relative;z-index:1;margin-bottom:8px;color:#fff;font-size:clamp(31px,7vw,46px)}
+body[data-theme="wedding-editorial"] .guest-countdown{position:relative;z-index:1;max-width:560px}
+body[data-theme="wedding-editorial"] .guest-countdown div{min-height:94px;display:flex;flex-direction:column;justify-content:center;border-radius:3px;background:#f49a22}
+body[data-theme="wedding-editorial"] #guest-profiles{padding:0 0 34px}
+body[data-theme="wedding-editorial"] #guest-profile-heading{padding:48px 20px 28px;font-size:clamp(31px,7vw,45px);letter-spacing:.015em}
+body[data-theme="wedding-editorial"] #guest-profiles .guest-profile-grid{grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch}
+body[data-theme="wedding-editorial"] #guest-profiles .guest-profile{position:relative;display:flex;flex-direction:column;justify-content:flex-start;gap:0;min-height:0;padding:30px clamp(9px,2.5vw,22px) 34px;overflow:visible}
+body[data-theme="wedding-editorial"] #guest-profiles .guest-profile[data-profile-role="groom"]{background:#f7f3ed}
+body[data-theme="wedding-editorial"] #guest-profiles .guest-profile[data-profile-role="bride"]{background:#eee7de}
+body[data-theme="wedding-editorial"] #guest-profiles .guest-profile:before{display:none}
+body[data-theme="wedding-editorial"] #guest-profiles .editorial-role{height:42px;display:flex;align-items:flex-end;justify-content:center;gap:1px;margin:0 auto 10px;color:#171513;font:700 clamp(10px,2.4vw,16px) "DM Sans",sans-serif;letter-spacing:.11em;white-space:nowrap}
+body[data-theme="wedding-editorial"] #guest-profiles .editorial-role span{display:inline-block;transform:rotate(calc((var(--letter-index) - (var(--letter-count) - 1)/2)*5deg)) translateY(calc(abs(var(--letter-index) - (var(--letter-count) - 1)/2)*-1px));transform-origin:50% 100%}
+body[data-theme="wedding-editorial"] #guest-profiles .guest-profile img{display:block;width:100%;height:auto;min-height:0;max-height:none;aspect-ratio:4/5;object-fit:cover;border-radius:48% 48% 0 0;box-shadow:0 15px 35px #2b211722}
+body[data-theme="wedding-editorial"] #guest-profiles .guest-profile h3{margin:18px 0 4px;color:#a28e78;font:italic clamp(23px,5vw,34px)/1.1 "Great Vibes",cursive;text-align:center}
+body[data-theme="wedding-editorial"] #guest-profiles .guest-profile:after{content:"";display:block;width:48px;height:1px;margin:13px auto 0;background:#b9a994}
+body[data-theme="wedding-editorial"] #guest-profiles .guest-profile[data-profile-role="groom"] img{order:1}
+body[data-theme="wedding-editorial"] #guest-profiles .guest-profile[data-profile-role="groom"] h3{order:2}
+body[data-theme="wedding-editorial"] #guest-profiles .guest-profile[data-profile-role="bride"] img{order:1}
+body[data-theme="wedding-editorial"] #guest-profiles .guest-profile[data-profile-role="bride"] h3{order:2}
+body[data-theme="wedding-editorial"] #guest-event-section{padding-top:68px;padding-bottom:68px;background:#e8ddce}
+body[data-theme="wedding-editorial"] #guest-event-heading{margin-bottom:32px;font-size:clamp(34px,8vw,50px)}
+body[data-theme="wedding-editorial"] #guest-sessions{grid-template-columns:1fr 1fr;max-width:620px;margin:28px auto 34px;border-left:0;position:relative}
+body[data-theme="wedding-editorial"] #guest-sessions:before{content:"";position:absolute;top:0;bottom:0;left:50%;width:1px;background:#171513;transform:translateX(-50%)}
+body[data-theme="wedding-editorial"] #guest-sessions p{min-height:132px;padding:18px 24px;font-size:clamp(17px,3.8vw,23px)}
+body[data-theme="wedding-editorial"] #guest-sessions p:nth-child(odd){border-right:0;text-align:right}
+body[data-theme="wedding-editorial"] #guest-sessions p:nth-child(even){text-align:left}
+body[data-theme="wedding-editorial"] #guest-sessions p:before{top:25px;right:-7px;width:11px;height:11px;border:1px solid #171513;background:#e8ddce}
+body[data-theme="wedding-editorial"] #guest-sessions p:nth-child(even):before{left:-5px}
+body[data-theme="wedding-editorial"] #guest-date,body[data-theme="wedding-editorial"] #guest-location,body[data-theme="wedding-editorial"] #guest-landmark{max-width:560px;margin:10px auto;font-size:20px}
+body[data-theme="wedding-editorial"] #guest-featured-section,body[data-theme="wedding-editorial"] #guest-featured-editorial-section{padding-top:64px;padding-bottom:64px;background:#f5f1eb}
+body[data-theme="wedding-editorial"] #guest-featured-section h2,body[data-theme="wedding-editorial"] #guest-featured-editorial-section h2{margin-bottom:28px}
+body[data-theme="wedding-editorial"] .guest-gallery-track{gap:16px;padding:8px 5px 18px}
+body[data-theme="wedding-editorial"] .guest-gallery-track img{flex-basis:min(74%,330px);width:min(74%,330px);height:420px;object-fit:cover}
+body[data-theme="wedding-editorial"] .guest-editorial-grid{grid-template-columns:1.08fr .92fr;gap:15px}
+body[data-theme="wedding-editorial"] .guest-editorial-grid img{border-radius:0;min-height:190px}
+body[data-theme="wedding-editorial"] #guest-closing-section{min-height:76svh;padding:70px 22px;background-color:#55483d;background-position:center 38%;background-size:cover}
+body[data-theme="wedding-editorial"] #guest-closing-section:before{background:linear-gradient(180deg,#17151335,#17151382)}
+body[data-theme="wedding-editorial"] #guest-closing{max-width:620px;font-size:clamp(52px,13vw,88px)}
+body[data-theme="wedding-editorial"] .guest-footer{padding:34px 18px 26px;text-align:center}
+@media(max-width:560px){
+ body[data-theme="wedding-editorial"] .guest-hero-wrap{min-height:600px}
+ body[data-theme="wedding-editorial"] .guest-copy{margin-top:-248px;padding-left:17px;padding-right:17px;padding-bottom:42px}
+ body[data-theme="wedding-editorial"] #guest-title{font-size:clamp(58px,15vw,90px)}
+ body[data-theme="wedding-editorial"] #guest-countdown-section{min-height:340px;padding:48px 15px}
+ body[data-theme="wedding-editorial"] .guest-countdown div{min-height:76px;padding:12px 2px}
+ body[data-theme="wedding-editorial"] #guest-profiles .guest-profile{padding:22px 8px 26px}
+ body[data-theme="wedding-editorial"] #guest-profiles .editorial-role{height:34px;font-size:10px}
+ body[data-theme="wedding-editorial"] #guest-profiles .guest-profile img{border-radius:46% 46% 0 0}
+ body[data-theme="wedding-editorial"] #guest-profiles .guest-profile h3{font-size:23px}
+ body[data-theme="wedding-editorial"] #guest-sessions p{min-height:118px;padding:13px 12px;font-size:16px}
+ body[data-theme="wedding-editorial"] #guest-featured-section,body[data-theme="wedding-editorial"] #guest-featured-editorial-section{padding:44px 14px}
+ body[data-theme="wedding-editorial"] .guest-gallery-track img{flex-basis:78%;width:78%;height:310px}
+ body[data-theme="wedding-editorial"] #guest-closing-section{min-height:64svh}
+}
+
 </style>
 </head>
 <body>
@@ -533,7 +602,7 @@ const guestNode=id=>document.getElementById(id);
   const weddingSchedule=d.category==='Pernikahan'&&(d.akadDate||d.receptionDate);if(weddingSchedule){$('guest-sessions').hidden=false;$('guest-date').hidden=true;const fmt=v=>v?new Date(parseEventDate(v,content.timeZone)).toLocaleString('id-ID',{dateStyle:'full',timeStyle:'short',timeZone:content.timeZone||'Asia/Jakarta'}):'Jadwal belum ditentukan';$('guest-akad').textContent='Akad Nikah: '+fmt(d.akadDate);$('guest-reception').textContent='Resepsi dimulai: '+fmt(d.receptionDate);$('guest-akad').hidden=!d.akadDate;$('guest-reception').hidden=!d.receptionDate;}else{$('guest-date').hidden=false;set('guest-date',d.date?new Date(parseEventDate(d.date,content.timeZone)).toLocaleString('id-ID',{dateStyle:'full',timeStyle:'short',timeZone:content.timeZone||'Asia/Jakarta'}):'');}$('guest-location').textContent=d.location||'';const landmark=content.locationLandmark||'';if(landmark){$('guest-landmark').textContent='Patokan lokasi: '+landmark;show('guest-landmark')}set('guest-closing',d.closing);
   const family=$('guest-family');Object.entries(cfg).forEach(([key,val])=>{if(!val)return;const p=document.createElement('p');p.textContent=(familyLabels[key]||key)+': '+val;family.append(p)});if(!family.children.length)family.hidden=true;
   if(media.hero){img('guest-hero',media.hero,'Foto utama undangan');show('guest-hero-wrap');if(d.theme==='wedding-editorial'){const photo='url('+JSON.stringify(media.hero)+')';$('guest-countdown-section').style.backgroundImage='linear-gradient(#17151372,#17151372),'+photo;$('guest-closing-section').style.backgroundImage='linear-gradient(#17151355,#17151375),'+photo}}
-  const profiles=[];if(media.child)profiles.push(['Foto anak',media.child]);if(media.groom)profiles.push([d.category==='Lamaran'||d.category==='Pertunangan'?'Calon pria':'Mempelai pria',media.groom]);if(media.bride)profiles.push([d.category==='Lamaran'||d.category==='Pertunangan'?'Calon wanita':'Mempelai wanita',media.bride]);if(profiles.length){show('guest-profiles');$('guest-profile-list').replaceChildren(...profiles.map(([label,url])=>{const box=document.createElement('div');box.className='guest-profile';const im=document.createElement('img');im.src=url;im.alt=label;im.loading='lazy';const h=document.createElement('h3');h.textContent=label;box.append(im,h);return box}))}
+  const profiles=[];if(media.child)profiles.push(['Foto anak',media.child,'child']);if(media.groom)profiles.push([d.category==='Lamaran'||d.category==='Pertunangan'?'Calon pria':'Mempelai pria',media.groom,'groom']);if(media.bride)profiles.push([d.category==='Lamaran'||d.category==='Pertunangan'?'Calon wanita':'Mempelai wanita',media.bride,'bride']);if(profiles.length){show('guest-profiles');$('guest-profile-list').replaceChildren(...profiles.map(([label,url,role])=>{const box=document.createElement('div');box.className='guest-profile';box.dataset.profileRole=role;const roleText=role==='groom'?'THE GROOM':role==='bride'?'THE BRIDE':'';if(roleText){const arc=document.createElement('span');arc.className='editorial-role';arc.setAttribute('aria-label',roleText);[...roleText].forEach((char,index)=>{const letter=document.createElement('span');letter.textContent=char;letter.style.setProperty('--letter-index',String(index));letter.style.setProperty('--letter-count',String(roleText.length));arc.append(letter)});box.append(arc)}const im=document.createElement('img');im.src=url;im.alt=label;im.loading='lazy';const h=document.createElement('h3');h.textContent=label;box.append(im,h);return box}))}
   if(d.category==='Pernikahan'){const target=d.akadDate||d.receptionDate||d.date;const targetLabel=d.akadDate?'Akad Nikah':d.receptionDate?'Resepsi':'Hari Acara';if(target)renderCountdown(target,targetLabel,content.timeZone);}else if(d.date)renderCountdown(d.date,'Hari Acara',content.timeZone);
   const map=safeMap(content.mapUrl)||('https://www.google.com/maps/search/?api=1&query='+encodeURIComponent([d.location,content.locationLandmark].filter(Boolean).join(' ')));if(map||d.location||content.locationLandmark){$('guest-map').href=map;show('guest-map');const frame=document.createElement('iframe');frame.src='https://www.google.com/maps?q='+encodeURIComponent([d.location,content.locationLandmark].filter(Boolean).join(' ')||content.mapUrl)+'&output=embed';frame.title='Pratinjau peta lokasi acara';frame.loading='lazy';frame.referrerPolicy='no-referrer-when-downgrade';$('guest-map-preview').replaceChildren(frame);show('guest-map-preview')}
   const featured=[];for(let i=1;i<=Math.min(6,Number(content.featuredCount)||0);i++)if(media['gallery-'+i])featured.push(media['gallery-'+i]);if(featured.length){show('guest-featured-section');const track=$('guest-featured');const makePhoto=(url,i)=>{const im=document.createElement('img');im.src=url;im.alt='Foto unggulan '+(i+1);im.loading='lazy';return im};track.replaceChildren(...featured.map(makePhoto));track.addEventListener('touchstart',()=>track._manualUntil=Date.now()+9000,{passive:true});track.addEventListener('pointerdown',()=>track._manualUntil=Date.now()+9000);if(featured.length>1){let slide=0;setInterval(()=>{if(track.matches(':hover')||Date.now()<(track._manualUntil||0))return;slide=(slide+1)%featured.length;track.scrollTo({left:track.children[slide].offsetLeft-track.offsetLeft,behavior:'smooth'})},4200)}show('guest-featured-editorial-section');$('guest-featured-editorial').replaceChildren(...featured.map(makePhoto))}
