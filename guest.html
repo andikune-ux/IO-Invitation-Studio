@@ -319,6 +319,61 @@ body[data-theme="general-atelier"]{--theme-ornament:repeating-radial-gradient(el
 .guest-social svg{width:21px;height:21px;flex:0 0 21px}
 .guest-social span:empty{display:none}
 @media(max-width:560px){.guest-map-preview{aspect-ratio:4/3}.guest-rsvp-options{display:grid;grid-template-columns:1fr}.guest-rsvp-options label{border-radius:12px}.guest-promo{border-radius:16px}.guest-socials{gap:14px}}
+
+/* Wedding Editorial — a distinct full-bleed editorial layout */
+@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
+body[data-theme="wedding-editorial"]{--paper:#f4f0e9;--card:#fff;--ink:#171513;--muted:#756b61;--accent:#f39a22;--accent-dark:#171513;--gold:#f39a22;--line:#ded7ce;background:#f4f0e9;font-family:"Cormorant Garamond",Georgia,serif}
+body[data-theme="wedding-editorial"] .guest-card{width:100%;max-width:760px;padding:0 0 76px;border:0;box-shadow:none;background:#f4f0e9}
+body[data-theme="wedding-editorial"] .guest-card:before{display:none}
+body[data-theme="wedding-editorial"] .guest-hero-wrap{width:100%;height:100svh;max-height:900px;min-height:620px;margin:0;border-radius:0;box-shadow:none;overflow:hidden}
+body[data-theme="wedding-editorial"] .guest-hero-wrap img{width:100%;height:100%;max-height:none;min-height:0;object-fit:cover;object-position:center 35%}
+body[data-theme="wedding-editorial"] .guest-hero-wrap:after{inset:0;background:linear-gradient(180deg,#09080720 30%,#090807a8 100%)}
+body[data-theme="wedding-editorial"] .guest-copy{position:relative;z-index:2;margin:-300px 0 0;padding:0 22px 54px;background:transparent;border:0;border-radius:0;box-shadow:none;color:#fff;text-shadow:0 2px 18px #0008}
+body[data-theme="wedding-editorial"] .guest-copy:before{content:"WEDDING INVITATION";display:block;width:auto;height:auto;margin:0 auto 12px;background:none;color:#fff;font:500 13px "Cormorant Garamond",serif;letter-spacing:.22em}
+body[data-theme="wedding-editorial"] .guest-copy:after{display:none}
+body[data-theme="wedding-editorial"] .guest-copy .guest-kicker{color:#fff;font:italic 19px "Cormorant Garamond",serif;letter-spacing:.04em;text-transform:none}
+body[data-theme="wedding-editorial"] .guest-copy .guest-recipient{color:#fff;font:500 19px "Cormorant Garamond",serif}
+body[data-theme="wedding-editorial"] .guest-copy h1{margin:18px auto 10px;color:#f49a22;font:400 clamp(54px,13vw,92px)/.95 "Great Vibes",cursive;letter-spacing:0;text-shadow:0 3px 16px #0007}
+body[data-theme="wedding-editorial"] .guest-copy .guest-divider{display:none}
+body[data-theme="wedding-editorial"] .guest-copy .guest-opening{color:#fff;max-width:590px;font:500 17px/1.65 "Cormorant Garamond",serif}
+body[data-theme="wedding-editorial"] .guest-copy h2{color:#fff;font:400 clamp(27px,7vw,43px) "Great Vibes",cursive}
+body[data-theme="wedding-editorial"] .guest-copy .guest-family{color:#fff}
+body[data-theme="wedding-editorial"] .guest-section{margin:0;padding:54px 24px;border:0;border-radius:0;box-shadow:none;background:#fff;color:#171513}
+body[data-theme="wedding-editorial"] .guest-section:before{display:none}
+body[data-theme="wedding-editorial"] .guest-section h2{color:#171513;font:600 clamp(31px,8vw,48px)/1.05 "Cormorant Garamond",serif}
+body[data-theme="wedding-editorial"] .guest-section h3{font:600 25px "Cormorant Garamond",serif;color:#171513}
+body[data-theme="wedding-editorial"] .guest-section p{font:500 19px/1.45 "Cormorant Garamond",serif;color:#51483f}
+body[data-theme="wedding-editorial"] #guest-profiles{padding:0;background:#fff}
+body[data-theme="wedding-editorial"] #guest-profiles .guest-profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:0}
+body[data-theme="wedding-editorial"] #guest-profiles .guest-profile{position:relative;display:flex;flex-direction:column;justify-content:center;min-width:0;padding:22px 14px}
+body[data-theme="wedding-editorial"] #guest-profiles .guest-profile img{width:100%;height:auto;aspect-ratio:3/4;object-fit:cover;border-radius:180px 180px 0 0;box-shadow:0 12px 32px #0002}
+body[data-theme="wedding-editorial"] #guest-profiles .guest-profile h3{font:italic 28px "Great Vibes",cursive;color:#a28e78}
+body[data-theme="wedding-editorial"] #guest-countdown-section{background:#e8e1d8 url("") center/cover}
+body[data-theme="wedding-editorial"] .guest-countdown{gap:8px}
+body[data-theme="wedding-editorial"] .guest-countdown div{padding:18px 5px;border:0;border-radius:15px;background:#f49a22;color:#171513;box-shadow:0 10px 25px #0001}
+body[data-theme="wedding-editorial"] .guest-countdown b{font:600 clamp(25px,7vw,38px) "Cormorant Garamond",serif;color:#171513}
+body[data-theme="wedding-editorial"] .guest-countdown span{color:#171513;font:600 11px "DM Sans",sans-serif}
+body[data-theme="wedding-editorial"] #guest-event-section{background:#e9dfd1}
+body[data-theme="wedding-editorial"] #guest-sessions{gap:0;max-width:640px;border-left:2px solid #171513;margin:22px auto;padding:0 0 0 20px;text-align:left}
+body[data-theme="wedding-editorial"] #guest-sessions p{position:relative;padding:18px 10px 18px 18px;border:0;border-bottom:1px dotted #8f806f;border-radius:0;background:transparent;color:#171513}
+body[data-theme="wedding-editorial"] #guest-sessions p:before{content:"";position:absolute;left:-27px;top:27px;width:12px;height:12px;border:2px solid #f49a22;border-radius:50%;background:#e9dfd1}
+body[data-theme="wedding-editorial"] .guest-gallery-track img{border-radius:2px;box-shadow:0 14px 28px #0002}
+body[data-theme="wedding-editorial"] .guest-bank{border:1px solid #d8c9b5;border-radius:2px;background:#fff}
+body[data-theme="wedding-editorial"] .guest-action{border-radius:8px;background:#f49a22;color:#171513;box-shadow:none;font:600 14px "Cormorant Garamond",serif}
+body[data-theme="wedding-editorial"] .guest-closing{font:400 clamp(42px,10vw,68px) "Great Vibes",cursive;color:#171513}
+body[data-theme="wedding-editorial"] #guest-closing-section{position:relative;min-height:65svh;display:flex;flex-direction:column;justify-content:center;background:#ddd5ca}
+body[data-theme="wedding-editorial"] #guest-closing-section h2{font:400 clamp(42px,10vw,68px) "Great Vibes",cursive}
+@media(max-width:560px){
+ body[data-theme="wedding-editorial"] .guest-hero-wrap{min-height:580px;height:100svh}
+ body[data-theme="wedding-editorial"] .guest-copy{margin-top:-265px;padding:0 18px 42px}
+ body[data-theme="wedding-editorial"] .guest-copy .guest-opening{font-size:16px}
+ body[data-theme="wedding-editorial"] #guest-profiles .guest-profile-grid{gap:0}
+ body[data-theme="wedding-editorial"] #guest-profiles .guest-profile{padding:14px 9px}
+ body[data-theme="wedding-editorial"] .guest-section{padding:42px 17px}
+ body[data-theme="wedding-editorial"] .guest-countdown{gap:6px}
+ body[data-theme="wedding-editorial"] .guest-countdown div{padding:14px 2px}
+}
+
 </style>
 </head>
 <body>
@@ -373,7 +428,7 @@ const guestNode=id=>document.getElementById(id);
   if(!eventId||!/^[a-z0-9][a-z0-9-]{2,63}$/.test(eventId))throw Error('ID acara tidak valid atau belum diisi.');
   if(guestId){const guestHeaders={Accept:'application/json'};if(inviteToken)guestHeaders.Authorization='Bearer '+inviteToken;const check=await fetch('/api/guest/resolve?eventId='+encodeURIComponent(eventId)+'&guestId='+encodeURIComponent(guestId),{headers:guestHeaders});const verified=await check.json();if(!check.ok)throw Error(verified.error||'Tautan tamu tidak valid.');set('guest-recipient','Kepada Yth. '+verified.guest.name);set('envelope-recipient',verified.guest.name)}else if(recipient){set('guest-recipient','Kepada Yth. '+recipient);set('envelope-recipient',recipient)}
   const response=await fetch('/api/invitation/'+encodeURIComponent(eventId),{headers:{Accept:'application/json'}}),d=await response.json();if(!response.ok)throw Error(d.error||'Undangan tidak ditemukan.');
-  const media=d.mediaUrls||{},content=d.content||{},cfg=content.family||{},view=categoryView[d.category]||{};const validThemes=["wedding-heritage","wedding-botanical","wedding-architectural","wedding-celestial","wedding-atelier","proposal-heritage","proposal-botanical","proposal-architectural","proposal-celestial","proposal-atelier","engagement-heritage","engagement-botanical","engagement-architectural","engagement-celestial","engagement-atelier","khitan-heritage","khitan-botanical","khitan-architectural","khitan-celestial","khitan-atelier","aqiqah-heritage","aqiqah-botanical","aqiqah-architectural","aqiqah-celestial","aqiqah-atelier","baby-heritage","baby-botanical","baby-architectural","baby-celestial","baby-atelier","birthday-heritage","birthday-botanical","birthday-architectural","birthday-celestial","birthday-atelier","graduation-heritage","graduation-botanical","graduation-architectural","graduation-celestial","graduation-atelier","completion-heritage","completion-botanical","completion-architectural","completion-celestial","completion-atelier","gratitude-heritage","gratitude-botanical","gratitude-architectural","gratitude-celestial","gratitude-atelier","thanksgiving-heritage","thanksgiving-botanical","thanksgiving-architectural","thanksgiving-celestial","thanksgiving-atelier","faith-heritage","faith-botanical","faith-architectural","faith-celestial","faith-atelier","spiritual-heritage","spiritual-botanical","spiritual-architectural","spiritual-celestial","spiritual-atelier","pengajian-heritage","pengajian-botanical","pengajian-architectural","pengajian-celestial","pengajian-atelier","launch-heritage","launch-botanical","launch-architectural","launch-celestial","launch-atelier","gathering-heritage","gathering-botanical","gathering-architectural","gathering-celestial","gathering-atelier","reunion-heritage","reunion-botanical","reunion-architectural","reunion-celestial","reunion-atelier","seminar-heritage","seminar-botanical","seminar-architectural","seminar-celestial","seminar-atelier","conference-heritage","conference-botanical","conference-architectural","conference-celestial","conference-atelier","family-heritage","family-botanical","family-architectural","family-celestial","family-atelier","memorial-heritage","memorial-botanical","memorial-architectural","memorial-celestial","memorial-atelier","general-heritage","general-botanical","general-architectural","general-celestial","general-atelier"];document.body.dataset.theme=validThemes.includes(d.theme)?d.theme:"wedding-heritage";
+  const media=d.mediaUrls||{},content=d.content||{},cfg=content.family||{},view=categoryView[d.category]||{};const validThemes=["wedding-editorial","wedding-heritage","wedding-botanical","wedding-architectural","wedding-celestial","wedding-atelier","proposal-heritage","proposal-botanical","proposal-architectural","proposal-celestial","proposal-atelier","engagement-heritage","engagement-botanical","engagement-architectural","engagement-celestial","engagement-atelier","khitan-heritage","khitan-botanical","khitan-architectural","khitan-celestial","khitan-atelier","aqiqah-heritage","aqiqah-botanical","aqiqah-architectural","aqiqah-celestial","aqiqah-atelier","baby-heritage","baby-botanical","baby-architectural","baby-celestial","baby-atelier","birthday-heritage","birthday-botanical","birthday-architectural","birthday-celestial","birthday-atelier","graduation-heritage","graduation-botanical","graduation-architectural","graduation-celestial","graduation-atelier","completion-heritage","completion-botanical","completion-architectural","completion-celestial","completion-atelier","gratitude-heritage","gratitude-botanical","gratitude-architectural","gratitude-celestial","gratitude-atelier","thanksgiving-heritage","thanksgiving-botanical","thanksgiving-architectural","thanksgiving-celestial","thanksgiving-atelier","faith-heritage","faith-botanical","faith-architectural","faith-celestial","faith-atelier","spiritual-heritage","spiritual-botanical","spiritual-architectural","spiritual-celestial","spiritual-atelier","pengajian-heritage","pengajian-botanical","pengajian-architectural","pengajian-celestial","pengajian-atelier","launch-heritage","launch-botanical","launch-architectural","launch-celestial","launch-atelier","gathering-heritage","gathering-botanical","gathering-architectural","gathering-celestial","gathering-atelier","reunion-heritage","reunion-botanical","reunion-architectural","reunion-celestial","reunion-atelier","seminar-heritage","seminar-botanical","seminar-architectural","seminar-celestial","seminar-atelier","conference-heritage","conference-botanical","conference-architectural","conference-celestial","conference-atelier","family-heritage","family-botanical","family-architectural","family-celestial","family-atelier","memorial-heritage","memorial-botanical","memorial-architectural","memorial-celestial","memorial-atelier","general-heritage","general-botanical","general-architectural","general-celestial","general-atelier"];document.body.dataset.theme=validThemes.includes(d.theme)?d.theme:"wedding-heritage";
   set('guest-title',d.title||'Undangan');set('guest-category',d.category||'YOU ARE INVITED');set('guest-opening',d.opening);
   const childCategory=['Khitanan / Sunatan','Aqiqah','Kelahiran Bayi'].includes(d.category);
   const mainNames=childCategory?[d.personOne,d.personTwo].filter(Boolean).join(' · '):[d.personOne,d.personTwo].filter(Boolean).join(' & ');
