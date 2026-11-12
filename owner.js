@@ -28,7 +28,7 @@
       });db.close();
     }catch{}
   }
-  function showApp() { authenticated=true; loginView.hidden=true; appView.hidden=false; $('#logout').hidden=false; loadEvents(); }
+  function showApp() { authenticated=true; loginView.hidden=true; appView.hidden=false; $('#logout').hidden=false; loadOwnerSettings().finally(loadEvents); }
   function hideApp() { authenticated=false; loginView.hidden=false; appView.hidden=true; $('#logout').hidden=true; $('#owner-token').value=''; }
   async function checkSession() { try { const data=await api('/api/auth/me'); if(data.authenticated && data.user?.role==='owner') showApp(); } catch {} }
   loginForm.addEventListener('submit', async (event) => {
@@ -124,6 +124,52 @@
     finally{button.disabled=false;button.textContent=original;}
   }
 
+  const DEFAULT_STATUS_COLORS={active:"#20a477",expired:"#d94c5c",pending:"#d59a36",archived:"#9299aa"};
+  let statusColors={...DEFAULT_STATUS_COLORS};
+  function applyStatusColors(){
+    Object.entries(statusColors).forEach(([key,color])=>{
+      document.documentElement.style.setProperty("--status-"+key,color);
+      const input=document.querySelector('[data-status-color="'+key+'"]');if(input)input.value=color;
+    });
+  }
+  async function loadOwnerSettings(){
+    try{
+      const data=await api("/api/owner/settings");
+      statusColors={...DEFAULT_STATUS_COLORS,...(data.settings?.statusColors||{})};
+      applyStatusColors();
+    }catch(error){setStatus("#health-status","Pengaturan warna belum dapat dimuat: "+error.message,true);}
+  }
+  $("#save-status-colors").addEventListener("click",async()=>{
+    const colors={};
+    document.querySelectorAll("[data-status-color]").forEach(input=>{colors[input.dataset.statusColor]=input.value;});
+    const button=$("#save-status-colors");button.disabled=true;
+    try{
+      const data=await api("/api/owner/settings",{method:"PUT",body:JSON.stringify({statusColors:colors})});
+      statusColors={...DEFAULT_STATUS_COLORS,...data.settings.statusColors};applyStatusColors();
+      setStatus("#health-status","Warna indikator berhasil disimpan ke cloud Owner.");toast("Pengaturan warna tersimpan.");
+    }catch(error){setStatus("#health-status",error.message,true);}
+    finally{button.disabled=false;}
+  });
+  document.querySelectorAll("[data-status-color]").forEach(input=>input.addEventListener("input",()=>{
+    statusColors[input.dataset.statusColor]=input.value;applyStatusColors();
+  }));
+  function renderHealth(){
+    const counts={active:0,expired:0,pending:0,archived:0};
+    const issues=[];
+    cachedEvents.forEach(e=>{
+      const g=e.guestAccess||{};
+      if(e.status==="archived"){counts.archived++;return;}
+      if(!e.published||g.status==="not_published"||g.status==="date_missing"){counts.pending++;issues.push({event:e,kind:"pending",message:!e.published?"Undangan belum dipublikasikan":"Tanggal acara belum tersedia; masa aktif otomatis belum dapat dihitung."});return;}
+      if(g.status==="expired"){counts.expired++;issues.push({event:e,kind:"expired",message:g.reason||"Masa aktif undangan telah berakhir."});return;}
+      if(g.status==="active"){counts.active++;return;}
+      counts.pending++;issues.push({event:e,kind:"pending",message:"Status akses belum dapat dipastikan dari metadata."});
+    });
+    Object.entries(counts).forEach(([key,value])=>{const node=$("#health-"+key);if(node)node.textContent=value;});
+    const detail=$("#health-details");
+    detail.innerHTML=issues.length?'<b>Perlu perhatian</b>'+issues.map(({event,kind,message})=>'<div class="health-issue"><span class="health-dot" data-status-dot="'+kind+'"></span><div><strong>'+escapeHtml(event.title)+'</strong><small>'+escapeHtml(event.eventId)+' · '+escapeHtml(message)+'</small>'+(event.guestAccess?.expiresAt?'<small>Kedaluwarsa: '+escapeHtml(new Date(event.guestAccess.expiresAt).toLocaleString("id-ID",{timeZone:"Asia/Jakarta"}))+' WIB</small>':'')+'</div><button type="button" data-health-edit="'+escapeHtml(event.eventId)+'">Buka acara</button></div>').join(''):'<div class="health-clear">Semua acara memiliki status akses yang teridentifikasi. Tetap lakukan pemeriksaan berkala.</div>';
+    detail.querySelectorAll("[data-health-edit]").forEach(button=>button.addEventListener("click",()=>location.href="./index.html?event="+encodeURIComponent(button.dataset.healthEdit)));
+    applyStatusColors();
+  }
   function renderEvents(){
     const query=($('#event-search').value||'').trim().toLowerCase();
     const filter=$('#event-filter')?.value||'all';
@@ -141,7 +187,7 @@
   }
   async function loadEvents(){
     if(!authenticated)return;const list=$('#events-list');list.innerHTML='<div class="empty"><span>✧</span>Memuat acara…</div>';setStatus('#events-status','');
-    try{const {events=[]}=await api('/api/owner/events');cachedEvents=events;$('#total-events').textContent=events.length;$('#active-admins').textContent=events.filter(e=>e.adminLink?.active).length;$('#published-events').textContent=events.filter(e=>e.published).length;$('#draft-events').textContent=events.filter(e=>!e.published&&e.status!=='archived').length;renderEvents();}
+    try{const {events=[]}=await api('/api/owner/events');cachedEvents=events;$('#total-events').textContent=events.length;$('#active-admins').textContent=events.filter(e=>e.adminLink?.active).length;$('#published-events').textContent=events.filter(e=>e.published).length;$('#draft-events').textContent=events.filter(e=>!e.published&&e.status!=='archived').length;renderHealth();renderEvents();}
     catch(error){list.innerHTML='<div class="empty">Tidak dapat memuat data acara.</div>';setStatus('#events-status',error.message,true);}
   }
   $('#event-search').addEventListener('input',renderEvents);
