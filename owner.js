@@ -2,7 +2,7 @@
   'use strict';
   const $ = (selector, root = document) => root.querySelector(selector);
   const loginView = $('#login-view'), appView = $('#app-view'), loginForm = $('#owner-login-form');
-  let authenticated = false, cachedEvents = [];
+  let authenticated = false, cachedEvents = [], cachedOperationalErrors = [];
   const toast = (message) => { const node=$('#toast'); node.textContent=message; node.classList.add('show'); setTimeout(()=>node.classList.remove('show'),2400); };
   const setStatus = (selector, message, error=false) => { const node=$(selector); node.textContent=message||''; node.classList.toggle('error',error); };
   async function api(path, options={}) {
@@ -168,6 +168,12 @@
     const detail=$("#health-details");
     detail.innerHTML=issues.length?'<b>Perlu perhatian</b>'+issues.map(({event,kind,message})=>'<div class="health-issue"><span class="health-dot" data-status-dot="'+kind+'"></span><div><strong>'+escapeHtml(event.title)+'</strong><small>'+escapeHtml(event.eventId)+' · '+escapeHtml(message)+'</small>'+(event.guestAccess?.expiresAt?'<small>Kedaluwarsa: '+escapeHtml(new Date(event.guestAccess.expiresAt).toLocaleString("id-ID",{timeZone:"Asia/Jakarta"}))+' WIB</small>':'')+'</div><button type="button" data-health-edit="'+escapeHtml(event.eventId)+'">Buka acara</button></div>').join(''):'<div class="health-clear">Semua acara memiliki status akses yang teridentifikasi. Tetap lakukan pemeriksaan berkala.</div>';
     detail.querySelectorAll("[data-health-edit]").forEach(button=>button.addEventListener("click",()=>location.href="./index.html?event="+encodeURIComponent(button.dataset.healthEdit)));
+    const runtime=$("#runtime-errors");
+    if(runtime){
+      if(cachedOperationalErrors===null)runtime.innerHTML='<div class="runtime-empty">Log operasional tidak dapat dimuat saat ini.</div>';
+      else if(!cachedOperationalErrors.length)runtime.innerHTML='<div class="runtime-empty">Belum ada kegagalan aplikasi yang tercatat.</div>';
+      else runtime.innerHTML=cachedOperationalErrors.slice(0,20).map(log=>'<article class="runtime-error"><div><b>'+escapeHtml(log.endpoint||"Endpoint tidak diketahui")+'</b><span class="runtime-code">HTTP '+escapeHtml(log.status)+' · '+escapeHtml(log.requestId||log.id||"—")+'</span></div><p>'+escapeHtml(log.message||"Kesalahan tanpa pesan")+'</p><small>'+escapeHtml(log.createdAt?new Date(log.createdAt).toLocaleString("id-ID",{timeZone:"Asia/Jakarta"}):"—")+' WIB</small></article>').join('');
+    }
     applyStatusColors();
   }
   function renderEvents(){
@@ -187,7 +193,7 @@
   }
   async function loadEvents(){
     if(!authenticated)return;const list=$('#events-list');list.innerHTML='<div class="empty"><span>✧</span>Memuat acara…</div>';setStatus('#events-status','');
-    try{const {events=[]}=await api('/api/owner/events');cachedEvents=events;$('#total-events').textContent=events.length;$('#active-admins').textContent=events.filter(e=>e.adminLink?.active||(e.admin&&!e.admin.disabled)).length;$('#published-events').textContent=events.filter(e=>e.published).length;$('#draft-events').textContent=events.filter(e=>!e.published&&e.status!=='archived').length;renderHealth();renderEvents();}
+    try{const {events=[]}=await api('/api/owner/events');cachedEvents=events;try{const monitor=await api('/api/owner/monitoring');cachedOperationalErrors=monitor.logs||[];}catch{cachedOperationalErrors=null;}$('#total-events').textContent=events.length;$('#active-admins').textContent=events.filter(e=>e.adminLink?.active||(e.admin&&!e.admin.disabled)).length;$('#published-events').textContent=events.filter(e=>e.published).length;$('#draft-events').textContent=events.filter(e=>!e.published&&e.status!=='archived').length;renderHealth();renderEvents();}
     catch(error){list.innerHTML='<div class="empty">Tidak dapat memuat data acara.</div>';setStatus('#events-status',error.message,true);}
   }
   $('#event-search').addEventListener('input',renderEvents);
