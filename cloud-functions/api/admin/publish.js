@@ -45,7 +45,13 @@ const cleanContent = (input) => {
       };
     }
   }
-  return { family, bankAccounts, stories, storyEnabled: source.storyEnabled !== false, featuredCount, mapUrl: cleanText(source.mapUrl, 1000), categoryData };
+  const socials = { whatsapp: cleanText(source.socials?.whatsapp, 100), tiktok: cleanText(source.socials?.tiktok, 100), instagram: cleanText(source.socials?.instagram, 100) };
+  for (const [key, entry] of Object.entries(categoryData)) {
+    entry.locationLandmark = cleanText(source.categoryData?.[key]?.locationLandmark, 300);
+    entry.promoUrl = cleanText(source.categoryData?.[key]?.promoUrl, 1000);
+    entry.socials = { whatsapp: cleanText(source.categoryData?.[key]?.socials?.whatsapp, 100), tiktok: cleanText(source.categoryData?.[key]?.socials?.tiktok, 100), instagram: cleanText(source.categoryData?.[key]?.socials?.instagram, 100) };
+  }
+  return { family, bankAccounts, stories, storyEnabled: source.storyEnabled !== false, featuredCount, mapUrl: cleanText(source.mapUrl, 1000), locationLandmark: cleanText(source.locationLandmark, 300), promoUrl: cleanText(source.promoUrl, 1000), socials, categoryData };
 };
 const validMediaKey = (key, eventId, kind) => typeof key === "string" &&
   key.startsWith(`events/${eventId}/media/${kind}-`) &&
@@ -81,7 +87,7 @@ export async function onRequestPost({ request }) {
       if (!validMediaKey(key, eventId, kind)) return json({ error: "Media tersimpan tidak valid." }, 400);
       const ext = key.split(".").pop();
       const isVideo = kind === "video", isAudio = kind === "opening-sfx" || kind === "background-music";
-      if (isVideo ? !["mp4", "webm"].includes(ext) : isAudio ? !["mp3", "m4a", "aac", "ogg", "wav", "webm"].includes(ext) : !["jpg", "jpeg", "png", "webp"].includes(ext)) {
+      if (isVideo ? !["mp4", "webm"].includes(ext) : isAudio ? !["mp3", "m4a", "aac", "ogg", "wav", "weba"].includes(ext) : !["jpg", "jpeg", "png", "webp"].includes(ext)) {
         return json({ error: "Ekstensi file tidak sesuai jenis media." }, 400);
       }
       const uploaded = await store.get(key, { type: "arrayBuffer", consistency: "strong" });
