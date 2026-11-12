@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./owner.css?v=owner-health-colors-v3">
-  <script src="./owner.js?v=owner-health-colors-v3" defer></script>
+  <link rel="stylesheet" href="./owner.css?v=owner-monitoring-v4">
+  <script src="./owner.js?v=owner-monitoring-v4" defer></script>
 </head>
 <body>
   <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
@@ -67,6 +67,7 @@
           </div>
           <p class="health-footnote">Catatan: panel ini memantau status akses dan kelengkapan data acara. Log kegagalan runtime EdgeOne (request ID, stack trace, dan durasi) tidak tersedia dari API aplikasi saat ini, sehingga tidak ditampilkan sebagai data palsu.</p>
           <div id="health-details" class="health-details"></div>
+          <div class="runtime-panel"><b>Log error aplikasi</b><small>Catatan kegagalan yang tertangkap di endpoint aplikasi.</small><div id="runtime-errors" class="runtime-errors">Memuat log…</div></div>
           <p id="health-status" class="status" role="status"></p>
         </section>
         <section class="panel glass create-panel" id="create">
