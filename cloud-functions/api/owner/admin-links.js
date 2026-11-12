@@ -1,4 +1,5 @@
 import { getStore } from "@edgeone/pages-blob";
+import { recordOperationalError } from "../../_lib/monitoring.js";
 import { json, readJson, validEventId } from "../../_lib/http.js";
 import { requireOwner } from "../../_lib/auth.js";
 
@@ -34,7 +35,8 @@ export async function onRequestPost({ request }) {
       if (session?.role === "admin" && session.eventId === eventId) await db.delete(key).catch(() => {});
     }));
     return json({ ok: true, eventId, durationMonths, expiresAt, createdAt: nowIso }, 201);
-  } catch {
+  } catch (error) {
+    await recordOperationalError(request, "/api/owner/admin-links POST", error, 503);
     return json({ error: "Gagal membuat tautan Admin." }, 503);
   }
 }
