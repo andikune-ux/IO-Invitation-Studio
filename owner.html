@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./owner.css?v=owner-monitoring-v4">
-  <script src="./owner.js?v=owner-monitoring-v4" defer></script>
+  <link rel="stylesheet" href="./owner.css?v=owner-compact-status-v5">
+  <script src="./owner.js?v=owner-compact-status-v5" defer></script>
 </head>
 <body>
   <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
@@ -20,7 +20,7 @@
       <div class="side-caption">WORKSPACE</div>
       <a class="side-link active" href="#dashboard"><span class="nav-icon">⌂</span><span>Overview</span></a>
       <a class="side-link" href="#create"><span class="nav-icon">＋</span><span>Buat acara</span></a>
-      <a class="side-link" href="#events"><span class="nav-icon">▦</span><span>Event Manager</span></a><a class="side-link" href="#health"><span class="nav-icon">◉</span><span>Monitoring</span></a>
+      <a class="side-link" href="#events"><span class="nav-icon">▦</span><span>Event Manager</span></a><a class="side-link" href="#system-logs"><span class="nav-icon">◉</span><span>Log Sistem</span></a>
       <div class="sidebar-note"><span class="live-dot"></span><div><b>Owner workspace</b><small>Secure session enabled</small></div></div>
       <div class="side-foot">IO DIGITAL EXPERIENCE <span>·</span> 2026</div>
     </aside>
@@ -50,26 +50,6 @@
           <article class="metric glass"><div class="metric-icon icon-green">✧</div><span>Undangan terbit</span><strong id="published-events">0</strong><small>Siap dibuka oleh tamu</small></article>
           <article class="metric glass"><div class="metric-icon icon-amber">◷</div><span>Draft acara</span><strong id="draft-events">0</strong><small>Belum diterbitkan</small></article>
         </div>
-        <section class="panel glass health-panel" id="health">
-          <div class="section-title"><div><span class="eyebrow">ACCESS HEALTH</span><h2>Kondisi akses & masa aktif</h2><p>Ringkasan dihitung dari status acara dan metadata undangan yang tersimpan.</p></div><button id="save-status-colors" class="button button-glass" type="button">Simpan warna</button></div>
-          <div class="health-grid" id="health-grid" aria-live="polite">
-            <article class="health-card"><span class="health-dot" data-status-dot="active"></span><div><b>Aktif</b><strong id="health-active">0</strong><small>Akses tamu masih berlaku</small></div></article>
-            <article class="health-card"><span class="health-dot" data-status-dot="expired"></span><div><b>Kedaluwarsa</b><strong id="health-expired">0</strong><small>Perlu perpanjangan Owner</small></div></article>
-            <article class="health-card"><span class="health-dot" data-status-dot="pending"></span><div><b>Belum terbit / tanggal belum ada</b><strong id="health-pending">0</strong><small>Perlu dilengkapi atau dipublikasikan</small></div></article>
-            <article class="health-card"><span class="health-dot" data-status-dot="archived"></span><div><b>Diarsipkan</b><strong id="health-archived">0</strong><small>Acara nonaktif</small></div></article>
-          </div>
-          <div class="status-color-settings">
-            <div><b>Warna indikator status</b><small>Pengaturan tersimpan di cloud Owner dan digunakan di perangkat berikutnya.</small></div>
-            <label>Aktif <input type="color" data-status-color="active" value="#20a477"></label>
-            <label>Kedaluwarsa <input type="color" data-status-color="expired" value="#d94c5c"></label>
-            <label>Perlu ditinjau <input type="color" data-status-color="pending" value="#d59a36"></label>
-            <label>Diarsipkan <input type="color" data-status-color="archived" value="#9299aa"></label>
-          </div>
-          <p class="health-footnote">Catatan: panel ini memantau status akses dan kelengkapan data acara. Log kegagalan runtime EdgeOne (request ID, stack trace, dan durasi) tidak tersedia dari API aplikasi saat ini, sehingga tidak ditampilkan sebagai data palsu.</p>
-          <div id="health-details" class="health-details"></div>
-          <div class="runtime-panel"><b>Log error aplikasi</b><small>Catatan kegagalan yang tertangkap di endpoint aplikasi.</small><div id="runtime-errors" class="runtime-errors">Memuat log…</div></div>
-          <p id="health-status" class="status" role="status"></p>
-        </section>
         <section class="panel glass create-panel" id="create">
           <div class="section-title"><div><span class="eyebrow">NEW EXPERIENCE</span><h2>Buat event baru</h2><p>Mulai dengan nama acara dan ID unik. Link Admin menggunakan ID acara. Owner tetap mengatur masa berlaku dan dapat mencabut akses kapan saja.</p></div><span class="owner-only">OWNER ONLY <span>✦</span></span></div>
           <form id="create-event-form" class="create-grid">
@@ -133,6 +113,10 @@
           <div id="events-list" class="events-list"><div class="empty"><span>✧</span>Memuat data acara…</div></div>
           <p id="events-status" class="status" role="status"></p>
         </section>
+      <section class="panel glass system-logs-panel" id="system-logs">
+        <div class="section-title"><div><span class="eyebrow">SYSTEM MONITORING</span><h2>Log Sistem</h2><p>Catatan kegagalan yang tertangkap di endpoint aplikasi.</p></div></div>
+        <div id="runtime-errors" class="runtime-errors">Memuat log…</div>
+      </section>
       </section>
       <footer>IO Invitation Studio <span>✦</span> Designed for meaningful moments</footer>
     </main>
