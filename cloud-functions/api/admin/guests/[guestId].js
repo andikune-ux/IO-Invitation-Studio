@@ -1,10 +1,8 @@
 import { getStore } from "@edgeone/pages-blob";
-import { randomBytes, createHash } from "node:crypto";
 import { json, readJson, safeText, validEventId } from "../../../_lib/http.js";
 import { requireEventAdmin } from "../../../_lib/auth.js";
 
 const STORE = "io-invitation-media";
-const digest = (value) => createHash("sha256").update(value).digest("hex");
 
 export async function onRequestPatch({ request, params }) {
   const body = await readJson(request);
@@ -17,19 +15,23 @@ export async function onRequestPatch({ request, params }) {
     const db = getStore(STORE), key = `events/${eventId}/guests/${guestId}.json`;
     const guest = await db.get(key, { type: "json", consistency: "strong" });
     if (!guest) return json({ error: "Tamu tidak ditemukan." }, 404);
-    if (body?.action === "rotate-link") {
-      const token = randomBytes(24).toString("base64url");
-      guest.tokenHash = digest(token);
-      guest.linkRotatedAt = new Date().toISOString();
+
+    if (body?.action === "revoke-link" || body?.action === "restore-link") {
+      guest.linkActive = body.action === "restore-link";
+      guest.linkRevokedAt = guest.linkActive ? null : new Date().toISOString();
+      guest.updatedAt = new Date().toISOString();
       await db.setJSON(key, guest);
-      return json({ ok: true, guestId, token });
+      return json({ ok: true, guestId, linkActive: guest.linkActive });
     }
+
+    // Backward compatibility: old links with a previously issued token remain
+    // valid until explicitly revoked, deleted, or expired.
     const name = safeText(body?.name, 100);
-    if (!name) return json({ error: "Nama tamu wajib diisi." }, 400);
+    if (!name) return json({ error: "Nama tamu tidak boleh kosong." }, 400);
     guest.name = name;
     guest.updatedAt = new Date().toISOString();
     await db.setJSON(key, guest);
-    return json({ ok: true, guest: { guestId, name, rsvp: guest.rsvp || "pending" } });
+    return json({ ok: true, guest: { guestId, name, rsvp: guest.rsvp || "pending", linkActive: guest.linkActive !== false } });
   } catch { return json({ error: "Gagal memperbarui tamu." }, 503); }
 }
 
