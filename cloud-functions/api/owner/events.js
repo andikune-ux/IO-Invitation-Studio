@@ -1,4 +1,5 @@
 import { getStore } from "@edgeone/pages-blob";
+import { recordOperationalError } from "../../_lib/monitoring.js";
 import { json } from "../../_lib/http.js";
 import { requireOwner } from "../../_lib/auth.js";
 import { getGuestAccessExpiry } from "../../_lib/guest-expiry.js";
@@ -43,7 +44,8 @@ export async function onRequestGet({ request }) {
     }));
     events.sort((a, b) => String(b?.createdAt || "").localeCompare(String(a?.createdAt || "")));
     return json({ ok: true, events: events.filter(Boolean) });
-  } catch {
+  } catch (error) {
+    await recordOperationalError(request, "/api/owner/events", error, 503);
     return json({ error: "Gagal membaca daftar acara dari Blob Storage." }, 503);
   }
 }
