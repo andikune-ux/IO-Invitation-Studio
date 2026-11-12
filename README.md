@@ -6,7 +6,7 @@ Platform undangan digital multi-acara dengan tiga peran: Owner, Admin acara, dan
 
 - **Owner** login menggunakan secret server-side `IO_ADMIN_API_TOKEN` dan mengelola acara, desain, media, publikasi, serta akses Admin.
 - **Admin acara** menggunakan link `/admin.html?event={eventId}`. Akses dibatasi pada satu event dan dikendalikan Owner melalui masa berlaku, aktivasi, dan pencabutan.
-- **Tamu** membuka undangan terbit dan link personal melalui `/guest.html?event={eventId}&guestId={guestId}`. ID tamu berupa UUID acak dan dapat dicabut dari Guest Manager.
+- **Tamu** membuka undangan terbit dan link personal melalui `/guest.html?event={eventId}&guestId={guestId}`. ID tamu berupa UUID acak dan dapat dicabut dari Guest Manager. Akses publik undangan dan media terkait otomatis berakhir pada tengah malam WIB di tanggal yang sama satu bulan kalender setelah tanggal acara (akad, tanggal acara, atau resepsi sebagai fallback). Owner tetap dapat mengakses dan mengedit data; Owner dapat memperpanjang masa aktif tanpa mengganti URL.
 
 **Catatan keamanan Admin:** event ID adalah identifier sekaligus kunci akses Admin pada model saat ini. Siapa pun yang mengetahui ID event dapat mengakses Guest Manager selama akses Admin aktif. Owner harus membatasi distribusi URL dan segera mencabut akses bila bocor. Masa berlaku bukan pengganti autentikasi berbasis secret.
 
