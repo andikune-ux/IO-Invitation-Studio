@@ -33,7 +33,7 @@ export async function onRequestGet({request}){
     const {blobs=[]}=await db.list({prefix:`events/${eventId}/guestbook/`,consistency:"strong"});
     const entries=(await Promise.all(blobs.map(async({key})=>db.get(key,{type:"json",consistency:"strong"}))))
       .filter(Boolean).sort((a,b)=>Date.parse(b.createdAt||0)-Date.parse(a.createdAt||0)).slice(0,100)
-      .map(({name,message,rsvp,createdAt})=>({name,message,rsvp,createdAt}));
+      .map(({id,name,message,rsvp,createdAt,reply,repliedAt})=>({id,name,message,rsvp,createdAt,reply:reply||null,repliedAt:repliedAt||null}));
     return json({ok:true,entries});
   }catch{return json({error:"Buku tamu belum dapat dimuat."},503)}
 }
@@ -63,7 +63,7 @@ export async function onRequestPost({request}){
     const {blobs=[]}=await db.list({prefix:`events/${eventId}/guestbook/`,consistency:"strong"});
     const entries=(await Promise.all(blobs.map(async({key})=>db.get(key,{type:"json",consistency:"strong"}))))
       .filter(Boolean).sort((a,b)=>Date.parse(b.createdAt||0)-Date.parse(a.createdAt||0)).slice(0,100)
-      .map(({name,message,rsvp,createdAt})=>({name,message,rsvp,createdAt}));
+      .map(({id,name,message,rsvp,createdAt,reply,repliedAt})=>({id,name,message,rsvp,createdAt,reply:reply||null,repliedAt:repliedAt||null}));
     return json({ok:true,entries},201);
   }catch{return json({error:"Konfirmasi kehadiran gagal disimpan."},503)}
 }
