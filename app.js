@@ -153,7 +153,7 @@ if(form){
   (activeContent.bankAccounts||[]).slice(0,2).forEach(addBank);
   if(activeContent.stories){activeContent.stories.forEach(st=>{const el=$('#story-text-'+st.index);if(el)el.value=st.text||''})}
   mediaKeys={...(inv?.media||{}),...(draftData?.media||{}),...(saved.mediaKeys||{})};
-  if(inv?.mediaUrls){for(const kind of Object.keys(inv.mediaUrls))if(inv.mediaUrls[kind])renderMedia(kind,inv.mediaUrls[kind])}
+  const previewMediaUrls={...(inv?.mediaUrls||{}),...(draftData?.mediaUrls||{})};for(const kind of Object.keys(previewMediaUrls))if(previewMediaUrls[kind])renderMedia(kind,previewMediaUrls[kind])
   for(const [kind,key] of Object.entries(mediaKeys)){if(typeof key==='string'&&key.startsWith(eventId+':')){try{const file=await getMedia(key);if(file){const url=URL.createObjectURL(file);objectUrls.push(url);renderMedia(kind,url)}}catch{}}}
   if(draftData?.media){for(const [kind,key] of Object.entries(draftData.media))if(key&&!inv?.mediaUrls?.[kind]){}}
   $('#editor-access-required').hidden=true;$('#editor-workspace').hidden=false;$('#guest-preview-link').href='./guest.html?event='+encodeURIComponent(eventId);$('#cloud-guest-link').href='./guest.html?event='+encodeURIComponent(eventId);preview();
