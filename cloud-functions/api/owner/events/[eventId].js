@@ -1,4 +1,5 @@
 import { getStore } from "@edgeone/pages-blob";
+import { recordOperationalError } from "../../../_lib/monitoring.js";
 import { json, readJson, safeText, validEventId } from "../../../_lib/http.js";
 import { requireOwner } from "../../../_lib/auth.js";
 import { extendGuestAccess, getGuestAccessExpiry } from "../../../_lib/guest-expiry.js";
@@ -48,7 +49,8 @@ export async function onRequestPatch({ request, params }) {
     const invitation = await store.get(`events/${eventId}/invitation.json`, { type: "json", consistency: "strong" });
     const guestExpiry = getGuestAccessExpiry(invitation || {}, meta);
     return json({ ok: true, event: { eventId, title: meta.title, category: meta.category || null, religion: meta.religion || null, status: meta.status, guestAccessExpiresAt: guestExpiry?.expiresAt || null, updatedAt: meta.updatedAt } });
-  } catch {
+  } catch (error) {
+    await recordOperationalError(request, "/api/owner/events/:eventId PATCH", error, 503);
     return json({ error: "Gagal memperbarui acara." }, 503);
   }
 }
