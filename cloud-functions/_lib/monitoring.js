@@ -17,6 +17,9 @@ export async function recordOperationalError(request, endpoint, error, status = 
       createdAt: new Date().toISOString()
     };
     await store.setJSON("monitoring/errors/" + Date.now() + "-" + id + ".json", record);
+    const { blobs = [] } = await store.list({ prefix: "monitoring/errors/", consistency: "strong" });
+    const obsolete = blobs.slice().sort((a, b) => String(a.key).localeCompare(String(b.key))).slice(0, Math.max(0, blobs.length - 100));
+    await Promise.all(obsolete.map(({ key }) => store.delete(key).catch(() => {})));
   } catch {
     // Monitoring must never turn a handled application error into a second failure.
   }
