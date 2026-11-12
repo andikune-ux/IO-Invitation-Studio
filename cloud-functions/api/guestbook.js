@@ -2,6 +2,7 @@ import { getStore } from "@edgeone/pages-blob";
 import { createHash, timingSafeEqual, randomUUID } from "node:crypto";
 import { json, readJson, safeText, validEventId } from "../_lib/http.js";
 import { getGuestAccessExpiry } from "../_lib/guest-expiry.js";
+import { requireOwner } from "../_lib/auth.js";
 
 const STORE = "io-invitation-media";
 const digest = value => createHash("sha256").update(value).digest("hex");
@@ -28,7 +29,7 @@ export async function onRequestGet({request}){
     const db=getStore(STORE);
     const access=await publishedEvent(db,eventId);
     if(!access)return json({error:"Undangan belum tersedia."},404);
-    if(access.expired)return json({error:"Masa aktif undangan telah berakhir.",expiresAt:access.expiresAt},410);
+    if(access.expired){const owner=await requireOwner(request);if(!owner.ok)return json({error:"Masa aktif undangan telah berakhir.",expiresAt:access.expiresAt},410);}
     const {blobs=[]}=await db.list({prefix:`events/${eventId}/guestbook/`,consistency:"strong"});
     const entries=(await Promise.all(blobs.map(async({key})=>db.get(key,{type:"json",consistency:"strong"}))))
       .filter(Boolean).sort((a,b)=>Date.parse(b.createdAt||0)-Date.parse(a.createdAt||0)).slice(0,100)
@@ -46,7 +47,7 @@ export async function onRequestPost({request}){
     const db=getStore(STORE);
     const access=await publishedEvent(db,eventId);
     if(!access)return json({error:"Undangan belum tersedia."},404);
-    if(access.expired)return json({error:"Masa aktif undangan telah berakhir.",expiresAt:access.expiresAt},410);
+    if(access.expired){const owner=await requireOwner(request);if(!owner.ok)return json({error:"Masa aktif undangan telah berakhir.",expiresAt:access.expiresAt},410);}
     let displayName=name;
     if(guestId){
       const key=`events/${eventId}/guests/${guestId}.json`;
