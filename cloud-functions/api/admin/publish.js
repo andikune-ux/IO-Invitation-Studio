@@ -51,7 +51,10 @@ const cleanContent = (input) => {
     entry.promoUrl = cleanText(source.categoryData?.[key]?.promoUrl, 1000);
     entry.socials = { whatsapp: cleanText(source.categoryData?.[key]?.socials?.whatsapp, 100), tiktok: cleanText(source.categoryData?.[key]?.socials?.tiktok, 100), instagram: cleanText(source.categoryData?.[key]?.socials?.instagram, 100) };
   }
-  return { family, bankAccounts, stories, storyEnabled: source.storyEnabled !== false, featuredCount, mapUrl: cleanText(source.mapUrl, 1000), locationLandmark: cleanText(source.locationLandmark, 300), promoUrl: cleanText(source.promoUrl, 1000), socials, categoryData };
+  const allowedTimeZones = new Set(["Asia/Jakarta","Asia/Makassar","Asia/Jayapura"]);
+  const timeZone = allowedTimeZones.has(source.timeZone) ? source.timeZone : "Asia/Jakarta";
+  for (const [key, entry] of Object.entries(categoryData)) entry.timeZone = allowedTimeZones.has(source.categoryData?.[key]?.timeZone) ? source.categoryData[key].timeZone : timeZone;
+  return { family, bankAccounts, stories, storyEnabled: source.storyEnabled !== false, featuredCount, mapUrl: cleanText(source.mapUrl, 1000), locationLandmark: cleanText(source.locationLandmark, 300), promoUrl: cleanText(source.promoUrl, 1000), socials, timeZone, categoryData };
 };
 const validMediaKey = (key, eventId, kind) => typeof key === "string" &&
   key.startsWith(`events/${eventId}/media/${kind}-`) &&
