@@ -94,6 +94,7 @@ export async function onRequestPost({ request }) {
     const invitation = {
       eventId,
       title: safeText(inv.title, 100),
+      theme: safeText(inv.theme, 40),
       category: meta.category || null,
       religion: meta.religion || null,
       personOne: safeText(inv.personOne, 100),
